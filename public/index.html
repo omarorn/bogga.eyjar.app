@@ -106,6 +106,16 @@
   .color-swatch { width: 40px; height: 40px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: transform .15s, border-color .15s; touch-action: manipulation; }
   .color-swatch:active { transform: scale(.9); }
   .color-swatch.selected { border-color: var(--text); transform: scale(1.15); }
+  .template-picker { display: grid; grid-template-columns: 1fr; gap: 8px; }
+  .template-btn { width: 100%; border: 1.5px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--text); padding: 10px 12px; text-align: left; cursor: pointer; touch-action: manipulation; transition: border-color .15s, transform .1s; }
+  .template-btn:active { transform: scale(.98); border-color: var(--c, var(--accent)); }
+  .template-btn-title { font-size: 14px; font-weight: 700; }
+  .template-btn-sub { margin-top: 4px; font-size: 12px; color: var(--muted); }
+  .trash-list { display: flex; flex-direction: column; gap: 10px; max-height: 45vh; overflow-y: auto; }
+  .trash-item { background: var(--bg); border-radius: 12px; padding: 12px; border: 1px solid var(--border); }
+  .trash-item-title { font-size: 14px; font-weight: 700; }
+  .trash-item-meta { margin-top: 4px; font-size: 12px; color: var(--muted); }
+  .trash-item-actions { margin-top: 10px; display: flex; gap: 8px; }
   .toast { position: fixed; bottom: calc(var(--safe-bottom) + 80px); left: 50%; transform: translateX(-50%) translateY(20px); background: var(--text); color: white; padding: 10px 20px; border-radius: 20px; font-size: 14px; font-weight: 600; opacity: 0; transition: all .2s; pointer-events: none; white-space: nowrap; z-index: 200; }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
   .share-notice { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: #ede9fe; border-radius: 12px; margin: 0 20px 4px; flex-shrink: 0; }
@@ -120,6 +130,13 @@
   .empty-text { font-size: 15px; }
   .shared-add-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 430px; padding: 12px 16px calc(var(--safe-bottom) + 12px); background: var(--surface); border-top: 1px solid var(--border); display: flex; gap: 10px; }
   .section-header { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 4px; }
+  .filter-bar { display: flex; gap: 6px; padding: 10px 14px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .filter-bar::-webkit-scrollbar { display: none; }
+  .filter-chip { flex-shrink: 0; padding: 6px 14px; border-radius: 20px; border: 1.5px solid var(--border); font-size: 13px; font-weight: 700; background: transparent; color: var(--muted); cursor: pointer; touch-action: manipulation; transition: all .15s; white-space: nowrap; }
+  .filter-chip.active { background: var(--accent); border-color: var(--accent); color: white; }
+  .search-wrap { padding: 10px 16px 0; flex-shrink: 0; }
+  .search-input { width: 100%; padding: 9px 14px 9px 36px; border-radius: 12px; border: 1.5px solid var(--border); font-size: 14px; background: var(--bg); outline: none; transition: border-color .15s; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zm-5.242 1.656a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: 12px center; }
+  .search-input:focus { border-color: var(--accent); }
   @keyframes shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-8px); } 40% { transform: translateX(8px); } 60% { transform: translateX(-6px); } 80% { transform: translateX(6px); } }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
   .animate-in { animation: fadeIn .2s ease-out; }
@@ -155,7 +172,7 @@
     <div class="pin-wrap">
       <div class="pin-logo">📋</div>
       <div class="pin-title" id="pin-greeting">Hæ Bogga</div>
-      <div class="pin-sub">Sláðu inn PIN kóða</div>
+      <div class="pin-sub">Sláðu inn PIN-kóða</div>
       <div class="pin-dots" id="login-dots">
         <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
       </div>
@@ -183,6 +200,17 @@
       <button class="btn-icon" id="btn-list-menu">⋯</button>
     </div>
     <div id="share-notice-wrap"></div>
+    <div class="filter-bar" id="filter-bar" style="display:none">
+      <button class="filter-chip active" data-filter="all">Allt</button>
+      <button class="filter-chip" data-filter="today">📅 Í dag</button>
+      <button class="filter-chip" data-filter="tomorrow">🌅 Á morgun</button>
+      <button class="filter-chip" data-filter="late">🔴 Seint</button>
+      <button class="filter-chip" data-filter="open">Opið</button>
+      <button class="filter-chip" data-filter="done">Klárað</button>
+    </div>
+    <div class="search-wrap" id="search-wrap" style="display:none">
+      <input class="search-input" id="search-input" type="search" placeholder="Leita í verkefnum..." autocomplete="off">
+    </div>
     <div class="scroll"><div class="tasks-list" id="tasks-list"></div></div>
     <div class="add-bar" id="add-bar" style="display:none">
       <div class="add-bar-inner">
@@ -191,6 +219,12 @@
           <input class="add-extra-input" id="add-tag" type="text" placeholder="Flokkur..." maxlength="40" list="add-tag-suggestions" autocomplete="off">
           <datalist id="add-tag-suggestions"></datalist>
           <input class="add-extra-input" id="add-deadline" type="date" style="flex:0; width:140px">
+          <select class="add-extra-input" id="add-recurrence" style="flex:0; width:140px">
+            <option value="">Ekkert</option>
+            <option value="daily">Daglega</option>
+            <option value="weekly">Vikulega</option>
+            <option value="monthly">Mánaðarlega</option>
+          </select>
         </div>
       </div>
       <button class="btn-add" id="btn-add-task">+</button>
@@ -218,6 +252,10 @@
       <div class="section-header" style="margin-bottom:10px">Litur</div>
       <div class="color-picker" id="color-picker"></div>
     </div>
+    <div>
+      <div class="section-header" style="margin-bottom:10px">Sniðmát (1-smellur)</div>
+      <div class="template-picker" id="template-picker"></div>
+    </div>
     <button class="btn-primary" id="modal-list-save">Búa til</button>
   </div>
 </div>
@@ -226,8 +264,17 @@
   <div class="modal">
     <div class="modal-title" id="options-modal-title">Valkostir</div>
     <button class="btn-ghost" id="btn-share-toggle">🔗 Deila lista</button>
+    <button class="btn-ghost" id="btn-open-trash">🗂 Ruslafata</button>
     <button class="btn-ghost danger" id="btn-delete-list">🗑 Eyða lista</button>
     <button class="btn-ghost" id="btn-close-options" style="margin-top:4px">Loka</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="trash-modal">
+  <div class="modal">
+    <div class="modal-title">Ruslafata</div>
+    <div class="trash-list" id="trash-list"></div>
+    <button class="btn-ghost" id="btn-close-trash">Loka</button>
   </div>
 </div>
 
@@ -238,6 +285,12 @@
     <input class="modal-input" id="edit-task-tag" type="text" placeholder="Flokkur..." maxlength="40" list="edit-tag-suggestions" autocomplete="off">
     <datalist id="edit-tag-suggestions"></datalist>
     <input class="modal-input" id="edit-task-deadline" type="date">
+    <select class="modal-input" id="edit-task-recurrence">
+      <option value="">Engin endurtekning</option>
+      <option value="daily">Daglega</option>
+      <option value="weekly">Vikulega</option>
+      <option value="monthly">Mánaðarlega</option>
+    </select>
     <button class="btn-primary" id="edit-task-save">Vista breytingar</button>
     <button class="btn-ghost" id="edit-task-cancel">Hætta við</button>
   </div>
@@ -248,8 +301,28 @@
 <script>
 const S = { token: localStorage.getItem('bogga_token'), name: localStorage.getItem('bogga_name') || 'Bogga', lists: [], currentList: null, tasks: [], setupPinStep: 1, shareToken: null };
 const COLORS = [{ v: '#6366f1', l: '#ede9fe' }, { v: '#ec4899', l: '#fce7f3' }, { v: '#f59e0b', l: '#fef3c7' }, { v: '#10b981', l: '#d1fae5' }, { v: '#0ea5e9', l: '#e0f2fe' }, { v: '#8b5cf6', l: '#ede9fe' }];
+const LIST_TEMPLATES = [
+  { id: 'innkaup', title: 'Innkaupalisti', color: '#10b981', tasks: [{ title: 'Mjólk', tag: 'Innkaup' }, { title: 'Brauð', tag: 'Innkaup' }, { title: 'Ávextir', tag: 'Innkaup' }, { title: 'Kaffi', tag: 'Innkaup' }] },
+  { id: 'vika', title: 'Vikuskipulag', color: '#6366f1', tasks: [{ title: 'Skipuleggja vikuna', tag: 'Skipulag' }, { title: 'Yfirfara dagatal', tag: 'Skipulag' }, { title: 'Matskrá vikunnar', tag: 'Heimili' }, { title: 'Setja 3 forgangsverkefni', tag: 'Vinna' }] },
+  { id: 'ferdalag', title: 'Ferðalag', color: '#0ea5e9', tasks: [{ title: 'Bóka gistingu', tag: 'Ferðalag' }, { title: 'Pakka fatnaði', tag: 'Ferðalag' }, { title: 'Vegabréf og skilríki', tag: 'Ferðalag' }, { title: 'Ferðaáætlun tilbúin', tag: 'Ferðalag' }] },
+  { id: 'heimili', title: 'Heimilisverk', color: '#f59e0b', tasks: [{ title: 'Ryksuga', tag: 'Heimili' }, { title: 'Þrífa baðherbergi', tag: 'Heimili' }, { title: 'Þvottur', tag: 'Heimili' }, { title: 'Taka út rusl', tag: 'Heimili' }] },
+  { id: 'velferd', title: 'Sjálfsrækt', color: '#ec4899', tasks: [{ title: 'Ganga 30 mín', tag: 'Heilsa' }, { title: 'Drekka vatn', tag: 'Heilsa' }, { title: 'Taka pásu frá skjá', tag: 'Vellíðan' }, { title: 'Kvöldyfirlit', tag: 'Vellíðan' }] }
+];
 let selectedColor = COLORS[0].v;
 let editingTask = null;
+let activeFilter = 'all';
+let searchQuery = '';
+
+function parseQuickAdd(text) {
+  let title = text, tag = '', deadline = '';
+  const tagMatch = title.match(/#(\S+)/); if (tagMatch) { tag = tagMatch[1]; title = title.replace(tagMatch[0], '').trim(); }
+  const today = new Date().toISOString().slice(0,10);
+  const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0,10);
+  if (/@í dag/i.test(title)) { deadline = today; title = title.replace(/@í dag/i, '').trim(); }
+  else if (/@á morgun/i.test(title)) { deadline = tomorrow; title = title.replace(/@á morgun/i, '').trim(); }
+  else { const dm = title.match(/@(\d{4}-\d{2}-\d{2})/); if (dm) { deadline = dm[1]; title = title.replace(dm[0], '').trim(); } }
+  return { title: title.replace(/\s+/g,' ').trim(), tag, deadline };
+}
 
 function updateTagSuggestions() {
   const tags = [...new Set(S.tasks.filter(t => t.tag).map(t => t.tag))];
@@ -262,6 +335,7 @@ function openEditModal(task) {
   document.getElementById('edit-task-title').value = task.title;
   document.getElementById('edit-task-tag').value = task.tag || '';
   document.getElementById('edit-task-deadline').value = task.deadline || '';
+  document.getElementById('edit-task-recurrence').value = task.recurrence || '';
   updateTagSuggestions();
   document.getElementById('edit-task-modal').classList.add('open');
   setTimeout(() => document.getElementById('edit-task-title').focus(), 300);
@@ -274,10 +348,11 @@ document.getElementById('edit-task-save').addEventListener('click', async () => 
   if (!title) { toast('Titill vantar'); return; }
   const tag = document.getElementById('edit-task-tag').value.trim();
   const deadline = document.getElementById('edit-task-deadline').value;
+  const recurrence = document.getElementById('edit-task-recurrence').value;
   try {
-    await api('PATCH', `/tasks/${editingTask.id}`, { title, tag, deadline });
+    await api('PATCH', `/tasks/${editingTask.id}`, { title, tag, deadline, recurrence });
     const t = S.tasks.find(t => t.id === editingTask.id);
-    if (t) { t.title = title; t.tag = tag || null; t.deadline = deadline || null; }
+    if (t) { t.title = title; t.tag = tag || null; t.deadline = deadline || null; t.recurrence = recurrence || null; }
     renderTasks();
     document.getElementById('edit-task-modal').classList.remove('open');
     toast('Verkefni uppfært ✓');
@@ -387,89 +462,267 @@ function renderLists() {
   addCard.addEventListener('click', openListModal); grid.appendChild(addCard);
 }
 
-function openListModal() { document.getElementById('modal-list-title').value = ''; selectedColor = COLORS[0].v; renderColorPicker(); document.getElementById('list-modal').classList.add('open'); setTimeout(() => document.getElementById('modal-list-title').focus(), 300); }
+function openListModal() {
+  document.getElementById('modal-list-title').value = '';
+  selectedColor = COLORS[0].v;
+  renderColorPicker();
+  renderTemplatePicker();
+  document.getElementById('list-modal').classList.add('open');
+  setTimeout(() => document.getElementById('modal-list-title').focus(), 300);
+}
 function closeListModal() { document.getElementById('list-modal').classList.remove('open'); }
 document.getElementById('list-modal').addEventListener('click', e => { if (e.target === document.getElementById('list-modal')) closeListModal(); });
 function renderColorPicker() {
   const picker = document.getElementById('color-picker'); picker.innerHTML = '';
   COLORS.forEach(({ v }) => { const sw = document.createElement('div'); sw.className = 'color-swatch' + (v === selectedColor ? ' selected' : ''); sw.style.background = v; sw.addEventListener('click', () => { selectedColor = v; renderColorPicker(); }); picker.appendChild(sw); });
 }
+function renderTemplatePicker() {
+  const wrap = document.getElementById('template-picker');
+  wrap.innerHTML = '';
+  LIST_TEMPLATES.forEach(template => {
+    const btn = document.createElement('button');
+    btn.className = 'template-btn';
+    btn.style.setProperty('--c', template.color);
+    btn.innerHTML = `<div class="template-btn-title">${esc(template.title)}</div><div class="template-btn-sub">${template.tasks.length} sjálfgefin verkefni</div>`;
+    btn.addEventListener('click', () => createListFromTemplate(template));
+    wrap.appendChild(btn);
+  });
+}
+async function createList(title, color, templateTasks = []) {
+  const list = await api('POST', '/lists', { title, color });
+  if (!templateTasks.length) {
+    list.open_count = 0;
+    list.total_count = 0;
+    return { list, createdTasks: 0, failedTasks: 0 };
+  }
+  const results = await Promise.allSettled(templateTasks.map(task => api('POST', `/lists/${list.id}/tasks`, { title: task.title, tag: task.tag || '', deadline: task.deadline || '' })));
+  const createdTasks = results.filter(r => r.status === 'fulfilled').length;
+  const failedTasks = results.length - createdTasks;
+  list.open_count = createdTasks;
+  list.total_count = createdTasks;
+  return { list, createdTasks, failedTasks };
+}
+async function createListFromTemplate(template) {
+  try {
+    const { list, createdTasks, failedTasks } = await createList(template.title, template.color, template.tasks);
+    S.lists.unshift(list);
+    renderLists();
+    closeListModal();
+    if (failedTasks > 0) toast(`${template.title} búinn til (${createdTasks}/${template.tasks.length} verkefni)`);
+    else toast(`${template.title} búinn til ✓`);
+  } catch (e) { toast(e.message); }
+}
 document.getElementById('modal-list-save').addEventListener('click', async () => {
   const title = document.getElementById('modal-list-title').value.trim();
   if (!title) { toast('Titill vantar'); return; }
-  try { const list = await api('POST', '/lists', { title, color: selectedColor }); list.open_count = 0; list.total_count = 0; S.lists.unshift(list); renderLists(); closeListModal(); toast('Listi búinn til ✓'); } catch (e) { toast(e.message); }
+  try {
+    const { list } = await createList(title, selectedColor);
+    S.lists.unshift(list);
+    renderLists();
+    closeListModal();
+    toast('Listi búinn til ✓');
+  } catch (e) { toast(e.message); }
 });
 document.getElementById('modal-list-title').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('modal-list-save').click(); });
 
 async function showListDetail(id) {
+  activeFilter = 'all'; searchQuery = '';
   showView('view-list'); document.getElementById('add-bar').style.display = 'none'; document.getElementById('tasks-list').innerHTML = ''; document.getElementById('share-notice-wrap').innerHTML = '';
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.toggle('active', c.dataset.filter === 'all'));
+  document.getElementById('search-input').value = '';
   try {
     const { list, tasks } = await api('GET', `/lists/${id}/tasks`);
     S.currentList = list; S.tasks = tasks;
     document.getElementById('list-topbar').style.borderBottom = `3px solid ${list.color}`;
     document.getElementById('list-title').textContent = list.title;
-    if (list.share_token) renderShareNotice(list.share_token);
+    document.getElementById('filter-bar').style.display = '';
+    document.getElementById('search-wrap').style.display = '';
+    if (list.share_token) renderShareNotice(list.share_token, getShareRoleFromToken(list.share_token));
     renderTasks(); document.getElementById('add-bar').style.display = 'flex'; document.getElementById('add-title').focus();
   } catch (e) { toast(e.message); goBack(); }
 }
-function renderShareNotice(token) {
+function renderShareNotice(token, role = getShareRoleFromToken(token)) {
   const url = `${location.origin}/#/s/${token}`;
-  document.getElementById('share-notice-wrap').innerHTML = `<div class="share-notice"><span>🔗 Deiltur listi virkur</span><button onclick="copyText('${url}')">Afrita link</button><button onclick="removeShare()">Loka</button></div>`;
+  const roleText = role === 'viewer' ? 'Aðeins lestur (viewer)' : 'Má bæta við (editor)';
+  document.getElementById('share-notice-wrap').innerHTML = `<div class="share-notice"><span>🔗 Deildur listi er virkur · ${roleText}</span><button onclick="copyText('${url}')">Afrita hlekk</button><button onclick="removeShare()">Loka</button></div>`;
 }
 function renderTasks() {
   const list = document.getElementById('tasks-list'); list.innerHTML = '';
-  if (S.tasks.length === 0) { list.innerHTML = `<div class="empty"><div class="empty-icon">✅</div><div class="empty-text">Enginn verkefni enn — bættu við!</div></div>`; return; }
-  const open = S.tasks.filter(t => t.status === 'open'), done = S.tasks.filter(t => t.status === 'done');
+  let tasks = S.tasks;
+  if (searchQuery) { const q = searchQuery.toLowerCase(); tasks = tasks.filter(t => t.title.toLowerCase().includes(q) || (t.tag && t.tag.toLowerCase().includes(q))); }
+  const today = new Date(); today.setHours(0,0,0,0);
+  const tomorrow = new Date(today); tomorrow.setDate(today.getDate()+1);
+  const dayAfter = new Date(tomorrow); dayAfter.setDate(tomorrow.getDate()+1);
+  if (activeFilter === 'today') tasks = tasks.filter(t => t.status==='open' && t.deadline && new Date(t.deadline+'T00:00:00')>=today && new Date(t.deadline+'T00:00:00')<tomorrow);
+  else if (activeFilter === 'tomorrow') tasks = tasks.filter(t => t.status==='open' && t.deadline && new Date(t.deadline+'T00:00:00')>=tomorrow && new Date(t.deadline+'T00:00:00')<dayAfter);
+  else if (activeFilter === 'late') tasks = tasks.filter(t => t.status==='open' && t.deadline && new Date(t.deadline+'T00:00:00')<today);
+  else if (activeFilter === 'open') tasks = tasks.filter(t => t.status==='open');
+  else if (activeFilter === 'done') tasks = tasks.filter(t => t.status==='done');
+  if (tasks.length === 0) {
+    const isEmpty = !searchQuery && activeFilter === 'all' && S.tasks.length === 0;
+    list.innerHTML = `<div class="empty"><div class="empty-icon">${isEmpty?'✅':'🔍'}</div><div class="empty-text">${isEmpty?'Engin verkefni enn — bættu við!':'Engin verkefni passa'}</div></div>`; updateTagSuggestions(); return;
+  }
+  const open = tasks.filter(t => t.status==='open'), done = tasks.filter(t => t.status==='done');
   [...open, ...done].forEach(task => list.appendChild(makeTaskEl(task)));
   updateTagSuggestions();
 }
 function makeTaskEl(task) {
   const ci = COLORS.find(c => S.currentList && c.v === S.currentList.color) || COLORS[0];
   const isDone = task.status === 'done', dl = task.deadline ? formatDeadline(task.deadline) : null, overdue = task.deadline && !isDone && new Date(task.deadline) < new Date();
+  const rec = task.recurrence ? recurrenceLabel(task.recurrence) : null;
   const el = document.createElement('div'); el.className = `task-item${isDone ? ' done' : ''} animate-in`; el.dataset.id = task.id;
-  el.innerHTML = `<div class="task-check${isDone ? ' checked' : ''}" data-task-id="${task.id}" data-done="${isDone}"></div><div class="task-body"><div class="task-title">${esc(task.title)}</div><div class="task-meta">${task.tag ? `<span class="task-tag" style="--c:${ci.v};--c-light:${ci.l}">${esc(task.tag)}</span>` : ''}${dl ? `<span class="task-deadline${overdue ? ' overdue' : ''}">📅 ${dl}</span>` : ''}</div></div><div class="task-actions"><button class="task-edit" data-edit-id="${task.id}">✎</button><button class="task-del" data-del-id="${task.id}">✕</button></div>`;
+  el.innerHTML = `<div class="task-check${isDone ? ' checked' : ''}" data-task-id="${task.id}" data-done="${isDone}"></div><div class="task-body"><div class="task-title">${esc(task.title)}</div><div class="task-meta">${task.tag ? `<span class="task-tag" style="--c:${ci.v};--c-light:${ci.l}">${esc(task.tag)}</span>` : ''}${dl ? `<span class="task-deadline${overdue ? ' overdue' : ''}">📅 ${dl}</span>` : ''}${rec ? `<span class="task-deadline">🔁 ${rec}</span>` : ''}</div></div><div class="task-actions"><button class="task-edit" data-edit-id="${task.id}">✎</button><button class="task-del" data-del-id="${task.id}">✕</button></div>`;
   return el;
 }
 document.getElementById('tasks-list').addEventListener('click', async e => {
   const check = e.target.closest('.task-check');
-  if (check) { const id = check.dataset.taskId, done = check.dataset.done === 'true'; try { await api('PATCH', `/tasks/${id}`, { status: done ? 'open' : 'done' }); const t = S.tasks.find(t => t.id === id); if (t) t.status = done ? 'open' : 'done'; renderTasks(); } catch (e) { toast(e.message); } return; }
+  if (check) { const id = check.dataset.taskId, done = check.dataset.done === 'true'; try { await api('PATCH', `/tasks/${id}`, { status: done ? 'open' : 'done' }); await refreshCurrentListTasks(); } catch (e) { toast(e.message); } return; }
   const edit = e.target.closest('[data-edit-id]');
   if (edit) { const task = S.tasks.find(t => t.id === edit.dataset.editId); if (task) openEditModal(task); return; }
   const del = e.target.closest('[data-del-id]');
   if (del) { try { await api('DELETE', `/tasks/${del.dataset.delId}`); S.tasks = S.tasks.filter(t => t.id !== del.dataset.delId); renderTasks(); } catch (e) { toast(e.message); } }
 });
+document.getElementById('filter-bar').addEventListener('click', e => {
+  const chip = e.target.closest('.filter-chip');
+  if (!chip) return;
+  activeFilter = chip.dataset.filter || 'all';
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.toggle('active', c === chip));
+  renderTasks();
+});
+document.getElementById('search-input').addEventListener('input', e => {
+  searchQuery = (e.target.value || '').trim();
+  renderTasks();
+});
 document.getElementById('add-title').addEventListener('focus', () => document.getElementById('add-extras').classList.add('open'));
+document.getElementById('add-title').addEventListener('input', e => {
+  const raw = e.target.value;
+  if (!raw) return;
+  const { tag, deadline } = parseQuickAdd(raw);
+  if (tag) { document.getElementById('add-tag').value = tag; document.getElementById('add-extras').classList.add('open'); }
+  if (deadline) { document.getElementById('add-deadline').value = deadline; document.getElementById('add-extras').classList.add('open'); }
+});
 document.getElementById('add-title').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-add-task').click(); });
 document.getElementById('btn-add-task').addEventListener('click', async () => {
-  const title = document.getElementById('add-title').value.trim(); if (!title || !S.currentList) return;
-  try { const task = await api('POST', `/lists/${S.currentList.id}/tasks`, { title, tag: document.getElementById('add-tag').value.trim(), deadline: document.getElementById('add-deadline').value }); S.tasks.unshift(task); renderTasks(); document.getElementById('add-title').value = ''; document.getElementById('add-tag').value = ''; document.getElementById('add-deadline').value = ''; document.getElementById('add-extras').classList.remove('open'); document.getElementById('add-title').focus(); } catch (e) { toast(e.message); }
+  const rawTitle = document.getElementById('add-title').value.trim();
+  if (!rawTitle || !S.currentList) return;
+  let title = rawTitle;
+  let tag = document.getElementById('add-tag').value.trim();
+  let deadline = document.getElementById('add-deadline').value;
+  const recurrence = document.getElementById('add-recurrence').value;
+  if (/[#@]/.test(rawTitle)) {
+    const parsed = parseQuickAdd(rawTitle);
+    title = parsed.title || title;
+    if (!tag && parsed.tag) tag = parsed.tag;
+    if (!deadline && parsed.deadline) deadline = parsed.deadline;
+  }
+  if (!title) { toast('Titill vantar'); return; }
+  try { const task = await api('POST', `/lists/${S.currentList.id}/tasks`, { title, tag, deadline, recurrence }); S.tasks.unshift(task); renderTasks(); document.getElementById('add-title').value = ''; document.getElementById('add-tag').value = ''; document.getElementById('add-deadline').value = ''; document.getElementById('add-recurrence').value = ''; document.getElementById('add-extras').classList.remove('open'); document.getElementById('add-title').focus(); } catch (e) { toast(e.message); }
 });
 
-document.getElementById('btn-list-menu').addEventListener('click', () => { if (!S.currentList) return; document.getElementById('options-modal-title').textContent = S.currentList.title; document.getElementById('btn-share-toggle').textContent = S.currentList.share_token ? '🔗 Afrita deililink' : '🔗 Deila lista'; document.getElementById('list-options-modal').classList.add('open'); });
+document.getElementById('btn-list-menu').addEventListener('click', () => { if (!S.currentList) return; document.getElementById('options-modal-title').textContent = S.currentList.title; document.getElementById('btn-share-toggle').textContent = S.currentList.share_token ? '🔗 Afrita deilihlekk' : '🔗 Deila lista'; document.getElementById('list-options-modal').classList.add('open'); });
 document.getElementById('list-options-modal').addEventListener('click', e => { if (e.target === document.getElementById('list-options-modal')) closeOptionsModal(); });
 function closeOptionsModal() { document.getElementById('list-options-modal').classList.remove('open'); }
 document.getElementById('btn-close-options').addEventListener('click', closeOptionsModal);
+document.getElementById('trash-modal').addEventListener('click', e => { if (e.target === document.getElementById('trash-modal')) closeTrashModal(); });
+document.getElementById('btn-close-trash').addEventListener('click', closeTrashModal);
+function closeTrashModal() { document.getElementById('trash-modal').classList.remove('open'); }
+async function refreshCurrentListTasks() {
+  if (!S.currentList) return;
+  const { tasks } = await api('GET', `/lists/${S.currentList.id}/tasks`);
+  S.tasks = tasks;
+  renderTasks();
+}
+function renderTrashItems(tasks) {
+  const el = document.getElementById('trash-list');
+  if (!tasks.length) {
+    el.innerHTML = `<div class="empty" style="padding:20px 8px"><div class="empty-icon">🗂</div><div class="empty-text">Ruslafatan er tóm</div></div>`;
+    return;
+  }
+  el.innerHTML = tasks.map(task => `<div class="trash-item"><div class="trash-item-title">${esc(task.title)}</div><div class="trash-item-meta">${task.tag ? `#${esc(task.tag)} · ` : ''}${task.deadline ? `Frestur: ${esc(task.deadline)}` : 'Enginn frestur'}</div><div class="trash-item-actions"><button class="btn-ghost" data-trash-restore="${task.id}">Endurheimta</button><button class="btn-ghost danger" data-trash-purge="${task.id}">Eyða varanlega</button></div></div>`).join('');
+}
+async function openTrashModal() {
+  if (!S.currentList) return;
+  try {
+    const { tasks } = await api('GET', `/lists/${S.currentList.id}/trash`);
+    renderTrashItems(tasks);
+    closeOptionsModal();
+    document.getElementById('trash-modal').classList.add('open');
+  } catch (e) { toast(e.message); }
+}
+document.getElementById('btn-open-trash').addEventListener('click', openTrashModal);
+document.getElementById('trash-list').addEventListener('click', async e => {
+  const restore = e.target.closest('[data-trash-restore]');
+  if (restore) {
+    try {
+      await api('POST', `/tasks/${restore.dataset.trashRestore}/restore`, {});
+      if (S.currentList) {
+        const { tasks } = await api('GET', `/lists/${S.currentList.id}/trash`);
+        renderTrashItems(tasks);
+      }
+      await refreshCurrentListTasks();
+      toast('Verkefni endurheimt ✓');
+    } catch (err) { toast(err.message); }
+    return;
+  }
+  const purge = e.target.closest('[data-trash-purge]');
+  if (purge) {
+    if (!confirm('Eyða verkefni varanlega?')) return;
+    try {
+      await api('DELETE', `/tasks/${purge.dataset.trashPurge}/purge`);
+      if (S.currentList) {
+        const { tasks } = await api('GET', `/lists/${S.currentList.id}/trash`);
+        renderTrashItems(tasks);
+      }
+      toast('Verkefni eytt varanlega');
+    } catch (err) { toast(err.message); }
+  }
+});
 document.getElementById('btn-share-toggle').addEventListener('click', async () => {
   if (!S.currentList) return;
   if (S.currentList.share_token) { copyText(`${location.origin}/#/s/${S.currentList.share_token}`); closeOptionsModal(); }
-  else { try { const { token } = await api('POST', `/lists/${S.currentList.id}/share`); S.currentList.share_token = token; renderShareNotice(token); copyText(`${location.origin}/#/s/${token}`); closeOptionsModal(); toast('Deililink afritaður ✓'); } catch (e) { toast(e.message); } }
+  else {
+    const canEdit = confirm('Leyfa gestum að bæta við verkefnum?\n\nOK = editor\nCancel = viewer (aðeins lestur)');
+    const chosenRole = canEdit ? 'editor' : 'viewer';
+    try {
+      const { token, role } = await api('POST', `/lists/${S.currentList.id}/share`, { role: chosenRole });
+      S.currentList.share_token = token;
+      renderShareNotice(token, role);
+      copyText(`${location.origin}/#/s/${token}`);
+      closeOptionsModal();
+      toast(`Deilihlekkur afritaður ✓ (${role})`);
+    } catch (e) { toast(e.message); }
+  }
 });
 document.getElementById('btn-delete-list').addEventListener('click', async () => {
   if (!S.currentList || !confirm(`Eyða "${S.currentList.title}"?`)) return;
   try { await api('DELETE', `/lists/${S.currentList.id}`); closeOptionsModal(); toast('Lista eytt'); goBack(); } catch (e) { toast(e.message); }
 });
-async function removeShare() { try { await api('DELETE', `/lists/${S.currentList.id}/share`); S.currentList.share_token = null; document.getElementById('share-notice-wrap').innerHTML = ''; toast('Deiling lokað'); } catch (e) { toast(e.message); } }
+async function removeShare() { try { await api('DELETE', `/lists/${S.currentList.id}/share`); S.currentList.share_token = null; document.getElementById('share-notice-wrap').innerHTML = ''; toast('Deiling lokuð'); } catch (e) { toast(e.message); } }
 
 async function showShare(token) {
   showView('view-share'); S.shareToken = token;
-  try { const { list, tasks } = await api('GET', `/share/${token}`); document.getElementById('share-title').textContent = list.title; document.getElementById('share-header').style.borderBottom = `3px solid ${list.color}`; renderShareTasks(tasks, list); }
-  catch { document.getElementById('share-title').textContent = 'Listi fannst ekki'; }
+  try {
+    const { list, tasks, role } = await api('GET', `/share/${token}`);
+    document.getElementById('share-title').textContent = list.title;
+    document.getElementById('share-header').style.borderBottom = `3px solid ${list.color}`;
+    renderShareTasks(tasks, list, role);
+  }
+  catch {
+    document.getElementById('share-title').textContent = 'Listi fannst ekki';
+    document.querySelector('.shared-add-bar').style.display = 'none';
+  }
 }
-function renderShareTasks(tasks, list) {
+function renderShareTasks(tasks, list, role = getShareRoleFromToken(S.shareToken)) {
   const el = document.getElementById('share-tasks'); el.innerHTML = '';
   const ci = COLORS.find(c => c.v === list.color) || COLORS[0];
-  if (tasks.length === 0) { el.innerHTML = `<div class="empty"><div class="empty-icon">📋</div><div class="empty-text">Enginn verkefni enn</div></div>`; return; }
-  tasks.forEach(task => { const isDone = task.status === 'done'; const item = document.createElement('div'); item.className = `task-item${isDone ? ' done' : ''} animate-in`; item.innerHTML = `<div class="task-check${isDone ? ' checked' : ''}"></div><div class="task-body"><div class="task-title">${esc(task.title)}</div><div class="task-meta">${task.tag ? `<span class="task-tag" style="--c:${ci.v};--c-light:${ci.l}">${esc(task.tag)}</span>` : ''}${task.deadline ? `<span class="task-deadline">📅 ${formatDeadline(task.deadline)}</span>` : ''}</div></div>`; el.appendChild(item); });
+  const addBar = document.querySelector('.shared-add-bar');
+  if (role === 'viewer') {
+    addBar.style.display = 'none';
+  } else {
+    addBar.style.display = 'flex';
+  }
+  if (tasks.length === 0) { el.innerHTML = `<div class="empty"><div class="empty-icon">📋</div><div class="empty-text">Engin verkefni enn</div></div>`; return; }
+  tasks.forEach(task => { const isDone = task.status === 'done'; const rec = task.recurrence ? recurrenceLabel(task.recurrence) : null; const item = document.createElement('div'); item.className = `task-item${isDone ? ' done' : ''} animate-in`; item.innerHTML = `<div class="task-check${isDone ? ' checked' : ''}"></div><div class="task-body"><div class="task-title">${esc(task.title)}</div><div class="task-meta">${task.tag ? `<span class="task-tag" style="--c:${ci.v};--c-light:${ci.l}">${esc(task.tag)}</span>` : ''}${task.deadline ? `<span class="task-deadline">📅 ${formatDeadline(task.deadline)}</span>` : ''}${rec ? `<span class="task-deadline">🔁 ${rec}</span>` : ''}</div></div>`; el.appendChild(item); });
 }
 document.getElementById('btn-share-add').addEventListener('click', addSharedTask);
 document.getElementById('share-add-title').addEventListener('keydown', e => { if (e.key === 'Enter') addSharedTask(); });
@@ -479,18 +732,20 @@ async function addSharedTask() {
 }
 
 document.getElementById('btn-back').addEventListener('click', goBack);
-function goBack() { S.currentList = null; S.tasks = []; location.hash = '#/'; showLists(); }
+function goBack() { activeFilter = 'all'; searchQuery = ''; document.getElementById('filter-bar').style.display = 'none'; document.getElementById('search-wrap').style.display = 'none'; S.currentList = null; S.tasks = []; location.hash = '#/'; showLists(); }
 document.getElementById('btn-logout').addEventListener('click', () => { if (confirm('Útskrá?')) logout(); });
 function logout() { S.token = null; localStorage.removeItem('bogga_token'); location.hash = ''; checkSetup(); }
 function updateDots(id, pin) { document.querySelectorAll(`#${id} .pin-dot`).forEach((d, i) => d.classList.toggle('filled', i < pin.length)); }
 function shakeElement(id) { const el = document.getElementById(id); el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); }
 function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); }
-function copyText(text) { navigator.clipboard.writeText(text).then(() => toast('Link afritaður ✓')).catch(() => toast(text)); }
+function copyText(text) { navigator.clipboard.writeText(text).then(() => toast('Hlekkur afritaður ✓')).catch(() => toast(text)); }
+function getShareRoleFromToken(token) { return token && token.startsWith('v_') ? 'viewer' : 'editor'; }
+function recurrenceLabel(rule) { if (rule === 'daily') return 'Daglega'; if (rule === 'weekly') return 'Vikulega'; if (rule === 'monthly') return 'Mánaðarlega'; return ''; }
 function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function formatDeadline(dateStr) {
   const d = new Date(dateStr + 'T00:00:00'), now = new Date(), diff = Math.ceil((d - now) / 86400000);
   if (diff === 0) return 'Í dag'; if (diff === 1) return 'Á morgun'; if (diff === -1) return 'Í gær';
-  if (diff < 0) return `${Math.abs(diff)} dögum liðin`; if (diff < 7) return `${diff} dagar`;
+  if (diff < 0) return `${Math.abs(diff)} dögum síðan`; if (diff < 7) return `eftir ${diff} daga`;
   return d.toLocaleDateString('is-IS', { month: 'short', day: 'numeric' });
 }
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});

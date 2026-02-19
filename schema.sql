@@ -26,6 +26,13 @@ CREATE TABLE IF NOT EXISTS tasks (
   FOREIGN KEY (list_id) REFERENCES lists(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS task_recurrence (
+  task_id TEXT PRIMARY KEY,
+  rule TEXT NOT NULL,
+  created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+  FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE
+);
+
 CREATE INDEX IF NOT EXISTS idx_lists_owner ON lists(owner_id);
 CREATE INDEX IF NOT EXISTS idx_tasks_list ON tasks(list_id);
 CREATE INDEX IF NOT EXISTS idx_lists_share ON lists(share_token);
