@@ -127,7 +127,7 @@ async function handleAPI(path, method, request, env) {
 
   if (path === '/api/auth/setup' && method === 'POST') {
     const existing = await env.DB.prepare('SELECT id FROM users LIMIT 1').first();
-    if (existing) return err('Already set up', 403);
+    if (existing) return err('Uppsetning er þegar til', 403);
     const { pin, name } = await request.json().catch(() => ({}));
     if (!pin || !/^\d{4}$/.test(pin)) return err('PIN verður að vera 4 tölur');
     const id = crypto.randomUUID();
@@ -140,10 +140,10 @@ async function handleAPI(path, method, request, env) {
 
   if (path === '/api/auth/login' && method === 'POST') {
     const { pin } = await request.json().catch(() => ({}));
-    if (!pin) return err('PIN vantar');
+    if (!pin) return err('PIN-kóða vantar');
     const pin_hash = await hashPIN(pin);
     const user = await env.DB.prepare('SELECT * FROM users WHERE pin_hash = ? LIMIT 1').bind(pin_hash).first();
-    if (!user) return err('Rangt PIN', 401);
+    if (!user) return err('Rangur PIN-kóði', 401);
     const token = await signJWT({ sub: user.id, exp: Math.floor(Date.now() / 1000) + 86400 * 7 }, env.JWT_SECRET);
     return json({ token, name: user.display_name });
   }
@@ -329,7 +329,7 @@ async function handleAPI(path, method, request, env) {
   }
 
   if (seg[0] === 'share' && seg[2] === 'tasks' && method === 'POST') {
-    if (shareRoleFromToken(seg[1]) === 'viewer') return err('Aðeins eigandi eða ritari mega bæta við', 403);
+    if (shareRoleFromToken(seg[1]) === 'viewer') return err('Aðeins notandi með breytingarheimild má bæta við verkefni', 403);
     const list = await env.DB.prepare('SELECT id FROM lists WHERE share_token = ?').bind(seg[1]).first();
     if (!list) return err('Fannst ekki', 404);
     const { title, deadline, tag, recurrence } = await request.json().catch(() => ({}));

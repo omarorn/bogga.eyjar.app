@@ -1,6 +1,9 @@
 name = "bogga-app"
 main = "src/index.js"
 compatibility_date = "2024-11-01"
+routes = [
+  { pattern = "bogga.eyjar.app/*", custom_domain = true }
+]
 
 assets = { directory = "./public", binding = "ASSETS" }
 

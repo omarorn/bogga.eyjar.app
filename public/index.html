@@ -154,7 +154,7 @@
         <button class="btn-primary" id="setup-name-next" style="max-width: 280px">Áfram →</button>
       </div>
       <div class="setup-step" id="setup-step-pin">
-        <p class="pin-sub" id="setup-pin-label">Veldu 4 stafa PIN</p>
+        <p class="pin-sub" id="setup-pin-label">Veldu 4 stafa PIN-kóða</p>
         <div class="pin-dots" id="setup-dots">
           <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
         </div>
@@ -407,14 +407,14 @@ async function handleSetupKey(d) {
   if (S.setupPinStep === 1) {
     if (setupPin.length >= 4) return;
     setupPin += d; updateDots('setup-dots', setupPin);
-    if (setupPin.length === 4) setTimeout(() => { S.setupPinStep = 2; setupConfirmPin = ''; document.getElementById('setup-pin-label').textContent = 'Staðfestu PIN'; updateDots('setup-dots', setupConfirmPin); }, 200);
+    if (setupPin.length === 4) setTimeout(() => { S.setupPinStep = 2; setupConfirmPin = ''; document.getElementById('setup-pin-label').textContent = 'Staðfestu PIN-kóða'; updateDots('setup-dots', setupConfirmPin); }, 200);
   } else {
     if (setupConfirmPin.length >= 4) return;
     setupConfirmPin += d; updateDots('setup-dots', setupConfirmPin);
     if (setupConfirmPin.length === 4) {
       if (setupConfirmPin !== setupPin) {
-        shakeElement('setup-dots'); toast('PIN passar ekki — reyndu aftur');
-        setTimeout(() => { S.setupPinStep = 1; setupPin = ''; setupConfirmPin = ''; document.getElementById('setup-pin-label').textContent = 'Veldu 4 stafa PIN'; updateDots('setup-dots', setupPin); }, 500);
+        shakeElement('setup-dots'); toast('PIN-kóðar passa ekki — reyndu aftur');
+        setTimeout(() => { S.setupPinStep = 1; setupPin = ''; setupConfirmPin = ''; document.getElementById('setup-pin-label').textContent = 'Veldu 4 stafa PIN-kóða'; updateDots('setup-dots', setupPin); }, 500);
       } else {
         try {
           const res = await api('POST', '/auth/setup', { pin: setupPin, name: S.name });
@@ -439,7 +439,7 @@ async function handleLoginKey(d) {
       S.token = res.token; S.name = res.name;
       localStorage.setItem('bogga_token', res.token); localStorage.setItem('bogga_name', res.name);
       loginPin = ''; updateDots('login-dots', loginPin); location.hash = '#/'; showLists();
-    } catch { shakeElement('login-dots'); toast('Rangt PIN'); setTimeout(() => { loginPin = ''; updateDots('login-dots', loginPin); }, 400); }
+    } catch { shakeElement('login-dots'); toast('Rangur PIN-kóði'); setTimeout(() => { loginPin = ''; updateDots('login-dots', loginPin); }, 400); }
   }
 }
 
@@ -543,7 +543,7 @@ async function showListDetail(id) {
 }
 function renderShareNotice(token, role = getShareRoleFromToken(token)) {
   const url = `${location.origin}/#/s/${token}`;
-  const roleText = role === 'viewer' ? 'Aðeins lestur (viewer)' : 'Má bæta við (editor)';
+  const roleText = role === 'viewer' ? 'Aðeins lestur' : 'Má bæta við';
   document.getElementById('share-notice-wrap').innerHTML = `<div class="share-notice"><span>🔗 Deildur listi er virkur · ${roleText}</span><button onclick="copyText('${url}')">Afrita hlekk</button><button onclick="removeShare()">Loka</button></div>`;
 }
 function renderTasks() {
@@ -681,7 +681,7 @@ document.getElementById('btn-share-toggle').addEventListener('click', async () =
   if (!S.currentList) return;
   if (S.currentList.share_token) { copyText(`${location.origin}/#/s/${S.currentList.share_token}`); closeOptionsModal(); }
   else {
-    const canEdit = confirm('Leyfa gestum að bæta við verkefnum?\n\nOK = editor\nCancel = viewer (aðeins lestur)');
+    const canEdit = confirm('Leyfa gestum að bæta við verkefnum?\n\nOK = Má bæta við\nCancel = Aðeins lestur');
     const chosenRole = canEdit ? 'editor' : 'viewer';
     try {
       const { token, role } = await api('POST', `/lists/${S.currentList.id}/share`, { role: chosenRole });
@@ -708,7 +708,7 @@ async function showShare(token) {
     renderShareTasks(tasks, list, role);
   }
   catch {
-    document.getElementById('share-title').textContent = 'Listi fannst ekki';
+    document.getElementById('share-title').textContent = 'Listinn fannst ekki';
     document.querySelector('.shared-add-bar').style.display = 'none';
   }
 }
