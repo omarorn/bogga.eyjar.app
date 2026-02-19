@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0f172a">
@@ -406,7 +407,7 @@ const JOKES = [
   { h:11, q: "Hvernig líst íslenskum veðurfræðingi á starfið?", a: "Hann er eini maðurinn sem fær laun þegar hann hefur rangt fyrir sér." },
   { h:12, q: "Hvað eru þrír Íslendingar á einum stað?", a: "Tveir þeirra þekkjast. Og sá þriðji er frændi þeirra." },
   { h:13, q: "Hvernig þekkirðu vegan Íslending?", a: "Hann segir þér það á fyrstu 5 mínútunum — þó þú hafir bara boðið upp á skyr." },
-  { h:14, q: "Af hverju fer Íslendingur aldrei á fætur á réttum tíma?", a: "Vegna þess að „strax" þýðir eitthvað allt annað hér norðan við pólheimkræðuna." },
+  { h:14, q: "Af hverju fer Íslendingur aldrei á fætur á réttum tíma?", a: "Vegna þess að „strax“ þýðir eitthvað allt annað hér norðan við pólheimkræðuna." },
   { h:15, q: "Hvað segjir Íslendingur þegar eitthvað fer úrskeiðis?", a: "\"Þetta er alveg fínt\" — og meinar það ekki." },
   { h:16, q: "Af hverju er veðrið alltaf umræðuefni nr. 1 á Íslandi?", a: "Vegna þess að það er eini hlutinn sem breytist hér — oft tvisvar á klukkustund." }
 ];
@@ -562,7 +563,7 @@ async function handleLoginKey(d) {
 }
 
 async function showLists() {
-  showView('view-lists'); document.getElementById('lists-title').textContent = `Hæ ${S.name} 👋`;
+  showView('view-lists'); document.getElementById('lists-title').textContent = getIcelandicGreeting(S.name);
   renderJokeCard(); startErgoHint();
   try { S.lists = await api('GET', '/lists'); renderLists(); }
   catch (e) { if (e.status === 401) logout(); else toast('Villa við að sækja lista'); }
@@ -979,6 +980,63 @@ function renderJokeCard() {
 }
 function copyText(text) { navigator.clipboard.writeText(text).then(() => toast('Hlekkur afritaður ✓')).catch(() => toast(text)); }
 function getShareRoleFromToken(token) { return token && token.startsWith('v_') ? 'viewer' : 'editor'; }
+function calcEaster(y) {
+  const f = Math.floor, G = y%19, C = f(y/100);
+  const H = (C-f(C/4)-f((8*C+13)/25)+19*G+15)%30;
+  const I = H-f(H/28)*(1-f(29/(H+1))*f((21-G)/11));
+  const J = (y+f(y/4)+I+2-C+f(C/4))%7, L = I-J;
+  return new Date(y, 2+f((L+40)/44), L+28-31*f((3+f((L+40)/44))/4));
+}
+function nthWeekday(y, mo, weekday, nth) {
+  const d = new Date(y, mo-1, 1);
+  while (d.getDay() !== weekday) d.setDate(d.getDate()+1);
+  d.setDate(d.getDate()+(nth-1)*7); return d;
+}
+function firstWeekdayOnOrAfter(y, mo, day, weekday) {
+  const d = new Date(y, mo-1, day);
+  while (d.getDay() !== weekday) d.setDate(d.getDate()+1); return d;
+}
+function getIcelandicGreeting(name) {
+  const now = new Date(), h = now.getHours(), dow = now.getDay();
+  const y = now.getFullYear(), mo = now.getMonth()+1, d = now.getDate();
+  const hol = getHoliday(y, mo, d);
+  if (hol) return `${hol.emoji} ${hol.greeting}, ${name}!`;
+  let g = h>=5&&h<10 ? 'Góðan morgun' : h>=10&&h<18 ? 'Góðan dag' : h>=18&&h<23 ? 'Gott kvöld' : 'Góða nótt';
+  const sfx = dow===1&&h<10?' 😅':dow===5&&h>=14?' 🎉':dow===6?' 🌟':dow===0?' ☀️':'';
+  return `${g}, ${name}!${sfx}`;
+}
+function getHoliday(y, mo, d) {
+  const E = calcEaster(y);
+  const ed = (offset=0) => { const x=new Date(E); x.setDate(x.getDate()+offset); return [x.getMonth()+1, x.getDate()]; };
+  const fwooa = (m,day,wday) => { const x=firstWeekdayOnOrAfter(y,m,day,wday); return [x.getMonth()+1, x.getDate()]; };
+  const nwday = (m,wday,n) => { const x=nthWeekday(y,m,wday,n); return [x.getMonth()+1, x.getDate()]; };
+  const match = (arr) => arr[0]===mo && arr[1]===d;
+  const DAYS = [
+    { check:[1,1],   greeting:'Gleðilegt nýtt ár',            emoji:'🥂' },
+    { check:[1,6],   greeting:'Gleðilegan þrettánda',          emoji:'🎄' },
+    { check:[2,14],  greeting:'Gleðilegan valentínusardag',    emoji:'❤️' },
+    { check:[5,1],   greeting:'Gleðilegan 1. maí',             emoji:'✊' },
+    { check:[6,17],  greeting:'Gleðilegan þjóðhátíðardag',     emoji:'🇮🇸' },
+    { check:[12,1],  greeting:'Gleðilegar aðventukveðjur',     emoji:'🕯️' },
+    { check:[12,23], greeting:'Gleðilega Þórláksmessu',        emoji:'🐟' },
+    { check:[12,24], greeting:'Gleðilegan aðfangadag',         emoji:'🎄' },
+    { check:[12,25], greeting:'Gleðileg jól',                  emoji:'🎁' },
+    { check:[12,26], greeting:'Gleðileg jól',                  emoji:'🎁' },
+    { check:[12,31], greeting:'Gleðilegan gamlársdag',         emoji:'🎆' },
+    { check:[4,22],  greeting:'Gleðilegan fullveldisdag',      emoji:'🇮🇸' },
+    { check:[10,31], greeting:'Skelfilega góðan hrekkjavöku',  emoji:'🎃' },
+    { check:ed(-3),  greeting:'Gleðilegan skírdag',            emoji:'✝️' },
+    { check:ed(-2),  greeting:'Gleðilegan föstudaginn langa',  emoji:'✝️' },
+    { check:ed(0),   greeting:'Gleðilega páska',               emoji:'🐣' },
+    { check:ed(1),   greeting:'Gleðilega páska',               emoji:'🐣' },
+    { check:ed(39),  greeting:'Gleðilegan uppstigningardag',   emoji:'☁️' },
+    { check:ed(49),  greeting:'Gleðilega hvítasunnu',          emoji:'🕊️' },
+    { check:ed(50),  greeting:'Gleðilega hvítasunnu',          emoji:'🕊️' },
+    { check:fwooa(4,19,4), greeting:'Gleðilegan sumardaginn fyrsta', emoji:'🌸' },
+    { check:nwday(8,1,1),  greeting:'Gleðilegan verslunarmannadag', emoji:'☀️' },
+  ];
+  return DAYS.find(x => match(x.check)) || null;
+}
 function recurrenceLabel(rule) { if (rule === 'daily') return 'Daglega'; if (rule === 'weekly') return 'Vikulega'; if (rule === 'monthly') return 'Mánaðarlega'; return ''; }
 function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function formatDeadline(dateStr) {
