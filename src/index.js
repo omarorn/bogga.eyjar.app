@@ -120,6 +120,12 @@ export default {
   },
 };
 
+export const __test = {
+  normalizeDeadline,
+  normalizeRecurrence,
+  nextRecurringDeadline,
+};
+
 // ── API router ────────────────────────────────────────────────
 
 async function handleAPI(path, method, request, env) {
