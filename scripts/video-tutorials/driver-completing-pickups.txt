@@ -1,0 +1,318 @@
+# Driver Tutorial: Klára Tínslur (Completing Pickups)
+# Duration: 2 minutes
+# Language: Icelandic (with English subtitles)
+# Avatar: Professional, friendly, casual (outdoor/field setting)
+
+---
+
+## OPENING (0:00 - 0:10)
+
+**Narration (Icelandic):**
+"Í þessari kennslu munum við sýna þér hvernig á að klára tínslu og skrá upplýsingar í kerfið."
+
+**Narration (English subtitle):**
+"In this tutorial, we'll show you how to complete a pickup and record information in the system."
+
+**Screen:**
+- Driver app showing arrived at stop
+- Container location on map
+- "Klára viðkomu" button highlighted
+
+---
+
+## SECTION 1: ARRIVE AT LOCATION (0:10 - 0:25)
+
+**Narration (Icelandic):**
+"Þegar þú kemur á staðinn skaltu opna upplýsingar um viðkomuna með því að smella á hana."
+
+**Narration (English subtitle):**
+"When you arrive at the location, open the stop details by clicking on it."
+
+**Screen:**
+- Click on current stop "Hótel Reykjavík"
+- Show stop detail screen:
+  - Viðskiptavinur: Hótel Reykjavík
+  - Staðsetning: Bankastræti 7
+  - Gámur: C-1189 (1100L)
+  - Fyllingarhlutfall: 85% (High priority ⚠️)
+  - Athugasemdir: "Gámur við bakdyrnar, vinstra megin"
+
+**Narration (Icelandic):**
+"Lestu athugasemdirnar til að finna gáminn auðveldlega."
+
+**Narration (English subtitle):**
+"Read the notes to find the container easily."
+
+**Caption on screen:**
+"Athugasemdir: Gámur við bakdyrnar"
+"Notes: Container at back door"
+
+---
+
+## SECTION 2: TAKE BEFORE PHOTO (0:25 - 0:45)
+
+**Narration (Icelandic):**
+"Áður en þú tæmir gáminn skaltu taka mynd af honum. Þetta staðfestir að hann var fullur."
+
+**Narration (English subtitle):**
+"Before emptying the container, take a photo of it. This confirms it was full."
+
+**Screen:**
+- Click "Taka mynd - Fyrir tínslu" (Take photo - Before pickup)
+- Camera opens (mobile camera view)
+- Show framing guide:
+  - "Staðsettu gáminn í miðjunni"
+  - "Center the container in the frame"
+  - Green square overlay for alignment
+
+**Narration (Icelandic):**
+"Gakktu úr skugga að gámurinn sé í miðjunni og að númerið sé læsilegt."
+
+**Narration (English subtitle):**
+"Make sure the container is centered and the number is readable."
+
+**Screen:**
+- Take photo showing:
+  - Full container (overflowing slightly)
+  - Container ID C-1189 visible
+  - Location context (building, street)
+- Photo captured ✓
+- Thumbnail preview appears
+
+**Caption on screen:**
+"Mynd fyrir tínslu - Fullur gámur"
+"Before photo - Full container"
+
+---
+
+## SECTION 3: EMPTY CONTAINER (0:45 - 1:00)
+
+**Narration (Icelandic):**
+"Nú geturðu tæmt gáminn eins og venjulega. Gakktu úr skugga um að lokið sé lokað eftir tæmingu."
+
+**Narration (English subtitle):**
+"Now you can empty the container as usual. Make sure the lid is closed after emptying."
+
+**Screen:**
+- Show illustration/animation of:
+  - Truck lifting container
+  - Contents emptying into truck
+  - Container being placed back down
+  - Lid closing
+
+**Caption on screen:**
+"Tæma gám → Loka loki → Setja aftur niður"
+"Empty container → Close lid → Put back down"
+
+---
+
+## SECTION 4: TAKE AFTER PHOTO (1:00 - 1:15)
+
+**Narration (Icelandic):**
+"Eftir tæmingu skaltu taka aðra mynd til að staðfesta að gámurinn sé tómur."
+
+**Narration (English subtitle):**
+"After emptying, take another photo to confirm the container is empty."
+
+**Screen:**
+- Click "Taka mynd - Eftir tínslu" (Take photo - After pickup)
+- Camera opens
+- Show framing guide (same as before)
+
+**Narration (Icelandic):**
+"Þessi mynd staðfestir að vinnan var unnin rétt."
+
+**Narration (English subtitle):**
+"This photo confirms the work was done correctly."
+
+**Screen:**
+- Take photo showing:
+  - Empty container
+  - Lid closed
+  - Container ID C-1189 visible
+- Photo captured ✓
+- Both thumbnails now visible:
+  - Fyrir: Full container
+  - Eftir: Empty container
+
+**Caption on screen:**
+"Mynd eftir tínslu - Tómur gámur"
+"After photo - Empty container"
+
+---
+
+## SECTION 5: NOTE ANY ISSUES (1:15 - 1:35)
+
+**Narration (Icelandic):**
+"Ef þú tókst eftir einhverju vandamáli skaltu skrá það í athugasemdakassann."
+
+**Narration (English subtitle):**
+"If you noticed any issues, record them in the notes field."
+
+**Screen:**
+- Show "Athugasemdir" (Notes) text field
+- Example issues to select from quick buttons:
+  - Lok skemmt (Lid damaged)
+  - Rangur staður (Wrong location)
+  - Óþrifnaður svæði (Dirty area)
+  - Annað (Other)
+
+**Narration (Icelandic):**
+"Til dæmis, ef lokið var skemmt eða gámurinn var á röngum stað."
+
+**Narration (English subtitle):**
+"For example, if the lid was damaged or the container was in the wrong place."
+
+**Screen:**
+- Click "Lok skemmt" quick button
+- Text auto-fills: "Lok skemmt - þarf viðgerð"
+- Add additional note: "Hægra horn sprungið"
+
+**Caption on screen:**
+"Skráðu vandamál til að láta skrifstofu vita"
+"Record issues to notify the office"
+
+---
+
+## SECTION 6: MARK PICKUP COMPLETE (1:35 - 1:50)
+
+**Narration (Icelandic):**
+"Þegar allt er tilbúið skaltu smella á 'Klára viðkomu' til að vista upplýsingarnar."
+
+**Narration (English subtitle):**
+"When everything is ready, click 'Complete Stop' to save the information."
+
+**Screen:**
+- Review summary screen:
+  - ✅ Mynd fyrir tínslu (Before photo)
+  - ✅ Mynd eftir tínslu (After photo)
+  - ✅ Athugasemdir (Notes: "Lok skemmt - þarf viðgerð")
+  - Tími: 10:25
+- Click "Klára viðkomu" button
+
+**Narration (Icelandic):**
+"Upplýsingarnar eru sendar beint til skrifstofunnar og viðskiptavinarins."
+
+**Narration (English subtitle):**
+"The information is sent directly to the office and customer."
+
+**Screen:**
+- Success animation with checkmark
+- Notification: "Viðkoma kláruð! Sendt til skrifstofunnar."
+- Route list updates:
+  - 4. ✅ Hótel Reykjavík - Lokið 10:25
+
+**Caption on screen:**
+"Viðkoma kláruð - Upplýsingar vistaðar"
+"Stop completed - Information saved"
+
+---
+
+## SECTION 7: MOVE TO NEXT STOP (1:50 - 2:00)
+
+**Narration (Icelandic):**
+"Nú geturðu haldið áfram á næsta viðkomustað. Kerfið velur hann sjálfkrafa."
+
+**Narration (English subtitle):**
+"Now you can continue to the next stop. The system selects it automatically."
+
+**Screen:**
+- Show next stop auto-selected:
+  - 5. 🔵 Veitingastaður - Austurstræti 12 (Now active)
+  - Distance: 0.8 km
+  - ETA: 3 min
+  - Fill level: 72%
+- "Byrja leiðsögn" button appears
+
+**Narration (Icelandic):**
+"Smelltu á 'Byrja leiðsögn' til að halda áfram."
+
+**Narration (English subtitle):**
+"Click 'Start Navigation' to continue."
+
+**Screen:**
+- Click "Byrja leiðsögn"
+- Map view with route to next stop
+
+**Caption on screen:**
+"Næsta viðkoma: Veitingastaður - 0.8 km"
+"Next stop: Restaurant - 0.8 km"
+
+---
+
+## CLOSING (2:00 - 2:10)
+
+**Narration (Icelandic):**
+"Þetta var yfirlit yfir hvernig á að klára tínslu. Ef þú hefur fleiri spurningar hafðu samband við þjónustuver."
+
+**Narration (English subtitle):**
+"This was an overview of how to complete a pickup. If you have more questions, contact support."
+
+**Screen:**
+- Show contact info:
+  - Þjónustusími: +354 555 1234
+  - Tölvupóstur: okumenn@gamaleigan.is
+
+**Caption on screen:**
+"Takk fyrir að horfa!"
+"Thank you for watching!"
+
+---
+
+## KEY TAKEAWAYS (Summary slide)
+
+**Icelandic:**
+1. Koma á staðinn og opna viðkomu
+2. Taka mynd FYRIR tínslu (fullur gámur)
+3. Tæma gáminn og loka loki
+4. Taka mynd EFTIR tínslu (tómur gámur)
+5. Skrá vandamál ef einhver eru
+6. Klára viðkomu og halda áfram
+
+**English:**
+1. Arrive at location and open stop details
+2. Take BEFORE photo (full container)
+3. Empty container and close lid
+4. Take AFTER photo (empty container)
+5. Record any issues
+6. Complete stop and continue
+
+---
+
+## PRODUCTION NOTES
+
+**Avatar Recommendation:**
+- Same avatar as driver GPS navigation tutorial (consistency)
+- Casual, friendly demeanor
+- Outdoor/field setting
+
+**Voice Settings:**
+- Language: Icelandic (is-IS)
+- Voice: Gunnar (male) - same as previous driver tutorial
+- Speed: Normal (1.0x)
+- Tone: Friendly, instructive
+
+**Screen Recording:**
+- Mobile view (portrait 9:16 aspect ratio)
+- 1080x1920 resolution
+- Show finger taps and swipes
+- Camera interface animations
+
+**Photo Examples:**
+- Use real photos of waste containers (1100L)
+- Before: Overflowing or nearly full container
+- After: Empty container with closed lid
+- Show container ID clearly visible
+
+**Issue Reporting:**
+- Show realistic damage examples:
+  - Cracked lid
+  - Broken hinge
+  - Container in wrong location
+- Quick-select buttons for common issues
+
+**Export Settings:**
+- Format: MP4 (H.264)
+- Resolution: 1080x1920 (Portrait)
+- Bitrate: 4 Mbps
+- Frame rate: 30 fps

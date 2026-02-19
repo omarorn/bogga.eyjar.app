@@ -1,0 +1,354 @@
+# Customer Tutorial: Notendagátt (Customer Portal)
+# Duration: 3 minutes
+# Language: Icelandic (with English subtitles)
+# Avatar: Professional, friendly, approachable (casual business setting)
+
+---
+
+## OPENING (0:00 - 0:15)
+
+**Narration (Icelandic):**
+"Velkomin í notendagátt Litlu Gámaleigunnar. Hér geturðu fylgst með gámunum þínum, pantað tínslur og séð reikninga."
+
+**Narration (English subtitle):**
+"Welcome to Litla Gámaleigan's customer portal. Here you can monitor your containers, request pickups, and view invoices."
+
+**Screen:**
+- Show portal homepage: https://www.gamaleigan.is/portal
+- Clean, modern interface
+- Litla Gámaleigan logo
+- Login button highlighted
+
+---
+
+## SECTION 1: LOGIN (0:15 - 0:30)
+
+**Narration (Icelandic):**
+"Til að skrá þig inn skaltu nota netfangið og lykilorðið sem þú fékkst í tölvupósti."
+
+**Narration (English subtitle):**
+"To log in, use the email and password you received by email."
+
+**Screen:**
+- Show login form:
+  - Netfang (Email): kaffi@kaffihus.is
+  - Lykilorð (Password): ••••••••
+- Click "Skrá inn" (Log in)
+- Loading animation
+- Redirect to dashboard
+
+**Caption on screen:**
+"Fyrsti innskráning? Athugaðu póstinn þinn"
+"First time logging in? Check your email"
+
+---
+
+## SECTION 2: DASHBOARD OVERVIEW (0:30 - 1:00)
+
+**Narration (Icelandic):**
+"Stjórnborðið sýnir yfirlit yfir alla þína gáma og stöðu þeirra."
+
+**Narration (English subtitle):**
+"The dashboard shows an overview of all your containers and their status."
+
+**Screen:**
+- Show dashboard with widgets:
+  - Gámar í eigu: 3
+  - Meðalfylling: 58%
+  - Næsta tínsla: 15. janúar
+  - Ógreiddir reikningar: 1
+
+**Narration (Icelandic):**
+"Þú sérð hversu fullir gámarnir eru, hvenær næsta tínsla er áætluð, og hvort það séu ógreiddir reikningar."
+
+**Narration (English subtitle):**
+"You see how full your containers are, when the next pickup is scheduled, and if there are unpaid invoices."
+
+**Screen:**
+- Scroll down to container list:
+  - Gámur C-1189 - Laugavegur 12 - 85% fullur ⚠️
+  - Gámur C-1190 - Laugavegur 14 - 45% fullur
+  - Gámur C-1191 - Laugavegur 16 - 30% fullur
+
+**Caption on screen:**
+"Rauður viðvörunarmerki = Gámur næstum fullur"
+"Red warning = Container nearly full"
+
+---
+
+## SECTION 3: VIEW CONTAINER DETAILS (1:00 - 1:20)
+
+**Narration (Icelandic):**
+"Til að sjá nánari upplýsingar um gám skaltu smella á hann."
+
+**Narration (English subtitle):**
+"To see more details about a container, click on it."
+
+**Screen:**
+- Click on "Gámur C-1189"
+- Show detail page:
+  - Fyllingarhlutfall: 85% (with progress bar)
+  - Síðasta tínsla: 10. desember 2024
+  - Næsta áætlaða tínsla: 15. janúar 2025
+  - Staðsetning: Laugavegur 12, 101 Reykjavík
+  - Gerð: 1100L sorphirðingagámur
+
+**Narration (Icelandic):**
+"Þú sérð fyllingarhlutfall í rauntíma frá skynjara sem er í gámnum."
+
+**Narration (English subtitle):**
+"You see the fill level in real-time from the sensor inside the container."
+
+**Screen:**
+- Show fill level chart (last 7 days):
+  - Line graph showing gradual increase from 20% to 85%
+  - X-axis: Dates (Dec 8 - Jan 6)
+  - Y-axis: Fill level (0-100%)
+
+**Caption on screen:**
+"Fylgingarhlutfall uppfærst í rauntíma"
+"Fill level updates in real-time"
+
+---
+
+## SECTION 4: VIEW PICKUP HISTORY (1:20 - 1:35)
+
+**Narration (Icelandic):**
+"Þú getur séð sögu allra tínslna fyrir hvern gám."
+
+**Narration (English subtitle):**
+"You can see the history of all pickups for each container."
+
+**Screen:**
+- Scroll down to "Tínslur" (Pickups) section
+- Show pickup history table:
+  - 10. des 2024 - Kláruð - Jón Jónsson - Lokið 09:15
+  - 25. nóv 2024 - Kláruð - Guðrún Pétursdóttir - Lokið 10:30
+  - 8. nóv 2024 - Kláruð - Jón Jónsson - Lokið 14:00
+
+**Narration (Icelandic):**
+"Fyrir hverja tínslu sérðu daginn, tímann, og ökumanninn sem kom."
+
+**Narration (English subtitle):**
+"For each pickup, you see the date, time, and driver who came."
+
+**Screen:**
+- Click on latest pickup (10. des 2024)
+- Show pickup details with photos:
+  - Fyrir: Full container photo
+  - Eftir: Empty container photo
+  - Athugasemdir: "Gámur tæmdur án vandamála"
+
+**Caption on screen:**
+"Myndir staðfesta að tínslan var unnin"
+"Photos confirm pickup was completed"
+
+---
+
+## SECTION 5: REQUEST COLLECTION (1:35 - 2:05)
+
+**Narration (Icelandic):**
+"Ef gámurinn er orðinn fullur geturðu pantað tínslu beint í gegnum gáttina."
+
+**Narration (English subtitle):**
+"If the container is full, you can request a pickup directly through the portal."
+
+**Screen:**
+- Click "Panta tínslu" (Request pickup) button
+- Show request form:
+  - Gámur: C-1189 (auto-selected)
+  - Dagsetning: Date picker
+  - Forgangur: Normal / Bráður (Priority: Normal / Urgent)
+  - Athugasemdir: Text field
+
+**Narration (Icelandic):**
+"Veldu dagsetningu sem hentar þér. Ef það er brátt mál geturðu valið 'Bráður forgangur'."
+
+**Narration (English subtitle):**
+"Select a date that works for you. If it's urgent, you can select 'Urgent Priority'."
+
+**Screen:**
+- Select date: 8. janúar 2025
+- Select priority: Bráður (Urgent)
+- Add note: "Gámur mjög fullur, þarf að tæma fljótt"
+- Click "Senda beiðni" (Send request)
+
+**Narration (Icelandic):**
+"Beiðnin er send beint til skrifstofunnar og þú færð staðfestingu í tölvupósti."
+
+**Narration (English subtitle):**
+"The request is sent directly to the office and you'll receive confirmation by email."
+
+**Screen:**
+- Success notification:
+  - "Tínslubeiðni móttekin!"
+  - "Þú færð staðfestingu í tölvupósti innan 24 klst."
+- Email preview:
+  - Subject: "Tínslubeiðni staðfest - C-1189"
+  - Body: "Við höfum móttekið beiðni um tínslu..."
+
+**Caption on screen:**
+"Beiðni send - Staðfesting send í tölvupóst"
+"Request sent - Confirmation sent by email"
+
+---
+
+## SECTION 6: VIEW INVOICES (2:05 - 2:35)
+
+**Narration (Icelandic):**
+"Þú getur séð alla reikninga og greitt þá beint í gegnum gáttina."
+
+**Narration (English subtitle):**
+"You can view all invoices and pay them directly through the portal."
+
+**Screen:**
+- Click "Reikningar" (Invoices) in menu
+- Show invoice list:
+  - R-2024-456 - 15. des 2024 - 11.036 kr - Ógreiddur (Unpaid) ⚠️
+  - R-2024-423 - 1. des 2024 - 11.036 kr - Greiddur (Paid) ✅
+  - R-2024-390 - 15. nóv 2024 - 11.036 kr - Greiddur (Paid) ✅
+
+**Narration (Icelandic):**
+"Ógreiddir reikningar eru merktir með viðvörunartákni."
+
+**Narration (English subtitle):**
+"Unpaid invoices are marked with a warning icon."
+
+**Screen:**
+- Click on unpaid invoice R-2024-456
+- Show invoice details:
+  - Viðskiptavinur: Kaffi Hús ehf.
+  - Pöntun: P-2024-001
+  - Þjónusta: Tínsla 1100L gáms - C-1189
+  - Upphæð: 8.900 kr
+  - VSK (24%): 2.136 kr
+  - Heildarupphæð: 11.036 kr
+  - Gjalddagi: 30. des 2024
+
+**Narration (Icelandic):**
+"Þú getur halað niður PDF afriti af reikningnum eða greitt hann beint með kortinu."
+
+**Narration (English subtitle):**
+"You can download a PDF copy of the invoice or pay it directly with your card."
+
+**Screen:**
+- Show payment buttons:
+  - Halað niður PDF (Download PDF)
+  - Greiða núna (Pay Now)
+- Click "Greiða núna"
+- Payment modal appears with credit card form
+- (Don't show actual payment details)
+
+**Caption on screen:**
+"Greiða með korti eða halað niður PDF"
+"Pay by card or download PDF"
+
+---
+
+## SECTION 7: CONTACT SUPPORT (2:35 - 2:50)
+
+**Narration (Icelandic):**
+"Ef þú hefur spurningar eða vandamál geturðu haft samband við þjónustuver beint í gegnum gáttina."
+
+**Narration (English subtitle):**
+"If you have questions or issues, you can contact support directly through the portal."
+
+**Screen:**
+- Click "Þjónustuver" (Support) in menu
+- Show contact options:
+  - Sími: +354 555 1234
+  - Tölvupóstur: thjonusta@gamaleigan.is
+  - Opnunartími: Mán-Fös 8:00-17:00
+
+**Narration (Icelandic):**
+"Þú getur líka sent skilaboð beint í gegnum samskiptaformið."
+
+**Narration (English subtitle):**
+"You can also send a message directly through the contact form."
+
+**Screen:**
+- Show contact form:
+  - Efni: "Spurning um reikning"
+  - Skilaboð: Text area
+  - "Senda skilaboð" button
+
+**Caption on screen:**
+"Þjónustuver svarar innan 24 klst."
+"Support responds within 24 hours"
+
+---
+
+## CLOSING (2:50 - 3:00)
+
+**Narration (Icelandic):**
+"Þetta var yfirlit yfir notendagáttina. Við vonum að þú hafir gagn af henni!"
+
+**Narration (English subtitle):**
+"This was an overview of the customer portal. We hope you find it useful!"
+
+**Screen:**
+- Show dashboard overview again
+- Litla Gámaleigan logo
+
+**Caption on screen:**
+"Takk fyrir að horfa!"
+"Thank you for watching!"
+
+---
+
+## KEY TAKEAWAYS (Summary slide)
+
+**Icelandic:**
+1. Skrá inn → Skoða stjórnborð
+2. Fylgjast með fyllingarhlutfalli gáma
+3. Skoða sögu tínslna með myndum
+4. Panta tínslu með dagsetningu
+5. Skoða og greiða reikninga
+6. Hafa samband við þjónustuver
+
+**English:**
+1. Log in → View dashboard
+2. Monitor container fill levels
+3. View pickup history with photos
+4. Request pickup with date
+5. View and pay invoices
+6. Contact support
+
+---
+
+## PRODUCTION NOTES
+
+**Avatar Recommendation:**
+- Friendly, approachable avatar (30-40 years old)
+- Business casual attire
+- Office or café setting (customer perspective)
+- Warm, welcoming demeanor
+
+**Voice Settings:**
+- Language: Icelandic (is-IS)
+- Voice: Dóra (female) - friendly, helpful tone
+- Speed: Normal (1.0x)
+- Tone: Friendly, customer-service oriented
+
+**Screen Recording:**
+- Desktop view (16:9 aspect ratio)
+- 1920x1080 resolution
+- Show cursor movements
+- Highlight clicked elements
+
+**Portal UI:**
+- Clean, modern design
+- Responsive layout
+- Green/blue color scheme (Litla Gámaleigan branding)
+- Clear navigation menu
+
+**Real-time Updates:**
+- Show fill level chart updating
+- Notification animations
+- Success/error messages
+
+**Export Settings:**
+- Format: MP4 (H.264)
+- Resolution: 1920x1080
+- Bitrate: 5 Mbps
+- Frame rate: 30 fps

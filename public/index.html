@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0f172a">
+<title>Bogga</title>
+<link rel="manifest" href="/manifest.json">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f8fafc;
+    --surface: #ffffff;
+    --text: #0f172a;
+    --muted: #94a3b8;
+    --border: #e2e8f0;
+    --accent: #6366f1;
+    --danger: #ef4444;
+    --green: #10b981;
+    --radius: 16px;
+    --shadow: 0 1px 3px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.06);
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 16px; -webkit-font-smoothing: antialiased; }
+  #app { height: 100%; display: flex; flex-direction: column; max-width: 430px; margin: 0 auto; }
+  .view { display: none; flex-direction: column; height: 100%; }
+  .view.active { display: flex; }
+  .topbar { padding: calc(var(--safe-top) + 16px) 20px 16px; display: flex; align-items: center; gap: 12px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .topbar-title { font-size: 20px; font-weight: 700; flex: 1; }
+  .btn-icon { width: 40px; height: 40px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; background: transparent; touch-action: manipulation; transition: background .15s; }
+  .btn-icon:active { background: var(--border); }
+  .scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 20px; }
+  .scroll::-webkit-scrollbar { display: none; }
+  #view-pin, #view-setup { background: var(--surface); align-items: center; justify-content: center; }
+  .pin-wrap { display: flex; flex-direction: column; align-items: center; gap: 32px; padding: 40px 20px; width: 100%; }
+  .pin-logo { font-size: 64px; }
+  .pin-title { font-size: 28px; font-weight: 800; }
+  .pin-sub { font-size: 15px; color: var(--muted); text-align: center; }
+  .pin-dots { display: flex; gap: 16px; height: 48px; align-items: center; }
+  .pin-dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--border); transition: all .15s; }
+  .pin-dot.filled { background: var(--accent); border-color: var(--accent); transform: scale(1.1); }
+  .pin-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 280px; }
+  .pin-key { height: 72px; border-radius: 14px; border: none; background: var(--bg); font-size: 24px; font-weight: 600; cursor: pointer; touch-action: manipulation; transition: background .1s, transform .1s; display: flex; align-items: center; justify-content: center; }
+  .pin-key:active { background: var(--border); transform: scale(.94); }
+  .pin-key.del { font-size: 20px; color: var(--muted); }
+  .pin-key.empty { pointer-events: none; background: transparent; }
+  .setup-input { width: 100%; padding: 14px 16px; border-radius: var(--radius); border: 1.5px solid var(--border); font-size: 16px; background: var(--bg); outline: none; text-align: center; font-weight: 600; transition: border-color .15s; }
+  .setup-input:focus { border-color: var(--accent); }
+  .setup-step { display: none; flex-direction: column; align-items: center; gap: 20px; width: 100%; }
+  .setup-step.active { display: flex; }
+  .btn-primary { width: 100%; padding: 16px; border-radius: var(--radius); border: none; background: var(--accent); color: white; font-size: 16px; font-weight: 700; cursor: pointer; touch-action: manipulation; transition: opacity .15s; }
+  .btn-primary:active { opacity: .85; }
+  .lists-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding-bottom: calc(var(--safe-bottom) + 20px); }
+  .list-card { background: var(--surface); border-radius: var(--radius); padding: 20px 16px; box-shadow: var(--shadow); cursor: pointer; touch-action: manipulation; transition: transform .15s; position: relative; overflow: hidden; min-height: 120px; display: flex; flex-direction: column; justify-content: space-between; }
+  .list-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--c, var(--accent)); }
+  .list-card:active { transform: scale(.97); }
+  .list-card-title { font-size: 16px; font-weight: 700; line-height: 1.3; word-break: break-word; }
+  .list-card-count { font-size: 13px; color: var(--muted); margin-top: 8px; }
+  .list-card-badge { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: var(--c, var(--accent)); color: white; font-size: 13px; font-weight: 700; }
+  .list-add-card { background: transparent; border: 2px dashed var(--border); color: var(--muted); border-radius: var(--radius); min-height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; cursor: pointer; touch-action: manipulation; transition: border-color .15s, color .15s; font-size: 14px; font-weight: 600; }
+  .list-add-card:active { border-color: var(--accent); color: var(--accent); }
+  .list-add-icon { font-size: 28px; }
+  .tasks-list { display: flex; flex-direction: column; gap: 8px; padding-bottom: 100px; }
+  .task-item { background: var(--surface); border-radius: 12px; padding: 14px 16px; box-shadow: var(--shadow); display: flex; align-items: flex-start; gap: 12px; transition: opacity .2s; }
+  .task-item.done { opacity: .5; }
+  .task-check { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--border); flex-shrink: 0; cursor: pointer; touch-action: manipulation; display: flex; align-items: center; justify-content: center; transition: all .15s; margin-top: 1px; }
+  .task-check.checked { background: var(--green); border-color: var(--green); }
+  .task-check.checked::after { content: '✓'; color: white; font-size: 13px; font-weight: 700; }
+  .task-body { flex: 1; min-width: 0; }
+  .task-title { font-size: 15px; font-weight: 600; line-height: 1.4; word-break: break-word; }
+  .task-item.done .task-title { text-decoration: line-through; }
+  .task-meta { display: flex; gap: 8px; margin-top: 5px; flex-wrap: wrap; }
+  .task-tag { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px; background: var(--c-light, #ede9fe); color: var(--c, var(--accent)); text-transform: uppercase; letter-spacing: .04em; }
+  .task-deadline { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 4px; }
+  .task-deadline.overdue { color: var(--danger); }
+  .task-del { width: 32px; height: 32px; border-radius: 8px; border: none; background: transparent; color: var(--muted); cursor: pointer; touch-action: manipulation; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; transition: background .15s, color .15s; }
+  .task-del:active { background: #fee2e2; color: var(--danger); }
+  .task-edit { width: 32px; height: 32px; border-radius: 8px; border: none; background: transparent; color: var(--muted); cursor: pointer; touch-action: manipulation; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; transition: background .15s, color .15s; }
+  .task-edit:active { background: #ede9fe; color: var(--accent); }
+  .task-actions { display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; }
+  .add-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 430px; padding: 12px 16px calc(var(--safe-bottom) + 12px); background: var(--surface); border-top: 1px solid var(--border); display: flex; gap: 10px; align-items: flex-end; }
+  .add-bar-inner { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+  .add-input { padding: 12px 14px; border-radius: 12px; border: 1.5px solid var(--border); font-size: 15px; background: var(--bg); outline: none; width: 100%; transition: border-color .15s; }
+  .add-input:focus { border-color: var(--accent); }
+  .add-extras { display: none; gap: 8px; }
+  .add-extras.open { display: flex; }
+  .add-extra-input { flex: 1; padding: 10px 12px; border-radius: 10px; border: 1.5px solid var(--border); font-size: 13px; background: var(--bg); outline: none; transition: border-color .15s; }
+  .add-extra-input:focus { border-color: var(--accent); }
+  .btn-add { width: 46px; height: 46px; border-radius: 50%; border: none; background: var(--accent); color: white; font-size: 22px; cursor: pointer; touch-action: manipulation; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: opacity .15s, transform .1s; }
+  .btn-add:active { opacity: .85; transform: scale(.9); }
+  .btn-ghost { flex: 1; padding: 13px; border-radius: var(--radius); border: 1.5px solid var(--border); background: transparent; font-size: 14px; font-weight: 600; color: var(--text); cursor: pointer; touch-action: manipulation; transition: background .15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .btn-ghost:active { background: var(--border); }
+  .btn-ghost.danger { color: var(--danger); border-color: #fecaca; }
+  .btn-ghost.danger:active { background: #fee2e2; }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: flex; align-items: flex-end; justify-content: center; z-index: 100; opacity: 0; pointer-events: none; transition: opacity .2s; }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal { background: var(--surface); border-radius: 24px 24px 0 0; padding: 24px 20px; padding-bottom: calc(var(--safe-bottom) + 24px); width: 100%; max-width: 430px; transform: translateY(100%); transition: transform .25s cubic-bezier(.34,1.56,.64,1); display: flex; flex-direction: column; gap: 16px; }
+  .modal-overlay.open .modal { transform: translateY(0); }
+  .modal-title { font-size: 18px; font-weight: 800; }
+  .modal-input { width: 100%; padding: 14px 16px; border-radius: var(--radius); border: 1.5px solid var(--border); font-size: 16px; background: var(--bg); outline: none; transition: border-color .15s; }
+  .modal-input:focus { border-color: var(--accent); }
+  .color-picker { display: flex; gap: 12px; flex-wrap: wrap; }
+  .color-swatch { width: 40px; height: 40px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: transform .15s, border-color .15s; touch-action: manipulation; }
+  .color-swatch:active { transform: scale(.9); }
+  .color-swatch.selected { border-color: var(--text); transform: scale(1.15); }
+  .toast { position: fixed; bottom: calc(var(--safe-bottom) + 80px); left: 50%; transform: translateX(-50%) translateY(20px); background: var(--text); color: white; padding: 10px 20px; border-radius: 20px; font-size: 14px; font-weight: 600; opacity: 0; transition: all .2s; pointer-events: none; white-space: nowrap; z-index: 200; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .share-notice { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: #ede9fe; border-radius: 12px; margin: 0 20px 4px; flex-shrink: 0; }
+  .share-notice span { font-size: 13px; font-weight: 600; color: var(--accent); flex: 1; }
+  .share-notice button { font-size: 12px; color: var(--accent); background: none; border: none; cursor: pointer; font-weight: 700; }
+  #view-share { background: var(--bg); }
+  .share-header { padding: calc(var(--safe-top) + 20px) 20px 20px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; display: flex; flex-direction: column; gap: 6px; }
+  .share-header-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+  .share-header-title { font-size: 24px; font-weight: 800; }
+  .empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 60px 20px; color: var(--muted); text-align: center; }
+  .empty-icon { font-size: 48px; }
+  .empty-text { font-size: 15px; }
+  .shared-add-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 430px; padding: 12px 16px calc(var(--safe-bottom) + 12px); background: var(--surface); border-top: 1px solid var(--border); display: flex; gap: 10px; }
+  .section-header { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 4px; }
+  @keyframes shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-8px); } 40% { transform: translateX(8px); } 60% { transform: translateX(-6px); } 80% { transform: translateX(6px); } }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .animate-in { animation: fadeIn .2s ease-out; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="view" id="view-setup">
+    <div class="pin-wrap">
+      <div class="pin-logo">📋</div>
+      <div class="pin-title">Velkomin</div>
+      <div class="setup-step active" id="setup-step-name">
+        <p class="pin-sub">Hvað heitir þú?</p>
+        <input class="setup-input" id="setup-name" type="text" placeholder="Bogga" maxlength="30" autocomplete="off">
+        <button class="btn-primary" id="setup-name-next" style="max-width: 280px">Áfram →</button>
+      </div>
+      <div class="setup-step" id="setup-step-pin">
+        <p class="pin-sub" id="setup-pin-label">Veldu 4 stafa PIN</p>
+        <div class="pin-dots" id="setup-dots">
+          <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+        </div>
+        <div class="pin-pad" id="setup-pad">
+          <button class="pin-key" data-d="1">1</button><button class="pin-key" data-d="2">2</button><button class="pin-key" data-d="3">3</button>
+          <button class="pin-key" data-d="4">4</button><button class="pin-key" data-d="5">5</button><button class="pin-key" data-d="6">6</button>
+          <button class="pin-key" data-d="7">7</button><button class="pin-key" data-d="8">8</button><button class="pin-key" data-d="9">9</button>
+          <button class="pin-key empty"></button><button class="pin-key" data-d="0">0</button><button class="pin-key del" id="setup-del">⌫</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="view" id="view-pin">
+    <div class="pin-wrap">
+      <div class="pin-logo">📋</div>
+      <div class="pin-title" id="pin-greeting">Hæ Bogga</div>
+      <div class="pin-sub">Sláðu inn PIN kóða</div>
+      <div class="pin-dots" id="login-dots">
+        <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+      </div>
+      <div class="pin-pad" id="login-pad">
+        <button class="pin-key" data-d="1">1</button><button class="pin-key" data-d="2">2</button><button class="pin-key" data-d="3">3</button>
+        <button class="pin-key" data-d="4">4</button><button class="pin-key" data-d="5">5</button><button class="pin-key" data-d="6">6</button>
+        <button class="pin-key" data-d="7">7</button><button class="pin-key" data-d="8">8</button><button class="pin-key" data-d="9">9</button>
+        <button class="pin-key empty"></button><button class="pin-key" data-d="0">0</button><button class="pin-key del" id="login-del">⌫</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="view" id="view-lists">
+    <div class="topbar">
+      <span class="topbar-title" id="lists-title">Listar</span>
+      <button class="btn-icon" id="btn-logout">🔒</button>
+    </div>
+    <div class="scroll"><div class="lists-grid" id="lists-grid"></div></div>
+  </div>
+
+  <div class="view" id="view-list">
+    <div class="topbar" id="list-topbar">
+      <button class="btn-icon" id="btn-back">←</button>
+      <span class="topbar-title" id="list-title">Listi</span>
+      <button class="btn-icon" id="btn-list-menu">⋯</button>
+    </div>
+    <div id="share-notice-wrap"></div>
+    <div class="scroll"><div class="tasks-list" id="tasks-list"></div></div>
+    <div class="add-bar" id="add-bar" style="display:none">
+      <div class="add-bar-inner">
+        <input class="add-input" id="add-title" type="text" placeholder="Nýtt verkefni..." maxlength="200" autocomplete="off">
+        <div class="add-extras" id="add-extras">
+          <input class="add-extra-input" id="add-tag" type="text" placeholder="Flokkur..." maxlength="40" list="add-tag-suggestions" autocomplete="off">
+          <datalist id="add-tag-suggestions"></datalist>
+          <input class="add-extra-input" id="add-deadline" type="date" style="flex:0; width:140px">
+        </div>
+      </div>
+      <button class="btn-add" id="btn-add-task">+</button>
+    </div>
+  </div>
+
+  <div class="view" id="view-share">
+    <div class="share-header" id="share-header">
+      <div class="share-header-label">Sameiginlegur listi</div>
+      <div class="share-header-title" id="share-title">...</div>
+    </div>
+    <div class="scroll" style="padding-bottom:80px"><div class="tasks-list" id="share-tasks"></div></div>
+    <div class="shared-add-bar">
+      <input class="add-input" id="share-add-title" type="text" placeholder="Bæta við verkefni..." maxlength="200" style="flex:1">
+      <button class="btn-add" id="btn-share-add">+</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="list-modal">
+  <div class="modal">
+    <div class="modal-title">Nýr listi</div>
+    <input class="modal-input" id="modal-list-title" type="text" placeholder="Titill lista..." maxlength="60" autocomplete="off">
+    <div>
+      <div class="section-header" style="margin-bottom:10px">Litur</div>
+      <div class="color-picker" id="color-picker"></div>
+    </div>
+    <button class="btn-primary" id="modal-list-save">Búa til</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="list-options-modal">
+  <div class="modal">
+    <div class="modal-title" id="options-modal-title">Valkostir</div>
+    <button class="btn-ghost" id="btn-share-toggle">🔗 Deila lista</button>
+    <button class="btn-ghost danger" id="btn-delete-list">🗑 Eyða lista</button>
+    <button class="btn-ghost" id="btn-close-options" style="margin-top:4px">Loka</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="edit-task-modal">
+  <div class="modal">
+    <div class="modal-title">Breyta verkefni</div>
+    <input class="modal-input" id="edit-task-title" type="text" placeholder="Heiti verkefnis..." maxlength="200" autocomplete="off">
+    <input class="modal-input" id="edit-task-tag" type="text" placeholder="Flokkur..." maxlength="40" list="edit-tag-suggestions" autocomplete="off">
+    <datalist id="edit-tag-suggestions"></datalist>
+    <input class="modal-input" id="edit-task-deadline" type="date">
+    <button class="btn-primary" id="edit-task-save">Vista breytingar</button>
+    <button class="btn-ghost" id="edit-task-cancel">Hætta við</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const S = { token: localStorage.getItem('bogga_token'), name: localStorage.getItem('bogga_name') || 'Bogga', lists: [], currentList: null, tasks: [], setupPinStep: 1, shareToken: null };
+const COLORS = [{ v: '#6366f1', l: '#ede9fe' }, { v: '#ec4899', l: '#fce7f3' }, { v: '#f59e0b', l: '#fef3c7' }, { v: '#10b981', l: '#d1fae5' }, { v: '#0ea5e9', l: '#e0f2fe' }, { v: '#8b5cf6', l: '#ede9fe' }];
+let selectedColor = COLORS[0].v;
+let editingTask = null;
+
+function updateTagSuggestions() {
+  const tags = [...new Set(S.tasks.filter(t => t.tag).map(t => t.tag))];
+  const opts = tags.map(t => `<option value="${esc(t)}">`).join('');
+  ['add-tag-suggestions', 'edit-tag-suggestions'].forEach(id => { const dl = document.getElementById(id); if (dl) dl.innerHTML = opts; });
+}
+
+function openEditModal(task) {
+  editingTask = task;
+  document.getElementById('edit-task-title').value = task.title;
+  document.getElementById('edit-task-tag').value = task.tag || '';
+  document.getElementById('edit-task-deadline').value = task.deadline || '';
+  updateTagSuggestions();
+  document.getElementById('edit-task-modal').classList.add('open');
+  setTimeout(() => document.getElementById('edit-task-title').focus(), 300);
+}
+document.getElementById('edit-task-cancel').addEventListener('click', () => { document.getElementById('edit-task-modal').classList.remove('open'); });
+document.getElementById('edit-task-modal').addEventListener('click', e => { if (e.target === document.getElementById('edit-task-modal')) document.getElementById('edit-task-modal').classList.remove('open'); });
+document.getElementById('edit-task-save').addEventListener('click', async () => {
+  if (!editingTask) return;
+  const title = document.getElementById('edit-task-title').value.trim();
+  if (!title) { toast('Titill vantar'); return; }
+  const tag = document.getElementById('edit-task-tag').value.trim();
+  const deadline = document.getElementById('edit-task-deadline').value;
+  try {
+    await api('PATCH', `/tasks/${editingTask.id}`, { title, tag, deadline });
+    const t = S.tasks.find(t => t.id === editingTask.id);
+    if (t) { t.title = title; t.tag = tag || null; t.deadline = deadline || null; }
+    renderTasks();
+    document.getElementById('edit-task-modal').classList.remove('open');
+    toast('Verkefni uppfært ✓');
+  } catch (e) { toast(e.message); }
+});
+document.getElementById('edit-task-title').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('edit-task-save').click(); });
+
+async function api(method, path, body) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (S.token) headers['Authorization'] = `Bearer ${S.token}`;
+  const res = await fetch('/api' + path, { method, headers, body: body ? JSON.stringify(body) : undefined });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Villa');
+  return data;
+}
+
+function route() {
+  const hash = location.hash;
+  if (hash.startsWith('#/s/')) { showShare(hash.slice(4)); return; }
+  if (!S.token) { checkSetup(); return; }
+  if (hash.startsWith('#/list/')) { showListDetail(hash.slice(7)); return; }
+  showLists();
+}
+window.addEventListener('hashchange', route);
+window.addEventListener('load', route);
+
+function showView(id) { document.querySelectorAll('.view').forEach(v => v.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+
+async function checkSetup() {
+  try {
+    const { setup } = await api('GET', '/status');
+    showView(setup ? 'view-pin' : 'view-setup');
+    const n = localStorage.getItem('bogga_name');
+    if (n) document.getElementById('pin-greeting').textContent = `Hæ ${n} 👋`;
+  } catch { showView('view-pin'); }
+}
+
+let setupPin = '', setupConfirmPin = '';
+document.getElementById('setup-name-next').addEventListener('click', () => {
+  S.name = document.getElementById('setup-name').value.trim() || 'Bogga';
+  document.getElementById('setup-step-name').classList.remove('active');
+  document.getElementById('setup-step-pin').classList.add('active');
+  S.setupPinStep = 1; setupPin = ''; updateDots('setup-dots', setupPin);
+});
+document.getElementById('setup-name').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('setup-name-next').click(); });
+document.getElementById('setup-pad').addEventListener('click', e => { const k = e.target.closest('[data-d]'); if (k) handleSetupKey(k.dataset.d); });
+document.getElementById('setup-del').addEventListener('click', () => {
+  if (S.setupPinStep === 1) { setupPin = setupPin.slice(0,-1); updateDots('setup-dots', setupPin); }
+  else { setupConfirmPin = setupConfirmPin.slice(0,-1); updateDots('setup-dots', setupConfirmPin); }
+});
+async function handleSetupKey(d) {
+  if (S.setupPinStep === 1) {
+    if (setupPin.length >= 4) return;
+    setupPin += d; updateDots('setup-dots', setupPin);
+    if (setupPin.length === 4) setTimeout(() => { S.setupPinStep = 2; setupConfirmPin = ''; document.getElementById('setup-pin-label').textContent = 'Staðfestu PIN'; updateDots('setup-dots', setupConfirmPin); }, 200);
+  } else {
+    if (setupConfirmPin.length >= 4) return;
+    setupConfirmPin += d; updateDots('setup-dots', setupConfirmPin);
+    if (setupConfirmPin.length === 4) {
+      if (setupConfirmPin !== setupPin) {
+        shakeElement('setup-dots'); toast('PIN passar ekki — reyndu aftur');
+        setTimeout(() => { S.setupPinStep = 1; setupPin = ''; setupConfirmPin = ''; document.getElementById('setup-pin-label').textContent = 'Veldu 4 stafa PIN'; updateDots('setup-dots', setupPin); }, 500);
+      } else {
+        try {
+          const res = await api('POST', '/auth/setup', { pin: setupPin, name: S.name });
+          S.token = res.token; S.name = res.name;
+          localStorage.setItem('bogga_token', res.token); localStorage.setItem('bogga_name', res.name);
+          location.hash = '#/'; showLists();
+        } catch (e) { toast(e.message); }
+      }
+    }
+  }
+}
+
+let loginPin = '';
+document.getElementById('login-pad').addEventListener('click', e => { const k = e.target.closest('[data-d]'); if (k) handleLoginKey(k.dataset.d); });
+document.getElementById('login-del').addEventListener('click', () => { loginPin = loginPin.slice(0,-1); updateDots('login-dots', loginPin); });
+async function handleLoginKey(d) {
+  if (loginPin.length >= 4) return;
+  loginPin += d; updateDots('login-dots', loginPin);
+  if (loginPin.length === 4) {
+    try {
+      const res = await api('POST', '/auth/login', { pin: loginPin });
+      S.token = res.token; S.name = res.name;
+      localStorage.setItem('bogga_token', res.token); localStorage.setItem('bogga_name', res.name);
+      loginPin = ''; updateDots('login-dots', loginPin); location.hash = '#/'; showLists();
+    } catch { shakeElement('login-dots'); toast('Rangt PIN'); setTimeout(() => { loginPin = ''; updateDots('login-dots', loginPin); }, 400); }
+  }
+}
+
+async function showLists() {
+  showView('view-lists'); document.getElementById('lists-title').textContent = `Hæ ${S.name} 👋`;
+  try { S.lists = await api('GET', '/lists'); renderLists(); }
+  catch (e) { if (e.message.includes('Unauthorized')) logout(); else toast('Villa við að sækja lista'); }
+}
+function renderLists() {
+  const grid = document.getElementById('lists-grid'); grid.innerHTML = '';
+  S.lists.forEach(list => {
+    const card = document.createElement('div'); card.className = 'list-card animate-in'; card.style.setProperty('--c', list.color);
+    const open = list.open_count || 0, total = list.total_count || 0;
+    card.innerHTML = `<div class="list-card-title">${esc(list.title)}</div><div><div class="list-card-count">${total === 0 ? 'Tómur' : `${open} eftir af ${total}`}</div>${open > 0 ? `<div class="list-card-badge" style="--c:${list.color}">${open}</div>` : ''}</div>`;
+    card.addEventListener('click', () => { location.hash = `#/list/${list.id}`; });
+    grid.appendChild(card);
+  });
+  const addCard = document.createElement('div'); addCard.className = 'list-add-card';
+  addCard.innerHTML = `<div class="list-add-icon">+</div><div>Nýr listi</div>`;
+  addCard.addEventListener('click', openListModal); grid.appendChild(addCard);
+}
+
+function openListModal() { document.getElementById('modal-list-title').value = ''; selectedColor = COLORS[0].v; renderColorPicker(); document.getElementById('list-modal').classList.add('open'); setTimeout(() => document.getElementById('modal-list-title').focus(), 300); }
+function closeListModal() { document.getElementById('list-modal').classList.remove('open'); }
+document.getElementById('list-modal').addEventListener('click', e => { if (e.target === document.getElementById('list-modal')) closeListModal(); });
+function renderColorPicker() {
+  const picker = document.getElementById('color-picker'); picker.innerHTML = '';
+  COLORS.forEach(({ v }) => { const sw = document.createElement('div'); sw.className = 'color-swatch' + (v === selectedColor ? ' selected' : ''); sw.style.background = v; sw.addEventListener('click', () => { selectedColor = v; renderColorPicker(); }); picker.appendChild(sw); });
+}
+document.getElementById('modal-list-save').addEventListener('click', async () => {
+  const title = document.getElementById('modal-list-title').value.trim();
+  if (!title) { toast('Titill vantar'); return; }
+  try { const list = await api('POST', '/lists', { title, color: selectedColor }); list.open_count = 0; list.total_count = 0; S.lists.unshift(list); renderLists(); closeListModal(); toast('Listi búinn til ✓'); } catch (e) { toast(e.message); }
+});
+document.getElementById('modal-list-title').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('modal-list-save').click(); });
+
+async function showListDetail(id) {
+  showView('view-list'); document.getElementById('add-bar').style.display = 'none'; document.getElementById('tasks-list').innerHTML = ''; document.getElementById('share-notice-wrap').innerHTML = '';
+  try {
+    const { list, tasks } = await api('GET', `/lists/${id}/tasks`);
+    S.currentList = list; S.tasks = tasks;
+    document.getElementById('list-topbar').style.borderBottom = `3px solid ${list.color}`;
+    document.getElementById('list-title').textContent = list.title;
+    if (list.share_token) renderShareNotice(list.share_token);
+    renderTasks(); document.getElementById('add-bar').style.display = 'flex'; document.getElementById('add-title').focus();
+  } catch (e) { toast(e.message); goBack(); }
+}
+function renderShareNotice(token) {
+  const url = `${location.origin}/#/s/${token}`;
+  document.getElementById('share-notice-wrap').innerHTML = `<div class="share-notice"><span>🔗 Deiltur listi virkur</span><button onclick="copyText('${url}')">Afrita link</button><button onclick="removeShare()">Loka</button></div>`;
+}
+function renderTasks() {
+  const list = document.getElementById('tasks-list'); list.innerHTML = '';
+  if (S.tasks.length === 0) { list.innerHTML = `<div class="empty"><div class="empty-icon">✅</div><div class="empty-text">Enginn verkefni enn — bættu við!</div></div>`; return; }
+  const open = S.tasks.filter(t => t.status === 'open'), done = S.tasks.filter(t => t.status === 'done');
+  [...open, ...done].forEach(task => list.appendChild(makeTaskEl(task)));
+  updateTagSuggestions();
+}
+function makeTaskEl(task) {
+  const ci = COLORS.find(c => S.currentList && c.v === S.currentList.color) || COLORS[0];
+  const isDone = task.status === 'done', dl = task.deadline ? formatDeadline(task.deadline) : null, overdue = task.deadline && !isDone && new Date(task.deadline) < new Date();
+  const el = document.createElement('div'); el.className = `task-item${isDone ? ' done' : ''} animate-in`; el.dataset.id = task.id;
+  el.innerHTML = `<div class="task-check${isDone ? ' checked' : ''}" data-task-id="${task.id}" data-done="${isDone}"></div><div class="task-body"><div class="task-title">${esc(task.title)}</div><div class="task-meta">${task.tag ? `<span class="task-tag" style="--c:${ci.v};--c-light:${ci.l}">${esc(task.tag)}</span>` : ''}${dl ? `<span class="task-deadline${overdue ? ' overdue' : ''}">📅 ${dl}</span>` : ''}</div></div><div class="task-actions"><button class="task-edit" data-edit-id="${task.id}">✎</button><button class="task-del" data-del-id="${task.id}">✕</button></div>`;
+  return el;
+}
+document.getElementById('tasks-list').addEventListener('click', async e => {
+  const check = e.target.closest('.task-check');
+  if (check) { const id = check.dataset.taskId, done = check.dataset.done === 'true'; try { await api('PATCH', `/tasks/${id}`, { status: done ? 'open' : 'done' }); const t = S.tasks.find(t => t.id === id); if (t) t.status = done ? 'open' : 'done'; renderTasks(); } catch (e) { toast(e.message); } return; }
+  const edit = e.target.closest('[data-edit-id]');
+  if (edit) { const task = S.tasks.find(t => t.id === edit.dataset.editId); if (task) openEditModal(task); return; }
+  const del = e.target.closest('[data-del-id]');
+  if (del) { try { await api('DELETE', `/tasks/${del.dataset.delId}`); S.tasks = S.tasks.filter(t => t.id !== del.dataset.delId); renderTasks(); } catch (e) { toast(e.message); } }
+});
+document.getElementById('add-title').addEventListener('focus', () => document.getElementById('add-extras').classList.add('open'));
+document.getElementById('add-title').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-add-task').click(); });
+document.getElementById('btn-add-task').addEventListener('click', async () => {
+  const title = document.getElementById('add-title').value.trim(); if (!title || !S.currentList) return;
+  try { const task = await api('POST', `/lists/${S.currentList.id}/tasks`, { title, tag: document.getElementById('add-tag').value.trim(), deadline: document.getElementById('add-deadline').value }); S.tasks.unshift(task); renderTasks(); document.getElementById('add-title').value = ''; document.getElementById('add-tag').value = ''; document.getElementById('add-deadline').value = ''; document.getElementById('add-extras').classList.remove('open'); document.getElementById('add-title').focus(); } catch (e) { toast(e.message); }
+});
+
+document.getElementById('btn-list-menu').addEventListener('click', () => { if (!S.currentList) return; document.getElementById('options-modal-title').textContent = S.currentList.title; document.getElementById('btn-share-toggle').textContent = S.currentList.share_token ? '🔗 Afrita deililink' : '🔗 Deila lista'; document.getElementById('list-options-modal').classList.add('open'); });
+document.getElementById('list-options-modal').addEventListener('click', e => { if (e.target === document.getElementById('list-options-modal')) closeOptionsModal(); });
+function closeOptionsModal() { document.getElementById('list-options-modal').classList.remove('open'); }
+document.getElementById('btn-close-options').addEventListener('click', closeOptionsModal);
+document.getElementById('btn-share-toggle').addEventListener('click', async () => {
+  if (!S.currentList) return;
+  if (S.currentList.share_token) { copyText(`${location.origin}/#/s/${S.currentList.share_token}`); closeOptionsModal(); }
+  else { try { const { token } = await api('POST', `/lists/${S.currentList.id}/share`); S.currentList.share_token = token; renderShareNotice(token); copyText(`${location.origin}/#/s/${token}`); closeOptionsModal(); toast('Deililink afritaður ✓'); } catch (e) { toast(e.message); } }
+});
+document.getElementById('btn-delete-list').addEventListener('click', async () => {
+  if (!S.currentList || !confirm(`Eyða "${S.currentList.title}"?`)) return;
+  try { await api('DELETE', `/lists/${S.currentList.id}`); closeOptionsModal(); toast('Lista eytt'); goBack(); } catch (e) { toast(e.message); }
+});
+async function removeShare() { try { await api('DELETE', `/lists/${S.currentList.id}/share`); S.currentList.share_token = null; document.getElementById('share-notice-wrap').innerHTML = ''; toast('Deiling lokað'); } catch (e) { toast(e.message); } }
+
+async function showShare(token) {
+  showView('view-share'); S.shareToken = token;
+  try { const { list, tasks } = await api('GET', `/share/${token}`); document.getElementById('share-title').textContent = list.title; document.getElementById('share-header').style.borderBottom = `3px solid ${list.color}`; renderShareTasks(tasks, list); }
+  catch { document.getElementById('share-title').textContent = 'Listi fannst ekki'; }
+}
+function renderShareTasks(tasks, list) {
+  const el = document.getElementById('share-tasks'); el.innerHTML = '';
+  const ci = COLORS.find(c => c.v === list.color) || COLORS[0];
+  if (tasks.length === 0) { el.innerHTML = `<div class="empty"><div class="empty-icon">📋</div><div class="empty-text">Enginn verkefni enn</div></div>`; return; }
+  tasks.forEach(task => { const isDone = task.status === 'done'; const item = document.createElement('div'); item.className = `task-item${isDone ? ' done' : ''} animate-in`; item.innerHTML = `<div class="task-check${isDone ? ' checked' : ''}"></div><div class="task-body"><div class="task-title">${esc(task.title)}</div><div class="task-meta">${task.tag ? `<span class="task-tag" style="--c:${ci.v};--c-light:${ci.l}">${esc(task.tag)}</span>` : ''}${task.deadline ? `<span class="task-deadline">📅 ${formatDeadline(task.deadline)}</span>` : ''}</div></div>`; el.appendChild(item); });
+}
+document.getElementById('btn-share-add').addEventListener('click', addSharedTask);
+document.getElementById('share-add-title').addEventListener('keydown', e => { if (e.key === 'Enter') addSharedTask(); });
+async function addSharedTask() {
+  const title = document.getElementById('share-add-title').value.trim(); if (!title || !S.shareToken) return;
+  try { await api('POST', `/share/${S.shareToken}/tasks`, { title }); document.getElementById('share-add-title').value = ''; const { list, tasks } = await api('GET', `/share/${S.shareToken}`); renderShareTasks(tasks, list); toast('Verkefni bætt við ✓'); } catch (e) { toast(e.message); }
+}
+
+document.getElementById('btn-back').addEventListener('click', goBack);
+function goBack() { S.currentList = null; S.tasks = []; location.hash = '#/'; showLists(); }
+document.getElementById('btn-logout').addEventListener('click', () => { if (confirm('Útskrá?')) logout(); });
+function logout() { S.token = null; localStorage.removeItem('bogga_token'); location.hash = ''; checkSetup(); }
+function updateDots(id, pin) { document.querySelectorAll(`#${id} .pin-dot`).forEach((d, i) => d.classList.toggle('filled', i < pin.length)); }
+function shakeElement(id) { const el = document.getElementById(id); el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); }
+function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); }
+function copyText(text) { navigator.clipboard.writeText(text).then(() => toast('Link afritaður ✓')).catch(() => toast(text)); }
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function formatDeadline(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00'), now = new Date(), diff = Math.ceil((d - now) / 86400000);
+  if (diff === 0) return 'Í dag'; if (diff === 1) return 'Á morgun'; if (diff === -1) return 'Í gær';
+  if (diff < 0) return `${Math.abs(diff)} dögum liðin`; if (diff < 7) return `${diff} dagar`;
+  return d.toLocaleDateString('is-IS', { month: 'short', day: 'numeric' });
+}
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
+</script>
+</body>
+</html>

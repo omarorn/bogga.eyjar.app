@@ -1,0 +1,12 @@
+{
+  "name": "github-automation-scripts",
+  "version": "1.0.0",
+  "description": "Scripts for GitHub automation with Claude",
+  "type": "module",
+  "scripts": {
+    "fix-issue": "node fix-issue.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.0.0"
+  }
+}

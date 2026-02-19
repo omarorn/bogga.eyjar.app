@@ -1,0 +1,76 @@
+# =============================================================================
+# 2076 Cloudflare Workers Configuration
+# =============================================================================
+# Copy this file to wrangler.toml and fill in the values.
+# =============================================================================
+
+name = "{{WORKER_NAME}}"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# --- Static Assets ---
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+# --- D1 Database ---
+[[d1_databases]]
+binding = "DB"
+database_name = "{{D1_DATABASE_NAME}}"
+database_id = "{{D1_DATABASE_ID}}"
+migrations_dir = "migrations"
+
+# --- R2 Storage ---
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "{{R2_BUCKET_NAME}}"
+
+# --- KV Namespace ---
+# [[kv_namespaces]]
+# binding = "KV"
+# id = "{{KV_NAMESPACE_ID}}"
+
+# --- Vectorize (Semantic Search) ---
+# [[vectorize]]
+# binding = "VECTORIZE"
+# index_name = "{{VECTORIZE_INDEX_NAME}}"
+
+# --- Workers AI ---
+# [ai]
+# binding = "AI"
+
+# --- Durable Objects ---
+# [durable_objects]
+# bindings = [
+#   { name = "{{DO_NAME}}", class_name = "{{DO_CLASS}}" }
+# ]
+
+# --- Cron Triggers ---
+# [triggers]
+# crons = [
+#   "0 2 * * *",    # Daily at 2:00 AM UTC
+#   "0 3 * * 0",    # Weekly Sunday at 3:00 AM UTC
+#   "0 4 1 * *"     # Monthly 1st at 4:00 AM UTC
+# ]
+
+# --- Rate Limiting ---
+# [[unsafe.bindings]]
+# name = "RATE_LIMITER"
+# type = "ratelimit"
+# namespace_id = "0"
+# simple = { limit = 100, period = 60 }
+
+# --- Environment Variables ---
+[vars]
+ENVIRONMENT = "production"
+LOG_LEVEL = "info"
+
+# --- Secrets (set via `wrangler secret put`) ---
+# JWT_SECRET
+# ADMIN_PASSWORD
+# CLOUDFLARE_API_TOKEN
+# GEMINI_API_KEY
+# CF_IMAGES_KEY
+# VAPID_PUBLIC_KEY
+# VAPID_PRIVATE_KEY

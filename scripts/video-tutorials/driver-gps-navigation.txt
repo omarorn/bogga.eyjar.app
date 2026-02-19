@@ -1,0 +1,302 @@
+# Driver Tutorial: GPS Leiðsögn (GPS Navigation)
+# Duration: 3 minutes
+# Language: Icelandic (with English subtitles)
+# Avatar: Professional, friendly, casual (outdoor/field setting)
+
+---
+
+## OPENING (0:00 - 0:15)
+
+**Narration (Icelandic):**
+"Velkomin í ökumannaappið fyrir Litlu Gámaleigunina. Í þessari kennslu munum við sýna þér hvernig GPS leiðsögnin virkar."
+
+**Narration (English subtitle):**
+"Welcome to the driver app for Litla Gámaleigan. In this tutorial, we'll show you how GPS navigation works."
+
+**Screen:**
+- Show driver app login: https://okumenn.gamaleigan.is
+- Mobile view (portrait orientation)
+- Login with QR code scan
+
+---
+
+## SECTION 1: VIEW TODAY'S ROUTE (0:15 - 0:45)
+
+**Narration (Icelandic):**
+"Eftir innskráningu sérðu leiðina þína fyrir daginn með öllum viðkomustöðum."
+
+**Narration (English subtitle):**
+"After login, you see your route for the day with all stops."
+
+**Screen:**
+- Show route overview:
+  - Route: Leið 1 - Miðborg
+  - Stops: 12 total
+  - Completed: 3
+  - Remaining: 9
+  - Estimated completion: 14:30
+
+**Narration (Icelandic):**
+"Hver viðkomustaður sýnir upplýsingar um gáminn, staðsetningu og fyllingarhlutfall."
+
+**Narration (English subtitle):**
+"Each stop shows information about the container, location, and fill level."
+
+**Screen:**
+- Show stop list:
+  1. ✅ Kaffi Hús - Laugavegur 12 - Lokið 09:15
+  2. ✅ Veitingahús - Laugavegur 18 - Lokið 09:35
+  3. ✅ Bakarí - Skólavörðustígur 8 - Lokið 10:00
+  4. 🔵 Hótel Reykjavík - Bankastræti 7 - 85% fullur (Next stop)
+  5. ⚪ Veitingastaður - Austurstræti 12 - 72% fullur
+  6. ⚪ Kaffihús - Aðalstræti 9 - 68% fullur
+
+**Caption on screen:**
+"Næsta viðkoma: Hótel Reykjavík - 1.2 km"
+"Next stop: Hótel Reykjavík - 1.2 km"
+
+---
+
+## SECTION 2: START NAVIGATION (0:45 - 1:15)
+
+**Narration (Icelandic):**
+"Til að hefja leiðsögn til næsta staðar skaltu smella á 'Byrja leiðsögn' hnappinn."
+
+**Narration (English subtitle):**
+"To start navigation to the next location, click the 'Start Navigation' button."
+
+**Screen:**
+- Click "Byrja leiðsögn" button
+- Show full-screen map with:
+  - Blue route line from current location to destination
+  - Your location (blue dot with heading arrow)
+  - Destination (red pin with "Hótel Reykjavík")
+  - ETA: 4 min
+  - Distance: 1.2 km
+
+**Narration (Icelandic):**
+"Kerfið notar Mapbox til að sýna þér bestu leiðina. Þú færð talað leiðbeiningar í gegnum símann."
+
+**Narration (English subtitle):**
+"The system uses Mapbox to show you the best route. You get voice directions through your phone."
+
+**Screen:**
+- Show turn-by-turn banner at top:
+  - "Í 200 metrum, beygðu til hægri á Laugaveg"
+  - "In 200 meters, turn right onto Laugavegur"
+
+**Caption on screen:**
+"GPS leiðsögn með töldum leiðbeiningum"
+"GPS navigation with voice instructions"
+
+---
+
+## SECTION 3: FOLLOW DIRECTIONS (1:15 - 1:45)
+
+**Narration (Icelandic):**
+"Fylgdu bláu línunni á kortinu. Þegar þú nálgast beygju færðu áminnningu."
+
+**Narration (English subtitle):**
+"Follow the blue line on the map. When you approach a turn, you'll get a reminder."
+
+**Screen:**
+- Show map updating as you drive:
+  - Current location moving along route
+  - Next turn highlighted with arrow icon
+  - Distance to turn: 100m → 50m → Turn now!
+
+**Narration (Icelandic):**
+"Ef umferð er þung mun kerfið leggja til aðra leið til að spara tíma."
+
+**Narration (English subtitle):**
+"If traffic is heavy, the system will suggest an alternative route to save time."
+
+**Screen:**
+- Show reroute notification:
+  - "Betri leið fundin! Sparar 3 mínútur."
+  - "Better route found! Saves 3 minutes."
+  - Options: "Samþykkja" (Accept) or "Hafna" (Decline)
+  - Click "Samþykkja"
+  - Map updates with new route (green line)
+
+**Caption on screen:**
+"Sjálfvirk endurbeining ef umferð er þung"
+"Automatic rerouting for heavy traffic"
+
+---
+
+## SECTION 4: HANDLE MISSED TURN (1:45 - 2:15)
+
+**Narration (Icelandic):**
+"Ef þú missir af beygju mun kerfið endurreikna leiðina sjálfkrafa."
+
+**Narration (English subtitle):**
+"If you miss a turn, the system will automatically recalculate the route."
+
+**Screen:**
+- Show driver missing turn (driving past Bankastræti)
+- Notification appears:
+  - "Endurreikna leið..."
+  - "Recalculating route..."
+- New route appears on map (orange line)
+- Updated ETA: +2 min (now 6 min total)
+
+**Narration (Icelandic):**
+"Engin áhyggja! Kerfið finnur nýja leið fyrir þig. Haltu áfram að fylgja bláu línunni."
+
+**Narration (English subtitle):**
+"No worries! The system finds a new route for you. Just keep following the blue line."
+
+**Screen:**
+- Show new turn-by-turn directions:
+  - "Í 300 metrum, beygðu til vinstri á Austurstræti"
+  - "In 300 meters, turn left onto Austurstræti"
+
+**Caption on screen:**
+"Missir af beygju? Engin vandamál - sjálfvirk endurbeining"
+"Missed a turn? No problem - automatic rerouting"
+
+---
+
+## SECTION 5: ARRIVE AT DESTINATION (2:15 - 2:45)
+
+**Narration (Icelandic):**
+"Þegar þú kemur á áfangastað færðu tilkynningu. Gámurinn er auðkenndur á kortinu."
+
+**Narration (English subtitle):**
+"When you arrive at the destination, you get a notification. The container is marked on the map."
+
+**Screen:**
+- Show arrival notification:
+  - "Þú ert kominn á áfangastað!"
+  - "You have arrived at your destination!"
+  - Container location marked with green pin
+  - Photo of location from street view
+
+**Narration (Icelandic):**
+"Ef þú finnur ekki gáminn geturðu séð mynd af staðsetningunni sem viðskiptavinurinn gaf upp."
+
+**Narration (English subtitle):**
+"If you can't find the container, you can see a photo of the location provided by the customer."
+
+**Screen:**
+- Show container detail popup:
+  - Location: Behind building, near loading dock
+  - Photo: Container in alley
+  - Container ID: C-1189
+  - Size: 1100L
+  - Fill level: 85%
+
+**Caption on screen:**
+"Gámur staðsettur - Klára tínslu"
+"Container located - Complete pickup"
+
+---
+
+## SECTION 6: MARK STOP COMPLETE (2:45 - 3:00)
+
+**Narration (Icelandic):**
+"Eftir að þú hefur tæmt gáminn skaltu smella á 'Klára viðkomu' til að halda áfram á næsta stað."
+
+**Narration (English subtitle):**
+"After emptying the container, click 'Complete Stop' to continue to the next location."
+
+**Screen:**
+- Click "Klára viðkomu" button
+- Checkmark animation appears on stop
+- Route list updates:
+  - 4. ✅ Hótel Reykjavík - Lokið 10:25
+  - Progress: 4/12 stops completed
+- Next stop auto-selected:
+  - 5. 🔵 Veitingastaður - Austurstræti 12 (Now active)
+
+**Narration (Icelandic):**
+"Kerfið velur næsta viðkomustað sjálfkrafa. Þú getur nú byrjað leiðsögn að honum."
+
+**Narration (English subtitle):**
+"The system automatically selects the next stop. You can now start navigation to it."
+
+**Screen:**
+- Show "Byrja leiðsögn" button for next stop
+- ETA to next stop: 3 min
+- Distance: 0.8 km
+
+**Caption on screen:**
+"Næsta viðkoma: Veitingastaður - 0.8 km"
+"Next stop: Restaurant - 0.8 km"
+
+---
+
+## CLOSING (3:00 - 3:10)
+
+**Narration (Icelandic):**
+"Þetta var yfirlit yfir GPS leiðsögnina. Ef þú hefur fleiri spurningar hafðu samband við þjónustuver."
+
+**Narration (English subtitle):**
+"This was an overview of GPS navigation. If you have more questions, contact support."
+
+**Screen:**
+- Show contact info:
+  - Þjónustusími: +354 555 1234
+  - Tölvupóstur: okumenn@gamaleigan.is
+
+**Caption on screen:**
+"Takk fyrir að horfa!"
+"Thank you for watching!"
+
+---
+
+## KEY TAKEAWAYS (Summary slide)
+
+**Icelandic:**
+1. Skoða leiðina þína fyrir daginn
+2. Byrja leiðsögn til næsta staðar
+3. Fylgja bláu línunni á kortinu
+4. Sjálfvirk endurbeining ef þú missir af beygju
+5. Klára viðkomu og halda áfram
+
+**English:**
+1. View your route for the day
+2. Start navigation to next stop
+3. Follow blue line on map
+4. Automatic rerouting if you miss a turn
+5. Complete stop and continue
+
+---
+
+## PRODUCTION NOTES
+
+**Avatar Recommendation:**
+- Casual, friendly avatar (younger, 25-35 years old)
+- Outdoor/field setting (not office)
+- Work uniform or casual attire
+- Smile, approachable demeanor
+
+**Voice Settings:**
+- Language: Icelandic (is-IS)
+- Voice: Gunnar (male) - more casual tone
+- Speed: Normal (1.0x)
+- Tone: Friendly, helpful
+
+**Screen Recording:**
+- Mobile view (portrait 9:16 aspect ratio)
+- 1080x1920 resolution
+- Show finger taps on screen
+- Simulate driving movement on map
+
+**Map Animation:**
+- Use Mapbox GL JS screen recordings
+- Smooth panning and zooming
+- Show realistic GPS position updates
+- Blue route line with turn arrows
+
+**Voice Navigation:**
+- Include actual voice navigation audio samples
+- "Í 200 metrum, beygðu til hægri"
+- Female Icelandic voice (Mapbox default)
+
+**Export Settings:**
+- Format: MP4 (H.264)
+- Resolution: 1080x1920 (Portrait)
+- Bitrate: 4 Mbps
+- Frame rate: 30 fps

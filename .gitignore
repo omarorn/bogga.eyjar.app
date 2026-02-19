@@ -1,0 +1,177 @@
+# ============================================
+# 2076 Platform Template - Git Ignore
+# ============================================
+
+# ============================================
+# ENVIRONMENT & SECRETS (CRITICAL)
+# ============================================
+.env
+.env.local
+.env.*.local
+.dev.vars
+*.pem
+*.key
+secrets.json
+
+# ============================================
+# DEPENDENCIES
+# ============================================
+node_modules/
+.pnpm-store/
+package-lock.json
+
+# ============================================
+# BUILD OUTPUTS
+# ============================================
+dist/
+.output/
+.vercel/
+.netlify/
+.wrangler/
+.mf/
+
+# ============================================
+# CLOUDFLARE
+# ============================================
+.wrangler/
+.dev.vars
+wrangler.toml.bak
+
+# ============================================
+# ASTRO
+# ============================================
+.astro/
+
+# ============================================
+# VITE / REACT
+# ============================================
+*.local
+
+# ============================================
+# TYPESCRIPT
+# ============================================
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+
+# ============================================
+# TESTING
+# ============================================
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
+*.spec.ts.snap
+
+# ============================================
+# LOGS
+# ============================================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ============================================
+# EDITOR & IDE
+# ============================================
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+*.sublime-project
+
+# ============================================
+# OS FILES
+# ============================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ============================================
+# CLAUDE CODE / MCP
+# ============================================
+.claude/settings.local.json
+.playwright-mcp/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+!public/**/*.png
+!public/**/*.jpg
+!public/**/*.jpeg
+!public/**/*.gif
+!public/**/*.webp
+!src/assets/**/*.png
+!src/assets/**/*.jpg
+!src/assets/**/*.jpeg
+!src/assets/**/*.gif
+!src/assets/**/*.webp
+
+# ============================================
+# TEMPORARY FILES
+# ============================================
+tmp/
+temp/
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# ============================================
+# DATABASE
+# ============================================
+*.db
+*.sqlite
+*.sqlite3
+.d1/
+
+# ============================================
+# SENTRY
+# ============================================
+.sentryclirc
+
+# ============================================
+# MISC
+# ============================================
+*.pid
+*.seed
+*.pid.lock
+.npm
+.eslintcache
+.node_repl_history
+.yarn-integrity
+
+# ============================================
+# PROJECT-SPECIFIC
+# ============================================
+# Agent task outputs
+/tasks/*.output
+/tasks/*.log
+
+# Backup files
+/backups/
+
+# Local scripts
+/scripts/*.local.sh
+
+# Customer-specific overrides (keep in forks)
+# config/customer.json

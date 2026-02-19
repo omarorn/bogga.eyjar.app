@@ -1,0 +1,15 @@
+name = "bogga-app"
+main = "src/index.js"
+compatibility_date = "2024-11-01"
+
+assets = { directory = "./public", binding = "ASSETS" }
+
+[[d1_databases]]
+binding = "DB"
+database_name = "bogga-db"
+database_id = "77fd2dc9-526a-40c8-867b-87f069c7f709"
+
+[vars]
+APP_NAME = "Bogga"
+
+# Set this secret with: wrangler secret put JWT_SECRET

@@ -1,0 +1,71 @@
+# Litla Gámaleigan - Cron Backup Configuration Examples
+
+## Weekly Backup (Recommended)
+# Run every Sunday at 2:00 AM
+0 2 * * 0 /mnt/c/git/Litla_Gamaleigan/scripts/backup-database.sh >> /var/log/litla-backup.log 2>&1
+
+## Daily Backup (For Production Systems)
+# Run every day at 3:00 AM
+0 3 * * * /mnt/c/git/Litla_Gamaleigan/scripts/backup-database.sh >> /var/log/litla-backup.log 2>&1
+
+## Twice Weekly (Monday & Thursday)
+# Run Monday and Thursday at 1:30 AM
+30 1 * * 1,4 /mnt/c/git/Litla_Gamaleigan/scripts/backup-database.sh >> /var/log/litla-backup.log 2>&1
+
+## Installation Instructions:
+
+# 1. Open crontab editor:
+crontab -e
+
+# 2. Add one of the cron expressions above
+
+# 3. Save and exit (in vim: ESC, then :wq)
+
+# 4. Verify cron job was added:
+crontab -l
+
+# 5. Create log file directory (if needed):
+sudo mkdir -p /var/log
+sudo touch /var/log/litla-backup.log
+sudo chmod 644 /var/log/litla-backup.log
+
+## View Backup Logs:
+
+# View last 50 lines:
+tail -50 /var/log/litla-backup.log
+
+# View logs in real-time:
+tail -f /var/log/litla-backup.log
+
+# Search for errors:
+grep -i error /var/log/litla-backup.log
+
+## Testing Cron Job Manually:
+
+# Run as if triggered by cron:
+/mnt/c/git/Litla_Gamaleigan/scripts/backup-database.sh >> /var/log/litla-backup.log 2>&1
+
+# Verify backup was created:
+wrangler r2 bucket info litla-backups
+
+## Troubleshooting:
+
+# If cron job doesn't run, check:
+# 1. Cron service is running:
+sudo service cron status
+
+# 2. Script has execute permissions:
+ls -la /mnt/c/git/Litla_Gamaleigan/scripts/backup-database.sh
+
+# 3. Wrangler is available in cron environment:
+which wrangler
+
+# 4. Add PATH to crontab if needed:
+PATH=/usr/local/bin:/usr/bin:/bin
+0 2 * * 0 /mnt/c/git/Litla_Gamaleigan/scripts/backup-database.sh
+
+## Notes:
+# - Backups are automatically deleted after 28 days (R2 lifecycle rule)
+# - Each backup includes full database schema and data
+# - Backup files are named: backup-litla-gamaleigan-db-YYYYMMDD-HHMMSS.sql
+# - Stored in R2: litla-backups/database-backups/

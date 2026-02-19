@@ -1,0 +1,258 @@
+# Admin Tutorial: Pöntunarstjórnun (Order Management)
+# Duration: 2 minutes
+# Language: Icelandic (with English subtitles)
+# Avatar: Professional, neutral, friendly
+
+---
+
+## OPENING (0:00 - 0:10)
+
+**Narration (Icelandic):**
+"Í þessari kennslu munum við sýna þér hvernig á að búa til og stjórna pöntunum fyrir sorphirðingu."
+
+**Narration (English subtitle):**
+"In this tutorial, we'll show you how to create and manage waste collection orders."
+
+**Screen:**
+- Admin dashboard overview
+- Highlight "Pantanir" (Orders) menu item
+
+---
+
+## SECTION 1: NAVIGATE TO ORDERS (0:10 - 0:25)
+
+**Narration (Icelandic):**
+"Smelltu á 'Pantanir' í valmyndinni. Hér sérðu lista yfir allar pantanir með stöðu þeirra."
+
+**Narration (English subtitle):**
+"Click on 'Orders' in the menu. Here you see a list of all orders with their status."
+
+**Screen:**
+- Click "Pantanir" menu item
+- Show orders list with columns:
+  - Pöntunarnúmer (Order #): P-2024-001
+  - Viðskiptavinur (Customer): Kaffi Hús ehf.
+  - Gámur (Container): C-1189
+  - Áætlaður dagur (Scheduled): 2024-01-15
+  - Staða (Status): Áætluð (Scheduled)
+
+**Caption on screen:**
+"Stöður: Áætluð → Í vinnslu → Lokið"
+"Statuses: Scheduled → In Progress → Completed"
+
+---
+
+## SECTION 2: CREATE NEW ORDER (0:25 - 0:55)
+
+**Narration (Icelandic):**
+"Til að búa til nýja pöntun skaltu smella á 'Ný pöntun'. Fyrst velurðu viðskiptavin úr listanum."
+
+**Narration (English subtitle):**
+"To create a new order, click 'New Order'. First, select a customer from the list."
+
+**Screen:**
+- Click "Ný pöntun" button
+- Show form step 1:
+  - Viðskiptavinur: Dropdown with customers
+  - Select "Kaffi Hús ehf."
+  - Show customer's containers below
+
+**Narration (Icelandic):**
+"Síðan velurðu hvaða gám á að tæma. Þú sérð fyllingarhlutfall hvers gáms til að forgangsraða."
+
+**Narration (English subtitle):**
+"Then select which container to empty. You see the fill level of each container to prioritize."
+
+**Screen:**
+- Show container selection:
+  - C-1189 (Laugavegur 12) - 85% fullur ⚠️ High priority
+  - C-1190 (Laugavegur 14) - 45% fullur
+  - C-1191 (Laugavegur 16) - 30% fullur
+- Select C-1189
+
+**Caption on screen:**
+"Veldu gám → Skoða fyllingarhlutfall → Forgangsraða"
+"Select container → View fill level → Prioritize"
+
+**Narration (Icelandic):**
+"Veldu dagsetningu fyrir tínsluna og bættu við athugasemd ef þörf er á."
+
+**Narration (English subtitle):**
+"Select a date for the collection and add a note if needed."
+
+**Screen:**
+- Date picker: Select "15. janúar 2024"
+- Optional note field: "Gámur mjög fullur, forgangsmál"
+- Click "Vista pöntun" (Save Order)
+
+---
+
+## SECTION 3: ASSIGN TO DRIVER AND ROUTE (0:55 - 1:20)
+
+**Narration (Icelandic):**
+"Eftir að pöntunin er búin til þarftu að úthluta henni til ökumanns og leiðar. Smelltu á pöntunina til að opna upplýsingar."
+
+**Narration (English subtitle):**
+"After creating the order, you need to assign it to a driver and route. Click on the order to open details."
+
+**Screen:**
+- Click on newly created order P-2024-001
+- Show order detail modal
+
+**Narration (Icelandic):**
+"Veldu leið úr listanum. Kerfið leggur til bestu leiðina út frá staðsetningu gámsins."
+
+**Narration (English subtitle):**
+"Select a route from the list. The system suggests the best route based on container location."
+
+**Screen:**
+- Route dropdown with suggestions:
+  - Leið 1: Miðborg (Recommended) ✓
+  - Leið 2: Vesturbær
+  - Leið 3: Austurbær
+- Select "Leið 1: Miðborg"
+
+**Narration (Icelandic):**
+"Síðan velurðu ökumann sem er í vinnu þann daginn."
+
+**Narration (English subtitle):**
+"Then select a driver who is working that day."
+
+**Screen:**
+- Driver dropdown:
+  - Jón Jónsson (Available) ✓
+  - Guðrún Pétursdóttir (Off duty)
+- Select "Jón Jónsson"
+- Click "Vista úthlutun" (Save Assignment)
+
+**Caption on screen:**
+"Pöntun → Leið → Ökumaður → Vista"
+"Order → Route → Driver → Save"
+
+---
+
+## SECTION 4: TRACK ORDER STATUS (1:20 - 1:40)
+
+**Narration (Icelandic):**
+"Þú getur fylgst með stöðu pöntunarinnar í rauntíma. Þegar ökumaður byrjar að vinna pöntunina breytist staðan í 'Í vinnslu'."
+
+**Narration (English subtitle):**
+"You can track the order status in real-time. When the driver starts working on the order, the status changes to 'In Progress'."
+
+**Screen:**
+- Show order status progression:
+  - 08:00 - Áætluð (Scheduled) → Blue
+  - 10:30 - Í vinnslu (In Progress) → Yellow
+  - 11:15 - Lokið (Completed) → Green
+
+**Narration (Icelandic):**
+"Þegar pöntunin er lokið sérðu myndir sem ökumaðurinn tók og athugasemdir."
+
+**Narration (English subtitle):**
+"When the order is completed, you see photos the driver took and their notes."
+
+**Screen:**
+- Show completed order details:
+  - Photos: Before (full container), After (empty container)
+  - Driver notes: "Gámur tæmdur án vandamála"
+  - Completion time: 11:15
+
+**Caption on screen:**
+"Lokið → Myndir → Athugasemdir → Tími"
+"Completed → Photos → Notes → Time"
+
+---
+
+## SECTION 5: GENERATE INVOICE (1:40 - 2:00)
+
+**Narration (Icelandic):**
+"Að lokum geturðu búið til reikning úr lokinni pöntun. Smelltu á 'Búa til reikning'."
+
+**Narration (English subtitle):**
+"Finally, you can generate an invoice from the completed order. Click 'Generate Invoice'."
+
+**Screen:**
+- Click "Búa til reikning" button
+- Show invoice preview:
+  - Viðskiptavinur: Kaffi Hús ehf.
+  - Pöntun: P-2024-001
+  - Þjónusta: Tínsla 1100L gáms
+  - Upphæð: 8.900 kr
+  - VSK (24%): 2.136 kr
+  - Heildarupphæð: 11.036 kr
+
+**Narration (Icelandic):**
+"Kerfið bætir við þjónustugjaldi og VSK sjálfkrafa. Smelltu á 'Senda reikning' til að senda hann á viðskiptavininn."
+
+**Narration (English subtitle):**
+"The system adds service fee and VAT automatically. Click 'Send Invoice' to email it to the customer."
+
+**Screen:**
+- Click "Senda reikning" (Send Invoice)
+- Success message: "Reikningur sendur á kaffi@kaffihus.is"
+
+**Caption on screen:**
+"Lokið → Reikningur → Senda → Vistaðu"
+"Completed → Invoice → Send → Done"
+
+---
+
+## CLOSING (2:00 - 2:10)
+
+**Narration (Icelandic):**
+"Þetta var yfirlit yfir pöntunarstjórnun. Ef þú hefur fleiri spurningar skaltu hafa samband við þjónustuver."
+
+**Narration (English subtitle):**
+"This was an overview of order management. If you have more questions, contact support."
+
+**Screen:**
+- Show contact info:
+  - Tölvupóstur: thjonusta@gamaleigan.is
+  - Sími: +354 555 1234
+
+**Caption on screen:**
+"Takk fyrir að horfa!"
+"Thank you for watching!"
+
+---
+
+## KEY TAKEAWAYS (Summary slide)
+
+**Icelandic:**
+1. Ný pöntun → Velja viðskiptavin og gám
+2. Úthluta til leiðar og ökumanns
+3. Fylgjast með stöðu í rauntíma
+4. Skoða myndir og athugasemdir
+5. Búa til og senda reikning
+
+**English:**
+1. New Order → Select customer and container
+2. Assign to route and driver
+3. Track status in real-time
+4. View photos and notes
+5. Generate and send invoice
+
+---
+
+## PRODUCTION NOTES
+
+**Avatar Recommendation:**
+- Same avatar as first tutorial (consistency)
+- Professional Icelandic avatar
+- Business casual attire
+
+**Voice Settings:**
+- Language: Icelandic (is-IS)
+- Same voice as first tutorial (consistency)
+- Speed: Normal (1.0x)
+
+**Screen Recording:**
+- Resolution: 1920x1080
+- Show full workflow from creation to invoicing
+- Highlight status changes with subtle animations
+
+**Export Settings:**
+- Format: MP4 (H.264)
+- Resolution: 1920x1080
+- Bitrate: 5 Mbps
+- Frame rate: 30 fps

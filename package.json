@@ -1,0 +1,94 @@
+{
+  "name": "{{PROJECT_NAME}}",
+  "version": "1.0.0",
+  "description": "{{PROJECT_DESCRIPTION}}",
+  "author": "2076 ehf <omar@vertis.is>",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "dev": "wrangler dev",
+    "dev:pages": "wrangler pages dev dist",
+    "build": "npm run build:css && npm run build:worker",
+    "build:worker": "wrangler deploy --dry-run --outdir=dist",
+    "build:css": "npx @tailwindcss/cli -i ./src/input.css -o ./public/output.css --minify",
+    "deploy": "npx wrangler deploy",
+    "deploy:pages": "npm run build && npx wrangler pages deploy dist --project-name={{PAGES_PROJECT_NAME}} --commit-dirty=true",
+    "cf-typegen": "wrangler types",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "db:migrate:local": "npx wrangler d1 execute {{D1_DATABASE_NAME}} --local --file=",
+    "db:migrate:remote": "npx wrangler d1 execute {{D1_DATABASE_NAME}} --remote --file=",
+    "db:query:local": "npx wrangler d1 execute {{D1_DATABASE_NAME}} --local --command=",
+    "db:query:remote": "npx wrangler d1 execute {{D1_DATABASE_NAME}} --remote --command=",
+    "db:backup": "npx wrangler d1 export {{D1_DATABASE_NAME}} --remote --output=backup-$(date +%Y%m%d).sql",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:unit": "vitest run tests/unit",
+    "test:integration": "vitest run tests/integration",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:debug": "playwright test --debug",
+    "clean": "rm -rf node_modules dist",
+    "prepare": "husky"
+  },
+  "dependencies": {
+    "hono": "^4.7.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250124.0",
+    "@playwright/test": "^1.57.0",
+    "@tailwindcss/cli": "^4.1.0",
+    "@types/node": "^22.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "@vitest/coverage-v8": "^4.0.0",
+    "@vitest/ui": "^4.0.0",
+    "autoprefixer": "^10.4.23",
+    "eslint": "^9.0.0",
+    "eslint-config-prettier": "^10.0.0",
+    "happy-dom": "^20.0.0",
+    "husky": "^9.1.0",
+    "lint-staged": "^16.0.0",
+    "postcss": "^8.5.0",
+    "prettier": "^3.5.0",
+    "tailwindcss": "^4.1.0",
+    "typescript": "^5.8.0",
+    "vitest": "^4.0.0",
+    "wrangler": "^4.54.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
+  },
+  "keywords": [
+    "cloudflare",
+    "workers",
+    "d1",
+    "r2",
+    "hono",
+    "typescript",
+    "2076"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/{{GITHUB_ORG}}/{{REPO_NAME}}.git"
+  },
+  "bugs": {
+    "url": "https://github.com/{{GITHUB_ORG}}/{{REPO_NAME}}/issues"
+  },
+  "homepage": "https://{{DOMAIN}}"
+}

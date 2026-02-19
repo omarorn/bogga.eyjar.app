@@ -1,0 +1,258 @@
+# Admin Tutorial: Gámastjórnun (Container Management)
+# Duration: 3 minutes
+# Language: Icelandic (with English subtitles)
+# Avatar: Professional, neutral, friendly
+
+---
+
+## OPENING (0:00 - 0:15)
+
+**Narration (Icelandic):**
+"Velkomin í stjórnborð Litlu Gámaleigunnar. Í þessari kennslu munum við sýna þér hvernig á að stjórna gámum í kerfinu."
+
+**Narration (English subtitle):**
+"Welcome to Litla Gámaleigan's admin dashboard. In this tutorial, we'll show you how to manage containers in the system."
+
+**Screen:**
+- Show login page: https://admin.gamaleigan.is
+- Highlight logo and welcome message
+
+---
+
+## SECTION 1: LOGIN AND NAVIGATION (0:15 - 0:45)
+
+**Narration (Icelandic):**
+"Skráðu þig inn með netfanginu þínu og lykilorði. Eftir innskráningu sérðu stjórnborðið með yfirliti yfir alla gáma."
+
+**Narration (English subtitle):**
+"Log in with your email and password. After login, you'll see the dashboard with an overview of all containers."
+
+**Screen:**
+- Login form with email: demo@gamaleigan.is
+- Dashboard overview with stats:
+  - Total containers: 127
+  - Active containers: 98
+  - Full containers: 12
+  - Alerts: 3
+
+**Caption on screen:**
+"Stjórnborð → Yfirlitsskjár"
+"Dashboard → Overview Screen"
+
+---
+
+## SECTION 2: VIEW CONTAINER LIST (0:45 - 1:15)
+
+**Narration (Icelandic):**
+"Smelltu á 'Gámar' í valmyndinni vinstra megin. Hér sérðu lista yfir alla gáma með síum til að finna ákveðna gáma."
+
+**Narration (English subtitle):**
+"Click on 'Containers' in the left menu. Here you see a list of all containers with filters to find specific ones."
+
+**Screen:**
+- Navigate to Containers page
+- Show container list with columns:
+  - ID (C-1189)
+  - Staðsetning (Location)
+  - Fyllingarhlutfall (Fill Level: 65%)
+  - Staða (Status: Active)
+  - Viðskiptavinur (Customer)
+
+**Caption on screen:**
+"Síur: Staða, Staðsetning, Viðskiptavinur"
+"Filters: Status, Location, Customer"
+
+**Narration (Icelandic):**
+"Notaðu síurnar til að finna gáma eftir stöðu, staðsetningu eða viðskiptavini. Þú getur líka leitað eftir gámarnúmeri."
+
+**Narration (English subtitle):**
+"Use filters to find containers by status, location, or customer. You can also search by container number."
+
+---
+
+## SECTION 3: CREATE NEW CONTAINER (1:15 - 1:45)
+
+**Narration (Icelandic):**
+"Til að búa til nýjan gám skaltu smella á 'Nýr gámur' hnappinn. Fylltu út formið með grunnatriðum."
+
+**Narration (English subtitle):**
+"To create a new container, click the 'New Container' button. Fill out the form with basic information."
+
+**Screen:**
+- Click "Nýr gámur" button
+- Show form with fields:
+  - Gámarnúmer (Container ID): C-1234
+  - Gerð (Type): 1100L
+  - Staðsetning (Location): Reykjavík, Laugavegur 12
+  - GPS hnit (Coordinates): 64.1466, -21.9426
+  - Viðskiptavinur (Customer): Select from dropdown
+
+**Caption on screen:**
+"Nauðsynlegar upplýsingar: Númer, Gerð, Staðsetning"
+"Required fields: Number, Type, Location"
+
+**Narration (Icelandic):**
+"Eftir að þú hefur fyllt út formið skaltu smella á 'Vista' til að búa til gáminn."
+
+**Narration (English subtitle):**
+"After filling out the form, click 'Save' to create the container."
+
+---
+
+## SECTION 4: EDIT CONTAINER (1:45 - 2:15)
+
+**Narration (Icelandic):**
+"Til að breyta gámi skaltu smella á gámarnúmerið í listanum. Þetta opnar upplýsingaglugga þar sem þú getur breytt öllum stillingum."
+
+**Narration (English subtitle):**
+"To edit a container, click on the container number in the list. This opens a detail modal where you can change all settings."
+
+**Screen:**
+- Click on container C-1189
+- Show modal with tabs:
+  - Grunnupplýsingar (Basic Info)
+  - Skynjaragögn (Sensor Data)
+  - Viðvaranir (Alerts)
+  - Saga (History)
+
+**Caption on screen:**
+"Breyta gámi → Grunnupplýsingar, Skynjaragögn, Viðvaranir"
+"Edit Container → Basic Info, Sensors, Alerts"
+
+---
+
+## SECTION 5: REAL-TIME STATUS (2:15 - 2:30)
+
+**Narration (Icelandic):**
+"Fylgingarhlutfallið uppfærist í rauntíma þegar skynjari sendir gögn. Þú sérð líka hitastig, raka og dyrastöðu."
+
+**Narration (English subtitle):**
+"The fill level updates in real-time when the sensor sends data. You also see temperature, humidity, and door status."
+
+**Screen:**
+- Show live sensor data updating:
+  - Fyllingarhlutfall: 67% → 68%
+  - Hitastig: 12°C
+  - Raki: 45%
+  - Dyr: Lokaðar (Closed)
+
+**Caption on screen:**
+"Rauntíma uppfærslur frá IoT skynjara"
+"Real-time updates from IoT sensor"
+
+---
+
+## SECTION 6: SET ALERT THRESHOLDS (2:30 - 2:45)
+
+**Narration (Icelandic):**
+"Þú getur stillt viðvaranir fyrir fyllingarhlutfall. Til dæmis, senda viðvörun þegar gámurinn er 80% fullur."
+
+**Narration (English subtitle):**
+"You can set alerts for fill level. For example, send an alert when the container is 80% full."
+
+**Screen:**
+- Click on "Viðvaranir" tab
+- Show alert threshold slider:
+  - Viðvörunarmörk: 80%
+  - Tölvupóstur: ✓ Enabled
+  - SMS: ✓ Enabled
+
+**Caption on screen:**
+"Stilltu viðvaranir → 80% fullur → Senda póst/SMS"
+"Set alerts → 80% full → Send email/SMS"
+
+---
+
+## SECTION 7: ASSIGN TO CUSTOMER (2:45 - 3:00)
+
+**Narration (Icelandic):**
+"Að lokum geturðu úthlutað gámnum til viðskiptavinar. Veldu viðskiptavin úr listanum og vistaðu."
+
+**Narration (English subtitle):**
+"Finally, you can assign the container to a customer. Select a customer from the list and save."
+
+**Screen:**
+- Show customer assignment dropdown
+- Select "Kaffi Hús ehf."
+- Click "Vista úthlutun" (Save Assignment)
+- Success message: "Gámur C-1189 úthlutaður til Kaffi Hús ehf."
+
+**Caption on screen:**
+"Gámur → Viðskiptavinur → Vista"
+"Container → Customer → Save"
+
+---
+
+## CLOSING (3:00 - 3:10)
+
+**Narration (Icelandic):**
+"Þetta var yfirlit yfir gámastjórnun. Ef þú hefur fleiri spurningar skaltu hafa samband við þjónustuver."
+
+**Narration (English subtitle):**
+"This was an overview of container management. If you have more questions, contact support."
+
+**Screen:**
+- Show contact info:
+  - Tölvupóstur: thjonusta@gamaleigan.is
+  - Sími: +354 555 1234
+  - Vefsvæði: www.gamaleigan.is/hjalp
+
+**Caption on screen:**
+"Takk fyrir að horfa!"
+"Thank you for watching!"
+
+---
+
+## KEY TAKEAWAYS (Summary slide)
+
+**Icelandic:**
+1. Innskráning → Stjórnborð → Gámar
+2. Búa til nýjan gám með grunnatriðum
+3. Skoða rauntíma fyllingarhlutfall
+4. Stilla viðvaranir (80% fullur)
+5. Úthluta gámi til viðskiptavinar
+
+**English:**
+1. Login → Dashboard → Containers
+2. Create new container with basic info
+3. View real-time fill level
+4. Set alerts (80% full threshold)
+5. Assign container to customer
+
+---
+
+## PRODUCTION NOTES
+
+**Avatar Recommendation:**
+- Professional Icelandic avatar (male or female, 30-40 years old)
+- Business casual attire
+- Neutral background (office setting)
+
+**Voice Settings:**
+- Language: Icelandic (is-IS)
+- Voice: Dóra (female) or Gunnar (male) - Synthesia Icelandic voices
+- Speed: Normal (1.0x)
+- Tone: Professional, friendly
+
+**Screen Recording:**
+- Resolution: 1920x1080 (Full HD)
+- Show cursor movements
+- Highlight clicked elements with circle animation
+- Add subtle zoom-in for form fields
+
+**Subtitles:**
+- Icelandic (hardcoded)
+- English (SRT file for YouTube)
+- Font: Arial, size 32, white text with black outline
+
+**Music:**
+- Background music: Soft corporate track (royalty-free)
+- Volume: -20dB (subtle, not distracting)
+- Fade out during narration, fade in during transitions
+
+**Export Settings:**
+- Format: MP4 (H.264)
+- Resolution: 1920x1080
+- Bitrate: 5 Mbps
+- Frame rate: 30 fps
+- Audio: AAC, 128 kbps, stereo
