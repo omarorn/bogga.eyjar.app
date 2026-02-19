@@ -78,6 +78,12 @@ function normalizeRecurrence(rule) {
   return ['daily', 'weekly', 'monthly'].includes(v) ? v : null;
 }
 
+function normalizeDeadline(value) {
+  if (value === null || value === undefined || value === '') return null;
+  const v = String(value).trim();
+  return /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : null;
+}
+
 function nextRecurringDeadline(deadline, recurrence) {
   const base = deadline ? new Date(`${deadline}T00:00:00`) : new Date();
   if (Number.isNaN(base.getTime())) return null;
@@ -251,10 +257,29 @@ async function handleAPI(path, method, request, env) {
     if (!task) return err('Fannst ekki', 404);
     const updates = await request.json().catch(() => ({}));
     const fields = [], values = [];
-    if (updates.status !== undefined) { fields.push('status = ?'); values.push(updates.status); }
-    if (updates.title !== undefined) { fields.push('title = ?'); values.push(updates.title); }
-    if (updates.deadline !== undefined) { fields.push('deadline = ?'); values.push(updates.deadline || null); }
-    if (updates.tag !== undefined) { fields.push('tag = ?'); values.push(updates.tag || null); }
+    if (updates.status !== undefined) {
+      const nextStatus = String(updates.status).trim();
+      if (!['open', 'done'].includes(nextStatus)) return err('Ógild staða', 400);
+      fields.push('status = ?');
+      values.push(nextStatus);
+    }
+    if (updates.title !== undefined) {
+      const nextTitle = String(updates.title || '').trim();
+      if (!nextTitle) return err('Titill vantar', 400);
+      fields.push('title = ?');
+      values.push(nextTitle);
+    }
+    if (updates.deadline !== undefined) {
+      const nextDeadline = normalizeDeadline(updates.deadline);
+      if (updates.deadline && !nextDeadline) return err('Ógildur frestur', 400);
+      fields.push('deadline = ?');
+      values.push(nextDeadline);
+    }
+    if (updates.tag !== undefined) {
+      const nextTag = String(updates.tag || '').trim();
+      fields.push('tag = ?');
+      values.push(nextTag || null);
+    }
     const recurrenceInPayload = Object.prototype.hasOwnProperty.call(updates, 'recurrence');
     const recurrenceRule = recurrenceInPayload ? normalizeRecurrence(updates.recurrence) : task.recurrence;
     if (!fields.length && !recurrenceInPayload) return err('Ekkert að uppfæra');

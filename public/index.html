@@ -140,6 +140,38 @@
   @keyframes shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-8px); } 40% { transform: translateX(8px); } 60% { transform: translateX(-6px); } 80% { transform: translateX(6px); } }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
   .animate-in { animation: fadeIn .2s ease-out; }
+  .joke-card { background: linear-gradient(135deg,#fef9c3 0%,#fef3c7 100%); border: 1.5px solid #fbbf24; border-radius: 18px; padding: 14px 16px 12px; margin: 10px 14px 0; position: relative; overflow: hidden; animation: fadeIn .3s ease-out; }
+  .joke-card::after { content: '😂'; position: absolute; top: 10px; right: 14px; font-size: 22px; opacity: .18; }
+  .joke-header { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .12em; color: #92400e; margin-bottom: 8px; }
+  .joke-q { font-size: 13px; color: #44403c; line-height: 1.45; }
+  .joke-a { font-size: 14px; font-weight: 700; color: #1c1917; margin-top: 7px; line-height: 1.45; }
+  .joke-laugh { background: none; border: none; font-size: 20px; cursor: pointer; padding: 4px 2px; margin-top: 4px; display: block; transition: transform .2s; -webkit-tap-highlight-color: transparent; }
+  .joke-laugh:active { transform: scale(1.5) rotate(-12deg); }
+  @keyframes bellShake { 0%,100%{transform:rotate(0)} 15%{transform:rotate(15deg)} 30%{transform:rotate(-12deg)} 45%{transform:rotate(10deg)} 60%{transform:rotate(-8deg)} 75%{transform:rotate(5deg)} }
+  .bell-ringing { animation: bellShake .5s ease; }
+  .notif-dot { position: absolute; top: 4px; right: 4px; width: 9px; height: 9px; border-radius: 50%; background: #ef4444; border: 2px solid var(--surface); display: none; }
+  .notif-dot.visible { display: block; }
+  @keyframes popIn { 0%{opacity:0;transform:translateY(30px) scale(.9)} 60%{transform:translateY(-4px) scale(1.02)} 100%{opacity:1;transform:translateY(0) scale(1)} }
+  @keyframes chairBounce { 0%,100%{transform:translateY(0) rotate(0deg)} 30%{transform:translateY(-4px) rotate(-8deg)} 60%{transform:translateY(-2px) rotate(6deg)} }
+  .ergo-hint { background:none;border:none;font-size:15px;cursor:pointer;padding:4px;opacity:0;transition:opacity .6s;-webkit-tap-highlight-color:transparent;line-height:1; }
+  .ergo-hint.peek { opacity:.3; }
+  .ergo-hint.wave { opacity:.7;animation:chairBounce .6s ease; }
+  .ergo-modal { position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s; }
+  .ergo-modal.open { opacity:1;pointer-events:all; }
+  .ergo-sheet { background:var(--surface);border-radius:28px 28px 0 0;padding:24px 20px calc(var(--safe-bottom)+28px);width:100%;max-width:430px;max-height:90vh;overflow-y:auto;animation:popIn .35s cubic-bezier(.34,1.56,.64,1) both; }
+  .ergo-title { font-size:20px;font-weight:800;color:var(--text);margin-bottom:4px; }
+  .ergo-sub { font-size:13px;color:var(--muted);margin-bottom:20px; }
+  .ergo-item { display:flex;align-items:flex-start;gap:14px;padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer;-webkit-tap-highlight-color:transparent; }
+  .ergo-item:last-of-type { border-bottom:none; }
+  .ergo-check { width:24px;height:24px;min-width:24px;border-radius:8px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;transition:all .15s;font-size:14px; }
+  .ergo-item.done .ergo-check { background:#10b981;border-color:#10b981;color:white; }
+  .ergo-item.done .ergo-text { opacity:.5;text-decoration:line-through; }
+  .ergo-emoji { font-size:20px;line-height:1;margin-top:1px; }
+  .ergo-text { font-size:14px;line-height:1.45;color:var(--text); }
+  .ergo-note { font-size:12px;color:var(--muted);margin-top:3px; }
+  .ergo-done-wrap { text-align:center;padding:16px 0 0;display:none; }
+  .ergo-done-wrap.visible { display:block; }
+  .ergo-score { font-size:28px;font-weight:900;color:#10b981;margin-bottom:4px; }
 </style>
 </head>
 <body>
@@ -187,7 +219,8 @@
 
   <div class="view" id="view-lists">
     <div class="topbar">
-      <span class="topbar-title" id="lists-title">Listar</span>
+      <span class="topbar-title" id="lists-title">Listar</span><button class="ergo-hint" id="ergo-hint" title="Psst...">🪑</button>
+      <button class="btn-icon" id="btn-bell" style="position:relative" title="Áminningar">🔔<span class="notif-dot" id="notif-dot"></span></button>
       <button class="btn-icon" id="btn-logout">🔒</button>
     </div>
     <div class="scroll"><div class="lists-grid" id="lists-grid"></div></div>
@@ -296,6 +329,64 @@
   </div>
 </div>
 
+<div class="ergo-modal" id="ergo-modal">
+  <div class="ergo-sheet">
+    <div class="ergo-title">🪑 Hvernig siturðu eiginlega?</div>
+    <div class="ergo-sub">Fandstu þetta?! Smelltu á það sem gildir 🤫</div>
+    <div id="ergo-list">
+      <div class="ergo-item" data-id="0">
+        <span class="ergo-emoji">🖥️</span>
+        <div style="flex:1"><div class="ergo-text">Skjárinn er á augnhæð</div><div class="ergo-note">Ekki þannig að þú þurfir að brjóta hnakkann til að lesa</div></div>
+        <div class="ergo-check"></div>
+      </div>
+      <div class="ergo-item" data-id="1">
+        <span class="ergo-emoji">🪑</span>
+        <div style="flex:1"><div class="ergo-text">Hnén eru í 90° og fætur á gólfinu</div><div class="ergo-note">Eða á fótapalli ef þú ert í minni kantinum</div></div>
+        <div class="ergo-check"></div>
+      </div>
+      <div class="ergo-item" data-id="2">
+        <span class="ergo-emoji">💪</span>
+        <div style="flex:1"><div class="ergo-text">Handleggir liggja lárétt á armstöðum</div><div class="ergo-note">Ekki upphafðir eins og þú sért að biðja um hjálp</div></div>
+        <div class="ergo-check"></div>
+      </div>
+      <div class="ergo-item" data-id="3">
+        <span class="ergo-emoji">🧍</span>
+        <div style="flex:1"><div class="ergo-text">Bakið er stutt (eða þykist)</div><div class="ergo-note">Við vitum að þú ert að siga — allir eru það</div></div>
+        <div class="ergo-check"></div>
+      </div>
+      <div class="ergo-item" data-id="4">
+        <span class="ergo-emoji">📏</span>
+        <div style="flex:1"><div class="ergo-text">Skjárinn er 50–70 cm frá andliti</div><div class="ergo-note">Ef þú nærð að snerta hann með hendina er hann of nálægt</div></div>
+        <div class="ergo-check"></div>
+      </div>
+      <div class="ergo-item" data-id="5">
+        <span class="ergo-emoji">👁️</span>
+        <div style="flex:1"><div class="ergo-text">20-20-20: á 20 mín → horfa á eitthvað 6m í burtu í 20 sek</div><div class="ergo-note">Glugginn út telst, þó þú sjáir aðeins þak</div></div>
+        <div class="ergo-check"></div>
+      </div>
+      <div class="ergo-item" data-id="6">
+        <span class="ergo-emoji">🚶</span>
+        <div style="flex:1"><div class="ergo-text">Þú hefur staðið upp a.m.k. einu sinni</div><div class="ergo-note">Klósettferð telst. Vatnsglas-ferð líka.</div></div>
+        <div class="ergo-check"></div>
+      </div>
+      <div class="ergo-item" data-id="7">
+        <span class="ergo-emoji">💧</span>
+        <div style="flex:1"><div class="ergo-text">Glasi af vatni er nálægt og þú ert að drekka það</div><div class="ergo-note">Bara að eiga glasið er ekki nóg, Bogga</div></div>
+        <div class="ergo-check"></div>
+      </div>
+      <div class="ergo-item" data-id="8">
+        <span class="ergo-emoji">💆</span>
+        <div style="flex:1"><div class="ergo-text">Herðar losaðar — ekki upp við eyrun</div><div class="ergo-note">Slepptu þeim. Já, rétt núna. Betri, ekki satt?</div></div>
+        <div class="ergo-check"></div>
+      </div>
+    </div>
+    <div class="ergo-done-wrap" id="ergo-done">
+      <div class="ergo-score" id="ergo-score">0/9</div>
+      <div style="font-size:14px;color:var(--muted)">Bogga er stolt af þér 💚</div>
+    </div>
+    <button class="btn-ghost" style="width:100%;margin-top:16px" id="ergo-close">Loka 🌿</button>
+  </div>
+</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -307,6 +398,17 @@ const LIST_TEMPLATES = [
   { id: 'ferdalag', title: 'Ferðalag', color: '#0ea5e9', tasks: [{ title: 'Bóka gistingu', tag: 'Ferðalag' }, { title: 'Pakka fatnaði', tag: 'Ferðalag' }, { title: 'Vegabréf og skilríki', tag: 'Ferðalag' }, { title: 'Ferðaáætlun tilbúin', tag: 'Ferðalag' }] },
   { id: 'heimili', title: 'Heimilisverk', color: '#f59e0b', tasks: [{ title: 'Ryksuga', tag: 'Heimili' }, { title: 'Þrífa baðherbergi', tag: 'Heimili' }, { title: 'Þvottur', tag: 'Heimili' }, { title: 'Taka út rusl', tag: 'Heimili' }] },
   { id: 'velferd', title: 'Sjálfsrækt', color: '#ec4899', tasks: [{ title: 'Ganga 30 mín', tag: 'Heilsa' }, { title: 'Drekka vatn', tag: 'Heilsa' }, { title: 'Taka pásu frá skjá', tag: 'Vellíðan' }, { title: 'Kvöldyfirlit', tag: 'Vellíðan' }] }
+];
+const JOKES = [
+  { h:8,  q: "Af hverju fara Íslendingar alltaf tvisvar í búðina?", a: "Í fyrsta sinn gleyma þeir hvað þeir ætluðu að kaupa — og í seinna sinn kaupa þeir ranga hlutinn." },
+  { h:9,  q: "Hvað er þyngst að bera?", a: "Leyndarmál. Þess vegna segjum við þau öllum." },
+  { h:10, q: "Af hverju er tölvunarfræðingurinn alltaf kaldur?", a: "Vegna þess að hann er alltaf með Windows opið." },
+  { h:11, q: "Hvernig líst íslenskum veðurfræðingi á starfið?", a: "Hann er eini maðurinn sem fær laun þegar hann hefur rangt fyrir sér." },
+  { h:12, q: "Hvað eru þrír Íslendingar á einum stað?", a: "Tveir þeirra þekkjast. Og sá þriðji er frændi þeirra." },
+  { h:13, q: "Hvernig þekkirðu vegan Íslending?", a: "Hann segir þér það á fyrstu 5 mínútunum — þó þú hafir bara boðið upp á skyr." },
+  { h:14, q: "Af hverju fer Íslendingur aldrei á fætur á réttum tíma?", a: "Vegna þess að „strax" þýðir eitthvað allt annað hér norðan við pólheimkræðuna." },
+  { h:15, q: "Hvað segjir Íslendingur þegar eitthvað fer úrskeiðis?", a: "\"Þetta er alveg fínt\" — og meinar það ekki." },
+  { h:16, q: "Af hverju er veðrið alltaf umræðuefni nr. 1 á Íslandi?", a: "Vegna þess að það er eini hlutinn sem breytist hér — oft tvisvar á klukkustund." }
 ];
 let selectedColor = COLORS[0].v;
 let editingTask = null;
@@ -365,8 +467,24 @@ async function api(method, path, body) {
   if (S.token) headers['Authorization'] = `Bearer ${S.token}`;
   const res = await fetch('/api' + path, { method, headers, body: body ? JSON.stringify(body) : undefined });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || 'Villa');
+  if (!res.ok) {
+    const e = new Error(data.error || 'Villa');
+    e.status = res.status;
+    throw e;
+  }
   return data;
+}
+
+function startOfLocalDay(date = new Date()) {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function parseLocalDate(dateStr) {
+  if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(String(dateStr))) return null;
+  const [y, m, d] = String(dateStr).split('-').map(Number);
+  return new Date(y, m - 1, d);
 }
 
 function route() {
@@ -445,11 +563,14 @@ async function handleLoginKey(d) {
 
 async function showLists() {
   showView('view-lists'); document.getElementById('lists-title').textContent = `Hæ ${S.name} 👋`;
+  renderJokeCard(); startErgoHint();
   try { S.lists = await api('GET', '/lists'); renderLists(); }
-  catch (e) { if (e.message.includes('Unauthorized')) logout(); else toast('Villa við að sækja lista'); }
+  catch (e) { if (e.status === 401) logout(); else toast('Villa við að sækja lista'); }
 }
 function renderLists() {
   const grid = document.getElementById('lists-grid'); grid.innerHTML = '';
+  const hasOverdue = S.lists.some(l => l.open_count > 0);
+  document.getElementById('notif-dot').classList.toggle('visible', hasOverdue);
   S.lists.forEach(list => {
     const card = document.createElement('div'); card.className = 'list-card animate-in'; card.style.setProperty('--c', list.color);
     const open = list.open_count || 0, total = list.total_count || 0;
@@ -550,12 +671,12 @@ function renderTasks() {
   const list = document.getElementById('tasks-list'); list.innerHTML = '';
   let tasks = S.tasks;
   if (searchQuery) { const q = searchQuery.toLowerCase(); tasks = tasks.filter(t => t.title.toLowerCase().includes(q) || (t.tag && t.tag.toLowerCase().includes(q))); }
-  const today = new Date(); today.setHours(0,0,0,0);
+  const today = startOfLocalDay();
   const tomorrow = new Date(today); tomorrow.setDate(today.getDate()+1);
   const dayAfter = new Date(tomorrow); dayAfter.setDate(tomorrow.getDate()+1);
-  if (activeFilter === 'today') tasks = tasks.filter(t => t.status==='open' && t.deadline && new Date(t.deadline+'T00:00:00')>=today && new Date(t.deadline+'T00:00:00')<tomorrow);
-  else if (activeFilter === 'tomorrow') tasks = tasks.filter(t => t.status==='open' && t.deadline && new Date(t.deadline+'T00:00:00')>=tomorrow && new Date(t.deadline+'T00:00:00')<dayAfter);
-  else if (activeFilter === 'late') tasks = tasks.filter(t => t.status==='open' && t.deadline && new Date(t.deadline+'T00:00:00')<today);
+  if (activeFilter === 'today') tasks = tasks.filter(t => t.status === 'open' && parseLocalDate(t.deadline)?.getTime() >= today.getTime() && parseLocalDate(t.deadline)?.getTime() < tomorrow.getTime());
+  else if (activeFilter === 'tomorrow') tasks = tasks.filter(t => t.status === 'open' && parseLocalDate(t.deadline)?.getTime() >= tomorrow.getTime() && parseLocalDate(t.deadline)?.getTime() < dayAfter.getTime());
+  else if (activeFilter === 'late') tasks = tasks.filter(t => t.status === 'open' && parseLocalDate(t.deadline)?.getTime() < today.getTime());
   else if (activeFilter === 'open') tasks = tasks.filter(t => t.status==='open');
   else if (activeFilter === 'done') tasks = tasks.filter(t => t.status==='done');
   if (tasks.length === 0) {
@@ -568,7 +689,7 @@ function renderTasks() {
 }
 function makeTaskEl(task) {
   const ci = COLORS.find(c => S.currentList && c.v === S.currentList.color) || COLORS[0];
-  const isDone = task.status === 'done', dl = task.deadline ? formatDeadline(task.deadline) : null, overdue = task.deadline && !isDone && new Date(task.deadline) < new Date();
+  const isDone = task.status === 'done', dl = task.deadline ? formatDeadline(task.deadline) : null, overdue = task.deadline && !isDone && parseLocalDate(task.deadline)?.getTime() < startOfLocalDay().getTime();
   const rec = task.recurrence ? recurrenceLabel(task.recurrence) : null;
   const el = document.createElement('div'); el.className = `task-item${isDone ? ' done' : ''} animate-in`; el.dataset.id = task.id;
   el.innerHTML = `<div class="task-check${isDone ? ' checked' : ''}" data-task-id="${task.id}" data-done="${isDone}"></div><div class="task-body"><div class="task-title">${esc(task.title)}</div><div class="task-meta">${task.tag ? `<span class="task-tag" style="--c:${ci.v};--c-light:${ci.l}">${esc(task.tag)}</span>` : ''}${dl ? `<span class="task-deadline${overdue ? ' overdue' : ''}">📅 ${dl}</span>` : ''}${rec ? `<span class="task-deadline">🔁 ${rec}</span>` : ''}</div></div><div class="task-actions"><button class="task-edit" data-edit-id="${task.id}">✎</button><button class="task-del" data-del-id="${task.id}">✕</button></div>`;
@@ -576,7 +697,7 @@ function makeTaskEl(task) {
 }
 document.getElementById('tasks-list').addEventListener('click', async e => {
   const check = e.target.closest('.task-check');
-  if (check) { const id = check.dataset.taskId, done = check.dataset.done === 'true'; try { await api('PATCH', `/tasks/${id}`, { status: done ? 'open' : 'done' }); await refreshCurrentListTasks(); } catch (e) { toast(e.message); } return; }
+  if (check) { const id = check.dataset.taskId, done = check.dataset.done === 'true'; try { await api('PATCH', `/tasks/${id}`, { status: done ? 'open' : 'done' }); if (!done) playApplause(); await refreshCurrentListTasks(); } catch (e) { toast(e.message); } return; }
   const edit = e.target.closest('[data-edit-id]');
   if (edit) { const task = S.tasks.find(t => t.id === edit.dataset.editId); if (task) openEditModal(task); return; }
   const del = e.target.closest('[data-del-id]');
@@ -616,7 +737,7 @@ document.getElementById('btn-add-task').addEventListener('click', async () => {
     if (!deadline && parsed.deadline) deadline = parsed.deadline;
   }
   if (!title) { toast('Titill vantar'); return; }
-  try { const task = await api('POST', `/lists/${S.currentList.id}/tasks`, { title, tag, deadline, recurrence }); S.tasks.unshift(task); renderTasks(); document.getElementById('add-title').value = ''; document.getElementById('add-tag').value = ''; document.getElementById('add-deadline').value = ''; document.getElementById('add-recurrence').value = ''; document.getElementById('add-extras').classList.remove('open'); document.getElementById('add-title').focus(); } catch (e) { toast(e.message); }
+  try { const task = await api('POST', `/lists/${S.currentList.id}/tasks`, { title, tag, deadline, recurrence }); S.tasks.unshift(task); renderTasks(); playAhh(); document.getElementById('add-title').value = ''; document.getElementById('add-tag').value = ''; document.getElementById('add-deadline').value = ''; document.getElementById('add-recurrence').value = ''; document.getElementById('add-extras').classList.remove('open'); document.getElementById('add-title').focus(); } catch (e) { toast(e.message); }
 });
 
 document.getElementById('btn-list-menu').addEventListener('click', () => { if (!S.currentList) return; document.getElementById('options-modal-title').textContent = S.currentList.title; document.getElementById('btn-share-toggle').textContent = S.currentList.share_token ? '🔗 Afrita deilihlekk' : '🔗 Deila lista'; document.getElementById('list-options-modal').classList.add('open'); });
@@ -731,19 +852,140 @@ async function addSharedTask() {
   try { await api('POST', `/share/${S.shareToken}/tasks`, { title }); document.getElementById('share-add-title').value = ''; const { list, tasks } = await api('GET', `/share/${S.shareToken}`); renderShareTasks(tasks, list); toast('Verkefni bætt við ✓'); } catch (e) { toast(e.message); }
 }
 
+let ergoTaps = 0, ergoTapTimer = null, ergoHintTimer = null;
+function startErgoHint() {
+  clearTimeout(ergoHintTimer);
+  const hint = document.getElementById('ergo-hint');
+  hint.classList.remove('peek','wave');
+  ergoHintTimer = setTimeout(() => {
+    hint.classList.add('peek');
+    let waves = 0;
+    const wiggle = setInterval(() => {
+      hint.classList.remove('wave');
+      void hint.offsetWidth;
+      hint.classList.add('wave');
+      waves++;
+      if (waves >= 3) { clearInterval(wiggle); hint.classList.remove('wave'); }
+    }, 45000);
+  }, 12000);
+}
+function stopErgoHint() {
+  clearTimeout(ergoHintTimer);
+  const hint = document.getElementById('ergo-hint');
+  hint.classList.remove('peek','wave');
+}
+document.getElementById('ergo-hint').addEventListener('click', openErgoModal);
+document.getElementById('lists-title').addEventListener('click', () => {
+  ergoTaps++;
+  clearTimeout(ergoTapTimer);
+  if (ergoTaps >= 5) { ergoTaps = 0; openErgoModal(); return; }
+  ergoTapTimer = setTimeout(() => { ergoTaps = 0; }, 1800);
+});
+function openErgoModal() {
+  document.querySelectorAll('.ergo-item').forEach(el => el.classList.remove('done'));
+  document.querySelectorAll('.ergo-check').forEach(el => el.textContent = '');
+  document.getElementById('ergo-done').classList.remove('visible');
+  document.getElementById('ergo-modal').classList.add('open');
+}
+document.getElementById('ergo-modal').addEventListener('click', e => { if (e.target === document.getElementById('ergo-modal')) closeErgoModal(); });
+document.getElementById('ergo-close').addEventListener('click', closeErgoModal);
+function closeErgoModal() { document.getElementById('ergo-modal').classList.remove('open'); }
+document.getElementById('ergo-list').addEventListener('click', e => {
+  const item = e.target.closest('.ergo-item'); if (!item) return;
+  item.classList.toggle('done');
+  item.querySelector('.ergo-check').textContent = item.classList.contains('done') ? '✓' : '';
+  const done = document.querySelectorAll('.ergo-item.done').length;
+  const total = document.querySelectorAll('.ergo-item').length;
+  document.getElementById('ergo-score').textContent = `${done}/${total}`;
+  document.getElementById('ergo-done').classList.toggle('visible', done > 0);
+  if (done === total) { playApplause(); document.getElementById('ergo-score').textContent = '9/9 🏆'; }
+});
+
+document.getElementById('btn-bell').addEventListener('click', () => {
+  const btn = document.getElementById('btn-bell');
+  btn.classList.add('bell-ringing'); setTimeout(() => btn.classList.remove('bell-ringing'), 600);
+  document.getElementById('notif-dot').classList.remove('visible');
+  const overdue = (S.lists || []).reduce((a, l) => a + (l.open_count || 0), 0);
+  if (overdue > 0) toast(`🔔 ${overdue} verkefni bíða þín!`);
+  else toast('🔔 Allt í lagi — ekkert í biðröð!');
+});
 document.getElementById('btn-back').addEventListener('click', goBack);
-function goBack() { activeFilter = 'all'; searchQuery = ''; document.getElementById('filter-bar').style.display = 'none'; document.getElementById('search-wrap').style.display = 'none'; S.currentList = null; S.tasks = []; location.hash = '#/'; showLists(); }
+function goBack() { activeFilter = 'all'; searchQuery = ''; document.getElementById('filter-bar').style.display = 'none'; document.getElementById('search-wrap').style.display = 'none'; S.currentList = null; S.tasks = []; stopErgoHint(); location.hash = '#/'; showLists(); }
 document.getElementById('btn-logout').addEventListener('click', () => { if (confirm('Útskrá?')) logout(); });
 function logout() { S.token = null; localStorage.removeItem('bogga_token'); location.hash = ''; checkSetup(); }
 function updateDots(id, pin) { document.querySelectorAll(`#${id} .pin-dot`).forEach((d, i) => d.classList.toggle('filled', i < pin.length)); }
 function shakeElement(id) { const el = document.getElementById(id); el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); }
 function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); }
+
+function playAhh() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [261.63, 329.63, 392.00, 523.25].forEach((freq, i) => {
+      const osc = ctx.createOscillator(), gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'sine'; osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.07, ctx.currentTime + 0.08 + i * 0.03);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.7);
+      osc.start(ctx.currentTime + i * 0.02); osc.stop(ctx.currentTime + 0.75);
+    });
+    setTimeout(() => ctx.close(), 900);
+  } catch(e) {}
+}
+
+function playApplause() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const dur = 2.2, sr = ctx.sampleRate;
+    const buf = ctx.createBuffer(2, sr * dur, sr);
+    for (let c = 0; c < 2; c++) {
+      const d = buf.getChannelData(c);
+      for (let i = 0; i < d.length; i++) {
+        const t = i / sr, env = Math.pow(Math.sin(t / dur * Math.PI), 0.6);
+        const burst = 0.6 + 0.4 * Math.abs(Math.sin(t * 7.3 + c));
+        d[i] = (Math.random() * 2 - 1) * env * burst * 0.4;
+      }
+    }
+    const src = ctx.createBufferSource(); src.buffer = buf;
+    const filt = ctx.createBiquadFilter(); filt.type = 'bandpass'; filt.frequency.value = 1400; filt.Q.value = 0.4;
+    const gain = ctx.createGain(); gain.gain.setValueAtTime(0.8, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+    src.connect(filt); filt.connect(gain); gain.connect(ctx.destination);
+    src.start(); src.stop(ctx.currentTime + dur);
+    setTimeout(() => ctx.close(), (dur + 0.2) * 1000);
+  } catch(e) {}
+}
+
+function getJoke() {
+  const h = new Date().getHours();
+  return JOKES.find(j => j.h === h) || null;
+}
+
+function renderJokeCard() {
+  const existing = document.getElementById('joke-card-el');
+  if (existing) existing.remove();
+  const joke = getJoke();
+  if (!joke) return;
+  const el = document.createElement('div');
+  el.id = 'joke-card-el'; el.className = 'joke-card';
+  el.innerHTML = `<div class="joke-header">🃏 Brandari klukkustundarinnar · ${joke.h}:00</div><div class="joke-q">${esc(joke.q)}</div><div class="joke-a">— ${esc(joke.a)}</div><button class="joke-laugh" title="Hlæja!">😂</button>`;
+  el.querySelector('.joke-laugh').addEventListener('click', function() {
+    this.textContent = ['😂','🤣','💀','😹','🥲'][Math.floor(Math.random()*5)];
+    playApplause();
+    setTimeout(() => { this.textContent = '😂'; }, 1500);
+  });
+  const scroll = document.querySelector('#view-lists .scroll');
+  if (scroll) scroll.insertBefore(el, scroll.firstChild);
+}
 function copyText(text) { navigator.clipboard.writeText(text).then(() => toast('Hlekkur afritaður ✓')).catch(() => toast(text)); }
 function getShareRoleFromToken(token) { return token && token.startsWith('v_') ? 'viewer' : 'editor'; }
 function recurrenceLabel(rule) { if (rule === 'daily') return 'Daglega'; if (rule === 'weekly') return 'Vikulega'; if (rule === 'monthly') return 'Mánaðarlega'; return ''; }
 function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function formatDeadline(dateStr) {
-  const d = new Date(dateStr + 'T00:00:00'), now = new Date(), diff = Math.ceil((d - now) / 86400000);
+  const d = parseLocalDate(dateStr);
+  if (!d) return '';
+  const now = startOfLocalDay();
+  const diff = Math.round((d.getTime() - now.getTime()) / 86400000);
   if (diff === 0) return 'Í dag'; if (diff === 1) return 'Á morgun'; if (diff === -1) return 'Í gær';
   if (diff < 0) return `${Math.abs(diff)} dögum síðan`; if (diff < 7) return `eftir ${diff} daga`;
   return d.toLocaleDateString('is-IS', { month: 'short', day: 'numeric' });
