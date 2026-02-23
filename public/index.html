@@ -1,1054 +1,2675 @@
 <!DOCTYPE html>
 <html lang="is">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#0f172a">
-<title>Bogga</title>
-<link rel="manifest" href="/manifest.json">
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #f8fafc;
-    --surface: #ffffff;
-    --text: #0f172a;
-    --muted: #94a3b8;
-    --border: #e2e8f0;
-    --accent: #6366f1;
-    --danger: #ef4444;
-    --green: #10b981;
-    --radius: 16px;
-    --shadow: 0 1px 3px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.06);
-    --safe-top: env(safe-area-inset-top, 0px);
-    --safe-bottom: env(safe-area-inset-bottom, 0px);
-  }
-  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 16px; -webkit-font-smoothing: antialiased; }
-  #app { height: 100%; display: flex; flex-direction: column; max-width: 430px; margin: 0 auto; }
-  .view { display: none; flex-direction: column; height: 100%; }
-  .view.active { display: flex; }
-  .topbar { padding: calc(var(--safe-top) + 16px) 20px 16px; display: flex; align-items: center; gap: 12px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; }
-  .topbar-title { font-size: 20px; font-weight: 700; flex: 1; }
-  .btn-icon { width: 40px; height: 40px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; background: transparent; touch-action: manipulation; transition: background .15s; }
-  .btn-icon:active { background: var(--border); }
-  .scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 20px; }
-  .scroll::-webkit-scrollbar { display: none; }
-  #view-pin, #view-setup { background: var(--surface); align-items: center; justify-content: center; }
-  .pin-wrap { display: flex; flex-direction: column; align-items: center; gap: 32px; padding: 40px 20px; width: 100%; }
-  .pin-logo { font-size: 64px; }
-  .pin-title { font-size: 28px; font-weight: 800; }
-  .pin-sub { font-size: 15px; color: var(--muted); text-align: center; }
-  .pin-dots { display: flex; gap: 16px; height: 48px; align-items: center; }
-  .pin-dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--border); transition: all .15s; }
-  .pin-dot.filled { background: var(--accent); border-color: var(--accent); transform: scale(1.1); }
-  .pin-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 280px; }
-  .pin-key { height: 72px; border-radius: 14px; border: none; background: var(--bg); font-size: 24px; font-weight: 600; cursor: pointer; touch-action: manipulation; transition: background .1s, transform .1s; display: flex; align-items: center; justify-content: center; }
-  .pin-key:active { background: var(--border); transform: scale(.94); }
-  .pin-key.del { font-size: 20px; color: var(--muted); }
-  .pin-key.empty { pointer-events: none; background: transparent; }
-  .setup-input { width: 100%; padding: 14px 16px; border-radius: var(--radius); border: 1.5px solid var(--border); font-size: 16px; background: var(--bg); outline: none; text-align: center; font-weight: 600; transition: border-color .15s; }
-  .setup-input:focus { border-color: var(--accent); }
-  .setup-step { display: none; flex-direction: column; align-items: center; gap: 20px; width: 100%; }
-  .setup-step.active { display: flex; }
-  .btn-primary { width: 100%; padding: 16px; border-radius: var(--radius); border: none; background: var(--accent); color: white; font-size: 16px; font-weight: 700; cursor: pointer; touch-action: manipulation; transition: opacity .15s; }
-  .btn-primary:active { opacity: .85; }
-  .lists-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding-bottom: calc(var(--safe-bottom) + 20px); }
-  .list-card { background: var(--surface); border-radius: var(--radius); padding: 20px 16px; box-shadow: var(--shadow); cursor: pointer; touch-action: manipulation; transition: transform .15s; position: relative; overflow: hidden; min-height: 120px; display: flex; flex-direction: column; justify-content: space-between; }
-  .list-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--c, var(--accent)); }
-  .list-card:active { transform: scale(.97); }
-  .list-card-title { font-size: 16px; font-weight: 700; line-height: 1.3; word-break: break-word; }
-  .list-card-count { font-size: 13px; color: var(--muted); margin-top: 8px; }
-  .list-card-badge { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: var(--c, var(--accent)); color: white; font-size: 13px; font-weight: 700; }
-  .list-add-card { background: transparent; border: 2px dashed var(--border); color: var(--muted); border-radius: var(--radius); min-height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; cursor: pointer; touch-action: manipulation; transition: border-color .15s, color .15s; font-size: 14px; font-weight: 600; }
-  .list-add-card:active { border-color: var(--accent); color: var(--accent); }
-  .list-add-icon { font-size: 28px; }
-  .tasks-list { display: flex; flex-direction: column; gap: 8px; padding-bottom: 100px; }
-  .task-item { background: var(--surface); border-radius: 12px; padding: 14px 16px; box-shadow: var(--shadow); display: flex; align-items: flex-start; gap: 12px; transition: opacity .2s; }
-  .task-item.done { opacity: .5; }
-  .task-check { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--border); flex-shrink: 0; cursor: pointer; touch-action: manipulation; display: flex; align-items: center; justify-content: center; transition: all .15s; margin-top: 1px; }
-  .task-check.checked { background: var(--green); border-color: var(--green); }
-  .task-check.checked::after { content: '✓'; color: white; font-size: 13px; font-weight: 700; }
-  .task-body { flex: 1; min-width: 0; }
-  .task-title { font-size: 15px; font-weight: 600; line-height: 1.4; word-break: break-word; }
-  .task-item.done .task-title { text-decoration: line-through; }
-  .task-meta { display: flex; gap: 8px; margin-top: 5px; flex-wrap: wrap; }
-  .task-tag { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px; background: var(--c-light, #ede9fe); color: var(--c, var(--accent)); text-transform: uppercase; letter-spacing: .04em; }
-  .task-deadline { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 4px; }
-  .task-deadline.overdue { color: var(--danger); }
-  .task-del { width: 32px; height: 32px; border-radius: 8px; border: none; background: transparent; color: var(--muted); cursor: pointer; touch-action: manipulation; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; transition: background .15s, color .15s; }
-  .task-del:active { background: #fee2e2; color: var(--danger); }
-  .task-edit { width: 32px; height: 32px; border-radius: 8px; border: none; background: transparent; color: var(--muted); cursor: pointer; touch-action: manipulation; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; transition: background .15s, color .15s; }
-  .task-edit:active { background: #ede9fe; color: var(--accent); }
-  .task-actions { display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; }
-  .add-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 430px; padding: 12px 16px calc(var(--safe-bottom) + 12px); background: var(--surface); border-top: 1px solid var(--border); display: flex; gap: 10px; align-items: flex-end; }
-  .add-bar-inner { flex: 1; display: flex; flex-direction: column; gap: 8px; }
-  .add-input { padding: 12px 14px; border-radius: 12px; border: 1.5px solid var(--border); font-size: 15px; background: var(--bg); outline: none; width: 100%; transition: border-color .15s; }
-  .add-input:focus { border-color: var(--accent); }
-  .add-extras { display: none; gap: 8px; }
-  .add-extras.open { display: flex; }
-  .add-extra-input { flex: 1; padding: 10px 12px; border-radius: 10px; border: 1.5px solid var(--border); font-size: 13px; background: var(--bg); outline: none; transition: border-color .15s; }
-  .add-extra-input:focus { border-color: var(--accent); }
-  .btn-add { width: 46px; height: 46px; border-radius: 50%; border: none; background: var(--accent); color: white; font-size: 22px; cursor: pointer; touch-action: manipulation; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: opacity .15s, transform .1s; }
-  .btn-add:active { opacity: .85; transform: scale(.9); }
-  .btn-ghost { flex: 1; padding: 13px; border-radius: var(--radius); border: 1.5px solid var(--border); background: transparent; font-size: 14px; font-weight: 600; color: var(--text); cursor: pointer; touch-action: manipulation; transition: background .15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
-  .btn-ghost:active { background: var(--border); }
-  .btn-ghost.danger { color: var(--danger); border-color: #fecaca; }
-  .btn-ghost.danger:active { background: #fee2e2; }
-  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: flex; align-items: flex-end; justify-content: center; z-index: 100; opacity: 0; pointer-events: none; transition: opacity .2s; }
-  .modal-overlay.open { opacity: 1; pointer-events: all; }
-  .modal { background: var(--surface); border-radius: 24px 24px 0 0; padding: 24px 20px; padding-bottom: calc(var(--safe-bottom) + 24px); width: 100%; max-width: 430px; transform: translateY(100%); transition: transform .25s cubic-bezier(.34,1.56,.64,1); display: flex; flex-direction: column; gap: 16px; }
-  .modal-overlay.open .modal { transform: translateY(0); }
-  .modal-title { font-size: 18px; font-weight: 800; }
-  .modal-input { width: 100%; padding: 14px 16px; border-radius: var(--radius); border: 1.5px solid var(--border); font-size: 16px; background: var(--bg); outline: none; transition: border-color .15s; }
-  .modal-input:focus { border-color: var(--accent); }
-  .color-picker { display: flex; gap: 12px; flex-wrap: wrap; }
-  .color-swatch { width: 40px; height: 40px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: transform .15s, border-color .15s; touch-action: manipulation; }
-  .color-swatch:active { transform: scale(.9); }
-  .color-swatch.selected { border-color: var(--text); transform: scale(1.15); }
-  .template-picker { display: grid; grid-template-columns: 1fr; gap: 8px; }
-  .template-btn { width: 100%; border: 1.5px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--text); padding: 10px 12px; text-align: left; cursor: pointer; touch-action: manipulation; transition: border-color .15s, transform .1s; }
-  .template-btn:active { transform: scale(.98); border-color: var(--c, var(--accent)); }
-  .template-btn-title { font-size: 14px; font-weight: 700; }
-  .template-btn-sub { margin-top: 4px; font-size: 12px; color: var(--muted); }
-  .trash-list { display: flex; flex-direction: column; gap: 10px; max-height: 45vh; overflow-y: auto; }
-  .trash-item { background: var(--bg); border-radius: 12px; padding: 12px; border: 1px solid var(--border); }
-  .trash-item-title { font-size: 14px; font-weight: 700; }
-  .trash-item-meta { margin-top: 4px; font-size: 12px; color: var(--muted); }
-  .trash-item-actions { margin-top: 10px; display: flex; gap: 8px; }
-  .toast { position: fixed; bottom: calc(var(--safe-bottom) + 80px); left: 50%; transform: translateX(-50%) translateY(20px); background: var(--text); color: white; padding: 10px 20px; border-radius: 20px; font-size: 14px; font-weight: 600; opacity: 0; transition: all .2s; pointer-events: none; white-space: nowrap; z-index: 200; }
-  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-  .share-notice { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: #ede9fe; border-radius: 12px; margin: 0 20px 4px; flex-shrink: 0; }
-  .share-notice span { font-size: 13px; font-weight: 600; color: var(--accent); flex: 1; }
-  .share-notice button { font-size: 12px; color: var(--accent); background: none; border: none; cursor: pointer; font-weight: 700; }
-  #view-share { background: var(--bg); }
-  .share-header { padding: calc(var(--safe-top) + 20px) 20px 20px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; display: flex; flex-direction: column; gap: 6px; }
-  .share-header-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
-  .share-header-title { font-size: 24px; font-weight: 800; }
-  .empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 60px 20px; color: var(--muted); text-align: center; }
-  .empty-icon { font-size: 48px; }
-  .empty-text { font-size: 15px; }
-  .shared-add-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 430px; padding: 12px 16px calc(var(--safe-bottom) + 12px); background: var(--surface); border-top: 1px solid var(--border); display: flex; gap: 10px; }
-  .section-header { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 4px; }
-  .filter-bar { display: flex; gap: 6px; padding: 10px 14px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
-  .filter-bar::-webkit-scrollbar { display: none; }
-  .filter-chip { flex-shrink: 0; padding: 6px 14px; border-radius: 20px; border: 1.5px solid var(--border); font-size: 13px; font-weight: 700; background: transparent; color: var(--muted); cursor: pointer; touch-action: manipulation; transition: all .15s; white-space: nowrap; }
-  .filter-chip.active { background: var(--accent); border-color: var(--accent); color: white; }
-  .search-wrap { padding: 10px 16px 0; flex-shrink: 0; }
-  .search-input { width: 100%; padding: 9px 14px 9px 36px; border-radius: 12px; border: 1.5px solid var(--border); font-size: 14px; background: var(--bg); outline: none; transition: border-color .15s; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zm-5.242 1.656a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: 12px center; }
-  .search-input:focus { border-color: var(--accent); }
-  @keyframes shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-8px); } 40% { transform: translateX(8px); } 60% { transform: translateX(-6px); } 80% { transform: translateX(6px); } }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-  .animate-in { animation: fadeIn .2s ease-out; }
-  .joke-card { background: linear-gradient(135deg,#fef9c3 0%,#fef3c7 100%); border: 1.5px solid #fbbf24; border-radius: 18px; padding: 14px 16px 12px; margin: 10px 14px 0; position: relative; overflow: hidden; animation: fadeIn .3s ease-out; }
-  .joke-card::after { content: '😂'; position: absolute; top: 10px; right: 14px; font-size: 22px; opacity: .18; }
-  .joke-header { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .12em; color: #92400e; margin-bottom: 8px; }
-  .joke-q { font-size: 13px; color: #44403c; line-height: 1.45; }
-  .joke-a { font-size: 14px; font-weight: 700; color: #1c1917; margin-top: 7px; line-height: 1.45; }
-  .joke-laugh { background: none; border: none; font-size: 20px; cursor: pointer; padding: 4px 2px; margin-top: 4px; display: block; transition: transform .2s; -webkit-tap-highlight-color: transparent; }
-  .joke-laugh:active { transform: scale(1.5) rotate(-12deg); }
-  @keyframes bellShake { 0%,100%{transform:rotate(0)} 15%{transform:rotate(15deg)} 30%{transform:rotate(-12deg)} 45%{transform:rotate(10deg)} 60%{transform:rotate(-8deg)} 75%{transform:rotate(5deg)} }
-  .bell-ringing { animation: bellShake .5s ease; }
-  .notif-dot { position: absolute; top: 4px; right: 4px; width: 9px; height: 9px; border-radius: 50%; background: #ef4444; border: 2px solid var(--surface); display: none; }
-  .notif-dot.visible { display: block; }
-  @keyframes popIn { 0%{opacity:0;transform:translateY(30px) scale(.9)} 60%{transform:translateY(-4px) scale(1.02)} 100%{opacity:1;transform:translateY(0) scale(1)} }
-  @keyframes chairBounce { 0%,100%{transform:translateY(0) rotate(0deg)} 30%{transform:translateY(-4px) rotate(-8deg)} 60%{transform:translateY(-2px) rotate(6deg)} }
-  .ergo-hint { background:none;border:none;font-size:15px;cursor:pointer;padding:4px;opacity:0;transition:opacity .6s;-webkit-tap-highlight-color:transparent;line-height:1; }
-  .ergo-hint.peek { opacity:.3; }
-  .ergo-hint.wave { opacity:.7;animation:chairBounce .6s ease; }
-  .ergo-modal { position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s; }
-  .ergo-modal.open { opacity:1;pointer-events:all; }
-  .ergo-sheet { background:var(--surface);border-radius:28px 28px 0 0;padding:24px 20px calc(var(--safe-bottom)+28px);width:100%;max-width:430px;max-height:90vh;overflow-y:auto;animation:popIn .35s cubic-bezier(.34,1.56,.64,1) both; }
-  .ergo-title { font-size:20px;font-weight:800;color:var(--text);margin-bottom:4px; }
-  .ergo-sub { font-size:13px;color:var(--muted);margin-bottom:20px; }
-  .ergo-item { display:flex;align-items:flex-start;gap:14px;padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer;-webkit-tap-highlight-color:transparent; }
-  .ergo-item:last-of-type { border-bottom:none; }
-  .ergo-check { width:24px;height:24px;min-width:24px;border-radius:8px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;transition:all .15s;font-size:14px; }
-  .ergo-item.done .ergo-check { background:#10b981;border-color:#10b981;color:white; }
-  .ergo-item.done .ergo-text { opacity:.5;text-decoration:line-through; }
-  .ergo-emoji { font-size:20px;line-height:1;margin-top:1px; }
-  .ergo-text { font-size:14px;line-height:1.45;color:var(--text); }
-  .ergo-note { font-size:12px;color:var(--muted);margin-top:3px; }
-  .ergo-done-wrap { text-align:center;padding:16px 0 0;display:none; }
-  .ergo-done-wrap.visible { display:block; }
-  .ergo-score { font-size:28px;font-weight:900;color:#10b981;margin-bottom:4px; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0f172a">
+  <title>Bogga</title>
+  <link rel="manifest" href="/manifest.json">
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --text: #0f172a;
+      --muted: #94a3b8;
+      --border: #e2e8f0;
+      --accent: #6366f1;
+      --danger: #ef4444;
+      --green: #10b981;
+      --radius: 16px;
+      --shadow: 0 1px 3px rgba(0, 0, 0, .08), 0 4px 16px rgba(0, 0, 0, .06);
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    html,
+    body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    #app {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      max-width: 430px;
+      margin: 0 auto;
+    }
+
+    .view {
+      display: none;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .view.active {
+      display: flex;
+    }
+
+    .topbar {
+      padding: calc(var(--safe-top) + 16px) 20px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .topbar-title {
+      font-size: 20px;
+      font-weight: 700;
+      flex: 1;
+    }
+
+    .btn-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      cursor: pointer;
+      background: transparent;
+      touch-action: manipulation;
+      transition: background .15s;
+    }
+
+    .btn-icon:active {
+      background: var(--border);
+    }
+
+    .scroll {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 20px;
+    }
+
+    .scroll::-webkit-scrollbar {
+      display: none;
+    }
+
+    #view-pin,
+    #view-setup {
+      background: var(--surface);
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pin-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 32px;
+      padding: 40px 20px;
+      width: 100%;
+    }
+
+    .pin-logo {
+      font-size: 64px;
+    }
+
+    .pin-title {
+      font-size: 28px;
+      font-weight: 800;
+    }
+
+    .pin-sub {
+      font-size: 15px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .pin-dots {
+      display: flex;
+      gap: 16px;
+      height: 48px;
+      align-items: center;
+    }
+
+    .pin-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      transition: all .15s;
+    }
+
+    .pin-dot.filled {
+      background: var(--accent);
+      border-color: var(--accent);
+      transform: scale(1.1);
+    }
+
+    .pin-pad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      width: 280px;
+    }
+
+    .pin-key {
+      height: 72px;
+      border-radius: 14px;
+      border: none;
+      background: var(--bg);
+      font-size: 24px;
+      font-weight: 600;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: background .1s, transform .1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pin-key:active {
+      background: var(--border);
+      transform: scale(.94);
+    }
+
+    .pin-key.del {
+      font-size: 20px;
+      color: var(--muted);
+    }
+
+    .pin-key.empty {
+      pointer-events: none;
+      background: transparent;
+    }
+
+    .setup-input {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: var(--radius);
+      border: 1.5px solid var(--border);
+      font-size: 16px;
+      background: var(--bg);
+      outline: none;
+      text-align: center;
+      font-weight: 600;
+      transition: border-color .15s;
+    }
+
+    .setup-input:focus {
+      border-color: var(--accent);
+    }
+
+    .setup-step {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      width: 100%;
+    }
+
+    .setup-step.active {
+      display: flex;
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 16px;
+      border-radius: var(--radius);
+      border: none;
+      background: var(--accent);
+      color: white;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: opacity .15s;
+    }
+
+    .btn-primary:active {
+      opacity: .85;
+    }
+
+    .lists-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      padding-bottom: calc(var(--safe-bottom) + 20px);
+    }
+
+    .list-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 20px 16px;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: transform .15s;
+      position: relative;
+      overflow: hidden;
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .list-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--c, var(--accent));
+    }
+
+    .list-card:active {
+      transform: scale(.97);
+    }
+
+    .list-card-title {
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.3;
+      word-break: break-word;
+    }
+
+    .list-card-count {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+    .list-card-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--c, var(--accent));
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .list-add-card {
+      background: transparent;
+      border: 2px dashed var(--border);
+      color: var(--muted);
+      border-radius: var(--radius);
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: border-color .15s, color .15s;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .list-add-card:active {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .list-add-icon {
+      font-size: 28px;
+    }
+
+    .tasks-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding-bottom: 100px;
+    }
+
+    .task-item {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 14px 16px;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      transition: opacity .2s;
+    }
+
+    .task-item.done {
+      opacity: .5;
+    }
+
+    .task-check {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+      cursor: pointer;
+      touch-action: manipulation;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .15s;
+      margin-top: 1px;
+    }
+
+    .task-check.checked {
+      background: var(--green);
+      border-color: var(--green);
+    }
+
+    .task-check.checked::after {
+      content: '✓';
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .task-body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .task-title {
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+
+    .task-item.done .task-title {
+      text-decoration: line-through;
+    }
+
+    .task-meta {
+      display: flex;
+      gap: 8px;
+      margin-top: 5px;
+      flex-wrap: wrap;
+    }
+
+    .task-tag {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: var(--c-light, #ede9fe);
+      color: var(--c, var(--accent));
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    .task-deadline {
+      font-size: 12px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .task-deadline.overdue {
+      color: var(--danger);
+    }
+
+    .task-del {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      touch-action: manipulation;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+      transition: background .15s, color .15s;
+    }
+
+    .task-del:active {
+      background: #fee2e2;
+      color: var(--danger);
+    }
+
+    .task-edit {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      touch-action: manipulation;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      flex-shrink: 0;
+      transition: background .15s, color .15s;
+    }
+
+    .task-edit:active {
+      background: #ede9fe;
+      color: var(--accent);
+    }
+
+    .task-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      flex-shrink: 0;
+    }
+
+    .add-bar {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 430px;
+      padding: 12px 16px calc(var(--safe-bottom) + 12px);
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+    }
+
+    .add-bar-inner {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .add-input {
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1.5px solid var(--border);
+      font-size: 15px;
+      background: var(--bg);
+      outline: none;
+      width: 100%;
+      transition: border-color .15s;
+    }
+
+    .add-input:focus {
+      border-color: var(--accent);
+    }
+
+    .add-extras {
+      display: none;
+      gap: 8px;
+    }
+
+    .add-extras.open {
+      display: flex;
+    }
+
+    .add-extra-input {
+      flex: 1;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1.5px solid var(--border);
+      font-size: 13px;
+      background: var(--bg);
+      outline: none;
+      transition: border-color .15s;
+    }
+
+    .add-extra-input:focus {
+      border-color: var(--accent);
+    }
+
+    .btn-add {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      border: none;
+      background: var(--accent);
+      color: white;
+      font-size: 22px;
+      cursor: pointer;
+      touch-action: manipulation;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity .15s, transform .1s;
+    }
+
+    .btn-add:active {
+      opacity: .85;
+      transform: scale(.9);
+    }
+
+    .btn-ghost {
+      flex: 1;
+      padding: 13px;
+      border-radius: var(--radius);
+      border: 1.5px solid var(--border);
+      background: transparent;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: background .15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-ghost:active {
+      background: var(--border);
+    }
+
+    .btn-ghost.danger {
+      color: var(--danger);
+      border-color: #fecaca;
+    }
+
+    .btn-ghost.danger:active {
+      background: #fee2e2;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .5);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal {
+      background: var(--surface);
+      border-radius: 24px 24px 0 0;
+      padding: 24px 20px;
+      padding-bottom: calc(var(--safe-bottom) + 24px);
+      width: 100%;
+      max-width: 430px;
+      transform: translateY(100%);
+      transition: transform .25s cubic-bezier(.34, 1.56, .64, 1);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .modal-overlay.open .modal {
+      transform: translateY(0);
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .modal-input {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: var(--radius);
+      border: 1.5px solid var(--border);
+      font-size: 16px;
+      background: var(--bg);
+      outline: none;
+      transition: border-color .15s;
+    }
+
+    .modal-input:focus {
+      border-color: var(--accent);
+    }
+
+    .color-picker {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .color-swatch {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 3px solid transparent;
+      transition: transform .15s, border-color .15s;
+      touch-action: manipulation;
+    }
+
+    .color-swatch:active {
+      transform: scale(.9);
+    }
+
+    .color-swatch.selected {
+      border-color: var(--text);
+      transform: scale(1.15);
+    }
+
+    .template-picker {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .template-btn {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface);
+      color: var(--text);
+      padding: 10px 12px;
+      text-align: left;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: border-color .15s, transform .1s;
+    }
+
+    .template-btn:active {
+      transform: scale(.98);
+      border-color: var(--c, var(--accent));
+    }
+
+    .template-btn-title {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .template-btn-sub {
+      margin-top: 4px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .trash-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 45vh;
+      overflow-y: auto;
+    }
+
+    .trash-item {
+      background: var(--bg);
+      border-radius: 12px;
+      padding: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .trash-item-title {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .trash-item-meta {
+      margin-top: 4px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .trash-item-actions {
+      margin-top: 10px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: calc(var(--safe-bottom) + 80px);
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--text);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      opacity: 0;
+      transition: all .2s;
+      pointer-events: none;
+      white-space: nowrap;
+      z-index: 200;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .share-notice {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      background: #ede9fe;
+      border-radius: 12px;
+      margin: 0 20px 4px;
+      flex-shrink: 0;
+    }
+
+    .share-notice span {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent);
+      flex: 1;
+    }
+
+    .share-notice button {
+      font-size: 12px;
+      color: var(--accent);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    #view-share {
+      background: var(--bg);
+    }
+
+    .share-header {
+      padding: calc(var(--safe-top) + 20px) 20px 20px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .share-header-label {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+    }
+
+    .share-header-title {
+      font-size: 24px;
+      font-weight: 800;
+    }
+
+    .empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 60px 20px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .empty-icon {
+      font-size: 48px;
+    }
+
+    .empty-text {
+      font-size: 15px;
+    }
+
+    .shared-add-bar {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 430px;
+      padding: 12px 16px calc(var(--safe-bottom) + 12px);
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 10px;
+    }
+
+    .section-header {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .filter-bar {
+      display: flex;
+      gap: 6px;
+      padding: 10px 14px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    .filter-bar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .filter-chip {
+      flex-shrink: 0;
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1.5px solid var(--border);
+      font-size: 13px;
+      font-weight: 700;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: all .15s;
+      white-space: nowrap;
+    }
+
+    .filter-chip.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    .search-wrap {
+      padding: 10px 16px 0;
+      flex-shrink: 0;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 9px 14px 9px 36px;
+      border-radius: 12px;
+      border: 1.5px solid var(--border);
+      font-size: 14px;
+      background: var(--bg);
+      outline: none;
+      transition: border-color .15s;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zm-5.242 1.656a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: 12px center;
+    }
+
+    .search-input:focus {
+      border-color: var(--accent);
+    }
+
+    @keyframes shake {
+
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+
+      20% {
+        transform: translateX(-8px);
+      }
+
+      40% {
+        transform: translateX(8px);
+      }
+
+      60% {
+        transform: translateX(-6px);
+      }
+
+      80% {
+        transform: translateX(6px);
+      }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate-in {
+      animation: fadeIn .2s ease-out;
+    }
+
+    .joke-card {
+      background: linear-gradient(135deg, #fef9c3 0%, #fef3c7 100%);
+      border: 1.5px solid #fbbf24;
+      border-radius: 18px;
+      padding: 14px 16px 12px;
+      margin: 10px 14px 0;
+      position: relative;
+      overflow: hidden;
+      animation: fadeIn .3s ease-out;
+    }
+
+    .joke-card::after {
+      content: '😂';
+      position: absolute;
+      top: 10px;
+      right: 14px;
+      font-size: 22px;
+      opacity: .18;
+    }
+
+    .joke-header {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      color: #92400e;
+      margin-bottom: 8px;
+    }
+
+    .joke-q {
+      font-size: 13px;
+      color: #44403c;
+      line-height: 1.45;
+    }
+
+    .joke-a {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1c1917;
+      margin-top: 7px;
+      line-height: 1.45;
+    }
+
+    .joke-laugh {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 4px 2px;
+      margin-top: 4px;
+      display: block;
+      transition: transform .2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .joke-laugh:active {
+      transform: scale(1.5) rotate(-12deg);
+    }
+
+    @keyframes bellShake {
+
+      0%,
+      100% {
+        transform: rotate(0)
+      }
+
+      15% {
+        transform: rotate(15deg)
+      }
+
+      30% {
+        transform: rotate(-12deg)
+      }
+
+      45% {
+        transform: rotate(10deg)
+      }
+
+      60% {
+        transform: rotate(-8deg)
+      }
+
+      75% {
+        transform: rotate(5deg)
+      }
+    }
+
+    .bell-ringing {
+      animation: bellShake .5s ease;
+    }
+
+    .notif-dot {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #ef4444;
+      border: 2px solid var(--surface);
+      display: none;
+    }
+
+    .notif-dot.visible {
+      display: block;
+    }
+
+    @keyframes popIn {
+      0% {
+        opacity: 0;
+        transform: translateY(30px) scale(.9)
+      }
+
+      60% {
+        transform: translateY(-4px) scale(1.02)
+      }
+
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1)
+      }
+    }
+
+    @keyframes chairBounce {
+
+      0%,
+      100% {
+        transform: translateY(0) rotate(0deg)
+      }
+
+      30% {
+        transform: translateY(-4px) rotate(-8deg)
+      }
+
+      60% {
+        transform: translateY(-2px) rotate(6deg)
+      }
+    }
+
+    .ergo-hint {
+      background: none;
+      border: none;
+      font-size: 15px;
+      cursor: pointer;
+      padding: 4px;
+      opacity: 0;
+      transition: opacity .6s;
+      -webkit-tap-highlight-color: transparent;
+      line-height: 1;
+    }
+
+    .ergo-hint.peek {
+      opacity: .3;
+    }
+
+    .ergo-hint.wave {
+      opacity: .7;
+      animation: chairBounce .6s ease;
+    }
+
+    .ergo-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(0, 0, 0, .45);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s;
+    }
+
+    .ergo-modal.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .ergo-sheet {
+      background: var(--surface);
+      border-radius: 28px 28px 0 0;
+      padding: 24px 20px calc(var(--safe-bottom)+28px);
+      width: 100%;
+      max-width: 430px;
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: popIn .35s cubic-bezier(.34, 1.56, .64, 1) both;
+    }
+
+    .ergo-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .ergo-sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    .ergo-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .ergo-item:last-of-type {
+      border-bottom: none;
+    }
+
+    .ergo-check {
+      width: 24px;
+      height: 24px;
+      min-width: 24px;
+      border-radius: 8px;
+      border: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .15s;
+      font-size: 14px;
+    }
+
+    .ergo-item.done .ergo-check {
+      background: #10b981;
+      border-color: #10b981;
+      color: white;
+    }
+
+    .ergo-item.done .ergo-text {
+      opacity: .5;
+      text-decoration: line-through;
+    }
+
+    .ergo-emoji {
+      font-size: 20px;
+      line-height: 1;
+      margin-top: 1px;
+    }
+
+    .ergo-text {
+      font-size: 14px;
+      line-height: 1.45;
+      color: var(--text);
+    }
+
+    .ergo-note {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    .ergo-done-wrap {
+      text-align: center;
+      padding: 16px 0 0;
+      display: none;
+    }
+
+    .ergo-done-wrap.visible {
+      display: block;
+    }
+
+    .ergo-score {
+      font-size: 28px;
+      font-weight: 900;
+      color: #10b981;
+      margin-bottom: 4px;
+    }
+
+    /* Bogga Avatar CSS */
+    .bogga-scene-wrapper {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      pointer-events: none;
+    }
+
+    .bogga-title {
+      margin-bottom: 0.5rem;
+      text-align: center;
+      background: white;
+      padding: 8px 12px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      font-size: 14px;
+      max-width: 250px;
+      pointer-events: auto;
+      display: none;
+    }
+
+    .bogga-scene-wrapper.show-title .bogga-title {
+      display: block;
+    }
+
+    .scene-container {
+      width: 150px;
+      height: 150px;
+      position: relative;
+      pointer-events: auto;
+    }
+
+    .avatar-container {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      overflow: hidden;
+      animation: bogga-float 6s ease-in-out infinite;
+      transition: all 1s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      transform-origin: bottom center;
+      cursor: pointer;
+    }
+
+    @keyframes bogga-float {
+      0% {
+        transform: translateY(0px);
+      }
+
+      50% {
+        transform: translateY(-5px);
+      }
+
+      100% {
+        transform: translateY(0px);
+      }
+    }
+
+    .bottle-container {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 1s ease;
+      transform: scale(0.5) translateY(50px);
+      cursor: pointer;
+    }
+
+    .bottle-container:hover {
+      animation: bogga-shake 0.5s infinite;
+    }
+
+    @keyframes bogga-shake {
+      0% {
+        transform: translate(1px, 1px) rotate(0deg);
+      }
+
+      20% {
+        transform: translate(-3px, 0px) rotate(-5deg);
+      }
+
+      40% {
+        transform: translate(1px, -1px) rotate(5deg);
+      }
+
+      60% {
+        transform: translate(-3px, 1px) rotate(0deg);
+      }
+
+      80% {
+        transform: translate(-1px, -1px) rotate(5deg);
+      }
+
+      100% {
+        transform: translate(1px, 2px) rotate(-5deg);
+      }
+    }
+
+    .scene-container[data-state="bottle"] .avatar-container {
+      transform: scale(0.1) translateY(1500px);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .scene-container[data-state="bottle"] .bottle-container {
+      opacity: 1;
+      pointer-events: auto;
+      transform: scale(1) translateY(0);
+    }
+
+    .bogga-svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .bogga-eye,
+    .bogga-eye-l,
+    .bogga-eye-r,
+    .bogga-pupil,
+    .bogga-mouth-default,
+    .bogga-mouth-tongue,
+    .bogga-eyebrow,
+    .bogga-hand,
+    .bogga-sparkle,
+    .bogga-face,
+    .bogga-makeup,
+    .bogga-hangover {
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .bogga-mouth-default {
+      d: path("M 115 190 Q 150 210 185 190 Q 150 225 115 190");
+      fill: #fff;
+      stroke: #d3738a;
+      stroke-width: 3;
+    }
+
+    .bogga-mouth-tongue {
+      d: path("M 130 205 Q 150 218 170 205 Q 150 220 130 205");
+      fill: #ff85a2;
+    }
+
+    .bogga-hand {
+      transform: translate(0px, 150px);
+      opacity: 0;
+    }
+
+    .bogga-sparkle {
+      opacity: 0;
+      transform: scale(0);
+      transform-origin: center;
+    }
+
+    .bogga-makeup {
+      opacity: 0;
+    }
+
+    .bogga-hangover {
+      opacity: 0;
+    }
+
+    .bogga-blink-wrap {
+      animation: bogga-blink 5s infinite;
+      transform-origin: 150px 130px;
+    }
+
+    @keyframes bogga-blink {
+
+      0%,
+      96%,
+      98%,
+      100% {
+        transform: scaleY(1);
+      }
+
+      97% {
+        transform: scaleY(0.1);
+      }
+    }
+
+    [data-emotion="highfive"] .bogga-hand {
+      transform: translate(25px, 0px) rotate(-15deg);
+      opacity: 1;
+      transform-origin: 230px 200px;
+      animation: bogga-highfive-wave 1.5s ease-in-out infinite alternate;
+    }
+
+    @keyframes bogga-highfive-wave {
+      0% {
+        transform: translate(25px, 0px) rotate(-15deg);
+      }
+
+      100% {
+        transform: translate(30px, 0px) rotate(5deg);
+      }
+    }
+
+    [data-emotion="highfive"] .bogga-mouth-default {
+      d: path("M 105 180 Q 150 240 195 180 Q 150 260 105 180");
+    }
+
+    [data-emotion="highfive"] .bogga-mouth-tongue {
+      d: path("M 125 210 Q 150 240 175 210 Q 150 250 125 210");
+    }
+
+    [data-emotion="highfive"] .bogga-eyebrow-l {
+      transform: translateY(-5px) rotate(-10deg);
+    }
+
+    [data-emotion="highfive"] .bogga-eyebrow-r {
+      transform: translateY(-5px) rotate(10deg);
+    }
+
+    [data-emotion="thinking"] .bogga-mouth-default {
+      d: path("M 130 200 Q 150 195 170 200");
+      fill: none;
+      stroke-width: 5;
+      stroke-linecap: round;
+    }
+
+    [data-emotion="thinking"] .bogga-mouth-tongue {
+      opacity: 0;
+    }
+
+    [data-emotion="thinking"] .bogga-eyebrow-l {
+      transform: translateY(8px) rotate(15deg);
+    }
+
+    [data-emotion="thinking"] .bogga-eyebrow-r {
+      transform: translateY(-10px) rotate(5deg);
+    }
+
+    [data-emotion="thinking"] .bogga-eye-l {
+      transform: scaleY(0.8);
+    }
+
+    [data-emotion="thinking"] .bogga-pupil {
+      transform: translateX(8px) translateY(-5px);
+    }
+
+    [data-emotion="happy"] .bogga-mouth-default {
+      d: path("M 105 180 Q 150 230 195 180 Q 150 250 105 180");
+    }
+
+    [data-emotion="happy"] .bogga-mouth-tongue {
+      d: path("M 125 210 Q 150 230 175 210 Q 150 240 125 210");
+    }
+
+    [data-emotion="happy"] .bogga-eye-l,
+    [data-emotion="happy"] .bogga-eye-r {
+      d: path("M 105 130 Q 120 115 135 130");
+      fill: none;
+      stroke: #2c3e50;
+      stroke-width: 6;
+      stroke-linecap: round;
+    }
+
+    [data-emotion="happy"] .bogga-pupil {
+      opacity: 0;
+    }
+
+    [data-emotion="happy"] .bogga-eyebrow-l {
+      transform: translateY(-10px) rotate(-10deg);
+    }
+
+    [data-emotion="happy"] .bogga-eyebrow-r {
+      transform: translateY(-10px) rotate(10deg);
+    }
+
+    [data-emotion="happy"] .bogga-sparkle {
+      opacity: 1;
+      transform: scale(1);
+      animation: bogga-spin 3s linear infinite;
+    }
+
+    @keyframes bogga-spin {
+      100% {
+        transform: scale(1) rotate(360deg);
+      }
+    }
+
+    [data-emotion="sad"] .bogga-mouth-default {
+      d: path("M 120 210 Q 150 190 180 210");
+      fill: none;
+      stroke-width: 5;
+      stroke-linecap: round;
+    }
+
+    [data-emotion="sad"] .bogga-mouth-tongue {
+      opacity: 0;
+    }
+
+    [data-emotion="sad"] .bogga-eyebrow-l {
+      transform: translateY(-5px) rotate(-20deg);
+    }
+
+    [data-emotion="sad"] .bogga-eyebrow-r {
+      transform: translateY(-5px) rotate(20deg);
+    }
+
+    [data-emotion="sad"] .bogga-pupil {
+      transform: translateY(5px);
+    }
+
+    [data-look="makeup"] .bogga-makeup {
+      opacity: 1;
+    }
+
+    [data-look="makeup"] .bogga-mouth-default {
+      stroke: #c0392b;
+      fill: #e74c3c;
+    }
+
+    [data-look="makeup"] .bogga-eye-l,
+    [data-look="makeup"] .bogga-eye-r {
+      stroke-width: 2;
+      stroke: #2c3e50;
+    }
+
+    [data-look="hangover"] .bogga-hangover {
+      opacity: 1;
+    }
+
+    [data-look="hangover"] .bogga-face {
+      fill: #f0e6e1;
+    }
+
+    [data-look="hangover"] .bogga-mouth-default {
+      stroke: #b28a8a;
+    }
+
+    [data-look="hangover"] .bogga-eye-l,
+    [data-look="hangover"] .bogga-eye-r {
+      transform: scaleY(0.7);
+    }
+
+    [data-look="hangover"] .bogga-pupil {
+      transform: translateY(3px);
+    }
+
+    [data-look="hangover"] .bogga-eyebrow-l {
+      transform: translateY(-2px) rotate(-5deg);
+    }
+
+    [data-look="hangover"] .bogga-eyebrow-r {
+      transform: translateY(-2px) rotate(5deg);
+    }
+
+    [data-look="hangover"] .bogga-mouth-default {
+      d: path("M 120 200 Q 150 195 180 200");
+      fill: none;
+      stroke-width: 4;
+    }
+  </style>
 </head>
+
 <body>
-<div id="app">
-  <div class="view" id="view-setup">
-    <div class="pin-wrap">
-      <div class="pin-logo">📋</div>
-      <div class="pin-title">Velkomin</div>
-      <div class="setup-step active" id="setup-step-name">
-        <p class="pin-sub">Hvað heitir þú?</p>
-        <input class="setup-input" id="setup-name" type="text" placeholder="Bogga" maxlength="30" autocomplete="off">
-        <button class="btn-primary" id="setup-name-next" style="max-width: 280px">Áfram →</button>
-      </div>
-      <div class="setup-step" id="setup-step-pin">
-        <p class="pin-sub" id="setup-pin-label">Veldu 4 stafa PIN-kóða</p>
-        <div class="pin-dots" id="setup-dots">
-          <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+  <div id="app">
+    <div class="view" id="view-setup">
+      <div class="pin-wrap">
+        <div class="pin-logo">📋</div>
+        <div class="pin-title">Velkomin</div>
+        <div class="setup-step active" id="setup-step-name">
+          <p class="pin-sub">Hvað heitir þú?</p>
+          <input class="setup-input" id="setup-name" type="text" placeholder="Bogga" maxlength="30" autocomplete="off">
+          <button class="btn-primary" id="setup-name-next" style="max-width: 280px">Áfram →</button>
         </div>
-        <div class="pin-pad" id="setup-pad">
-          <button class="pin-key" data-d="1">1</button><button class="pin-key" data-d="2">2</button><button class="pin-key" data-d="3">3</button>
-          <button class="pin-key" data-d="4">4</button><button class="pin-key" data-d="5">5</button><button class="pin-key" data-d="6">6</button>
-          <button class="pin-key" data-d="7">7</button><button class="pin-key" data-d="8">8</button><button class="pin-key" data-d="9">9</button>
-          <button class="pin-key empty"></button><button class="pin-key" data-d="0">0</button><button class="pin-key del" id="setup-del">⌫</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="view" id="view-pin">
-    <div class="pin-wrap">
-      <div class="pin-logo">📋</div>
-      <div class="pin-title" id="pin-greeting">Hæ Bogga</div>
-      <div class="pin-sub">Sláðu inn PIN-kóða</div>
-      <div class="pin-dots" id="login-dots">
-        <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
-      </div>
-      <div class="pin-pad" id="login-pad">
-        <button class="pin-key" data-d="1">1</button><button class="pin-key" data-d="2">2</button><button class="pin-key" data-d="3">3</button>
-        <button class="pin-key" data-d="4">4</button><button class="pin-key" data-d="5">5</button><button class="pin-key" data-d="6">6</button>
-        <button class="pin-key" data-d="7">7</button><button class="pin-key" data-d="8">8</button><button class="pin-key" data-d="9">9</button>
-        <button class="pin-key empty"></button><button class="pin-key" data-d="0">0</button><button class="pin-key del" id="login-del">⌫</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="view" id="view-lists">
-    <div class="topbar">
-      <span class="topbar-title" id="lists-title">Listar</span><button class="ergo-hint" id="ergo-hint" title="Psst...">🪑</button>
-      <button class="btn-icon" id="btn-bell" style="position:relative" title="Áminningar">🔔<span class="notif-dot" id="notif-dot"></span></button>
-      <button class="btn-icon" id="btn-logout">🔒</button>
-    </div>
-    <div class="scroll"><div class="lists-grid" id="lists-grid"></div></div>
-  </div>
-
-  <div class="view" id="view-list">
-    <div class="topbar" id="list-topbar">
-      <button class="btn-icon" id="btn-back">←</button>
-      <span class="topbar-title" id="list-title">Listi</span>
-      <button class="btn-icon" id="btn-list-menu">⋯</button>
-    </div>
-    <div id="share-notice-wrap"></div>
-    <div class="filter-bar" id="filter-bar" style="display:none">
-      <button class="filter-chip active" data-filter="all">Allt</button>
-      <button class="filter-chip" data-filter="today">📅 Í dag</button>
-      <button class="filter-chip" data-filter="tomorrow">🌅 Á morgun</button>
-      <button class="filter-chip" data-filter="late">🔴 Seint</button>
-      <button class="filter-chip" data-filter="open">Opið</button>
-      <button class="filter-chip" data-filter="done">Klárað</button>
-    </div>
-    <div class="search-wrap" id="search-wrap" style="display:none">
-      <input class="search-input" id="search-input" type="search" placeholder="Leita í verkefnum..." autocomplete="off">
-    </div>
-    <div class="scroll"><div class="tasks-list" id="tasks-list"></div></div>
-    <div class="add-bar" id="add-bar" style="display:none">
-      <div class="add-bar-inner">
-        <input class="add-input" id="add-title" type="text" placeholder="Nýtt verkefni..." maxlength="200" autocomplete="off">
-        <div class="add-extras" id="add-extras">
-          <input class="add-extra-input" id="add-tag" type="text" placeholder="Flokkur..." maxlength="40" list="add-tag-suggestions" autocomplete="off">
-          <datalist id="add-tag-suggestions"></datalist>
-          <input class="add-extra-input" id="add-deadline" type="date" style="flex:0; width:140px">
-          <select class="add-extra-input" id="add-recurrence" style="flex:0; width:140px">
-            <option value="">Ekkert</option>
-            <option value="daily">Daglega</option>
-            <option value="weekly">Vikulega</option>
-            <option value="monthly">Mánaðarlega</option>
-          </select>
+        <div class="setup-step" id="setup-step-pin">
+          <p class="pin-sub" id="setup-pin-label">Veldu 4 stafa PIN-kóða</p>
+          <div class="pin-dots" id="setup-dots">
+            <div class="pin-dot"></div>
+            <div class="pin-dot"></div>
+            <div class="pin-dot"></div>
+            <div class="pin-dot"></div>
+          </div>
+          <div class="pin-pad" id="setup-pad">
+            <button class="pin-key" data-d="1">1</button><button class="pin-key" data-d="2">2</button><button
+              class="pin-key" data-d="3">3</button>
+            <button class="pin-key" data-d="4">4</button><button class="pin-key" data-d="5">5</button><button
+              class="pin-key" data-d="6">6</button>
+            <button class="pin-key" data-d="7">7</button><button class="pin-key" data-d="8">8</button><button
+              class="pin-key" data-d="9">9</button>
+            <button class="pin-key empty"></button><button class="pin-key" data-d="0">0</button><button
+              class="pin-key del" id="setup-del">⌫</button>
+          </div>
         </div>
       </div>
-      <button class="btn-add" id="btn-add-task">+</button>
+    </div>
+
+    <div class="view" id="view-pin">
+      <div class="pin-wrap">
+        <div class="pin-logo">📋</div>
+        <div class="pin-title" id="pin-greeting">Hæ Bogga</div>
+        <div class="pin-sub">Sláðu inn PIN-kóða</div>
+        <div class="pin-dots" id="login-dots">
+          <div class="pin-dot"></div>
+          <div class="pin-dot"></div>
+          <div class="pin-dot"></div>
+          <div class="pin-dot"></div>
+        </div>
+        <div class="pin-pad" id="login-pad">
+          <button class="pin-key" data-d="1">1</button><button class="pin-key" data-d="2">2</button><button
+            class="pin-key" data-d="3">3</button>
+          <button class="pin-key" data-d="4">4</button><button class="pin-key" data-d="5">5</button><button
+            class="pin-key" data-d="6">6</button>
+          <button class="pin-key" data-d="7">7</button><button class="pin-key" data-d="8">8</button><button
+            class="pin-key" data-d="9">9</button>
+          <button class="pin-key empty"></button><button class="pin-key" data-d="0">0</button><button
+            class="pin-key del" id="login-del">⌫</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="view" id="view-lists">
+      <div class="topbar">
+        <span class="topbar-title" id="lists-title">Listar</span><button class="ergo-hint" id="ergo-hint"
+          title="Psst...">🪑</button>
+        <button class="btn-icon" id="btn-bell" style="position:relative" title="Áminningar">🔔<span class="notif-dot"
+            id="notif-dot"></span></button>
+        <button class="btn-icon" id="btn-logout">🔒</button>
+      </div>
+      <div class="scroll">
+        <div class="lists-grid" id="lists-grid"></div>
+      </div>
+    </div>
+
+    <div class="view" id="view-list">
+      <div class="topbar" id="list-topbar">
+        <button class="btn-icon" id="btn-back">←</button>
+        <span class="topbar-title" id="list-title">Listi</span>
+        <button class="btn-icon" id="btn-list-menu">⋯</button>
+      </div>
+      <div id="share-notice-wrap"></div>
+      <div class="filter-bar" id="filter-bar" style="display:none">
+        <button class="filter-chip active" data-filter="all">Allt</button>
+        <button class="filter-chip" data-filter="today">📅 Í dag</button>
+        <button class="filter-chip" data-filter="tomorrow">🌅 Á morgun</button>
+        <button class="filter-chip" data-filter="late">🔴 Seint</button>
+        <button class="filter-chip" data-filter="open">Opið</button>
+        <button class="filter-chip" data-filter="done">Klárað</button>
+      </div>
+      <div class="search-wrap" id="search-wrap" style="display:none">
+        <input class="search-input" id="search-input" type="search" placeholder="Leita í verkefnum..."
+          autocomplete="off">
+      </div>
+      <div class="scroll">
+        <div class="tasks-list" id="tasks-list"></div>
+      </div>
+      <div class="add-bar" id="add-bar" style="display:none">
+        <div class="add-bar-inner">
+          <input class="add-input" id="add-title" type="text" placeholder="Nýtt verkefni..." maxlength="200"
+            autocomplete="off">
+          <div class="add-extras" id="add-extras">
+            <input class="add-extra-input" id="add-tag" type="text" placeholder="Flokkur..." maxlength="40"
+              list="add-tag-suggestions" autocomplete="off">
+            <datalist id="add-tag-suggestions"></datalist>
+            <input class="add-extra-input" id="add-deadline" type="date" style="flex:0; width:140px">
+            <select class="add-extra-input" id="add-recurrence" style="flex:0; width:140px">
+              <option value="">Ekkert</option>
+              <option value="daily">Daglega</option>
+              <option value="weekly">Vikulega</option>
+              <option value="monthly">Mánaðarlega</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn-add" id="btn-add-task">+</button>
+      </div>
+    </div>
+
+    <div class="view" id="view-share">
+      <div class="share-header" id="share-header">
+        <div class="share-header-label">Sameiginlegur listi</div>
+        <div class="share-header-title" id="share-title">...</div>
+      </div>
+      <div class="scroll" style="padding-bottom:80px">
+        <div class="tasks-list" id="share-tasks"></div>
+      </div>
+      <div class="shared-add-bar">
+        <input class="add-input" id="share-add-title" type="text" placeholder="Bæta við verkefni..." maxlength="200"
+          style="flex:1">
+        <button class="btn-add" id="btn-share-add">+</button>
+      </div>
     </div>
   </div>
 
-  <div class="view" id="view-share">
-    <div class="share-header" id="share-header">
-      <div class="share-header-label">Sameiginlegur listi</div>
-      <div class="share-header-title" id="share-title">...</div>
-    </div>
-    <div class="scroll" style="padding-bottom:80px"><div class="tasks-list" id="share-tasks"></div></div>
-    <div class="shared-add-bar">
-      <input class="add-input" id="share-add-title" type="text" placeholder="Bæta við verkefni..." maxlength="200" style="flex:1">
-      <button class="btn-add" id="btn-share-add">+</button>
+  <div class="modal-overlay" id="list-modal">
+    <div class="modal">
+      <div class="modal-title">Nýr listi</div>
+      <input class="modal-input" id="modal-list-title" type="text" placeholder="Titill lista..." maxlength="60"
+        autocomplete="off">
+      <div>
+        <div class="section-header" style="margin-bottom:10px">Litur</div>
+        <div class="color-picker" id="color-picker"></div>
+      </div>
+      <div>
+        <div class="section-header" style="margin-bottom:10px">Sniðmát (1-smellur)</div>
+        <div class="template-picker" id="template-picker"></div>
+      </div>
+      <button class="btn-primary" id="modal-list-save">Búa til</button>
     </div>
   </div>
-</div>
 
-<div class="modal-overlay" id="list-modal">
-  <div class="modal">
-    <div class="modal-title">Nýr listi</div>
-    <input class="modal-input" id="modal-list-title" type="text" placeholder="Titill lista..." maxlength="60" autocomplete="off">
-    <div>
-      <div class="section-header" style="margin-bottom:10px">Litur</div>
-      <div class="color-picker" id="color-picker"></div>
+  <div class="modal-overlay" id="list-options-modal">
+    <div class="modal">
+      <div class="modal-title" id="options-modal-title">Valkostir</div>
+      <button class="btn-ghost" id="btn-share-toggle">🔗 Deila lista</button>
+      <button class="btn-ghost" id="btn-open-trash">🗂 Ruslafata</button>
+      <button class="btn-ghost danger" id="btn-delete-list">🗑 Eyða lista</button>
+      <button class="btn-ghost" id="btn-close-options" style="margin-top:4px">Loka</button>
     </div>
-    <div>
-      <div class="section-header" style="margin-bottom:10px">Sniðmát (1-smellur)</div>
-      <div class="template-picker" id="template-picker"></div>
+  </div>
+
+  <div class="modal-overlay" id="trash-modal">
+    <div class="modal">
+      <div class="modal-title">Ruslafata</div>
+      <div class="trash-list" id="trash-list"></div>
+      <button class="btn-ghost" id="btn-close-trash">Loka</button>
     </div>
-    <button class="btn-primary" id="modal-list-save">Búa til</button>
   </div>
-</div>
 
-<div class="modal-overlay" id="list-options-modal">
-  <div class="modal">
-    <div class="modal-title" id="options-modal-title">Valkostir</div>
-    <button class="btn-ghost" id="btn-share-toggle">🔗 Deila lista</button>
-    <button class="btn-ghost" id="btn-open-trash">🗂 Ruslafata</button>
-    <button class="btn-ghost danger" id="btn-delete-list">🗑 Eyða lista</button>
-    <button class="btn-ghost" id="btn-close-options" style="margin-top:4px">Loka</button>
+  <div class="modal-overlay" id="edit-task-modal">
+    <div class="modal">
+      <div class="modal-title">Breyta verkefni</div>
+      <input class="modal-input" id="edit-task-title" type="text" placeholder="Heiti verkefnis..." maxlength="200"
+        autocomplete="off">
+      <input class="modal-input" id="edit-task-tag" type="text" placeholder="Flokkur..." maxlength="40"
+        list="edit-tag-suggestions" autocomplete="off">
+      <datalist id="edit-tag-suggestions"></datalist>
+      <input class="modal-input" id="edit-task-deadline" type="date">
+      <select class="modal-input" id="edit-task-recurrence">
+        <option value="">Engin endurtekning</option>
+        <option value="daily">Daglega</option>
+        <option value="weekly">Vikulega</option>
+        <option value="monthly">Mánaðarlega</option>
+      </select>
+      <button class="btn-primary" id="edit-task-save">Vista breytingar</button>
+      <button class="btn-ghost" id="edit-task-cancel">Hætta við</button>
+    </div>
   </div>
-</div>
 
-<div class="modal-overlay" id="trash-modal">
-  <div class="modal">
-    <div class="modal-title">Ruslafata</div>
-    <div class="trash-list" id="trash-list"></div>
-    <button class="btn-ghost" id="btn-close-trash">Loka</button>
-  </div>
-</div>
+  <div class="ergo-modal" id="ergo-modal">
+    <div class="ergo-sheet">
+      <div class="ergo-title">🪑 Hvernig siturðu eiginlega?</div>
+      <div class="ergo-sub">Fandstu þetta?! Smelltu á það sem gildir 🤫</div>
+      <div id="ergo-list">
+        <div class="ergo-item" data-id="0">
+          <span class="ergo-emoji">🖥️</span>
+          <div style="flex:1">
+            <div class="ergo-text">Skjárinn er á augnhæð</div>
+            <div class="ergo-note">Ekki þannig að þú þurfir að brjóta hnakkann til að lesa</div>
+          </div>
+          <div class="ergo-check"></div>
+        </div>
+        <div class="ergo-item" data-id="1">
+          <span class="ergo-emoji">🪑</span>
+          <div style="flex:1">
+            <div class="ergo-text">Hnén eru í 90° og fætur á gólfinu</div>
+            <div class="ergo-note">Eða á fótapalli ef þú ert í minni kantinum</div>
+          </div>
+          <div class="ergo-check"></div>
+        </div>
+        <div class="ergo-item" data-id="2">
+          <span class="ergo-emoji">💪</span>
+          <div style="flex:1">
+            <div class="ergo-text">Handleggir liggja lárétt á armstöðum</div>
+            <div class="ergo-note">Ekki upphafðir eins og þú sért að biðja um hjálp</div>
+          </div>
+          <div class="ergo-check"></div>
+        </div>
+        <div class="ergo-item" data-id="3">
+          <span class="ergo-emoji">🧍</span>
+          <div style="flex:1">
+            <div class="ergo-text">Bakið er stutt (eða þykist)</div>
+            <div class="ergo-note">Við vitum að þú ert að siga — allir eru það</div>
+          </div>
+          <div class="ergo-check"></div>
+        </div>
+        <div class="ergo-item" data-id="4">
+          <span class="ergo-emoji">📏</span>
+          <div style="flex:1">
+            <div class="ergo-text">Skjárinn er 50–70 cm frá andliti</div>
+            <div class="ergo-note">Ef þú nærð að snerta hann með hendina er hann of nálægt</div>
+          </div>
+          <div class="ergo-check"></div>
+        </div>
+        <div class="ergo-item" data-id="5">
+          <span class="ergo-emoji">👁️</span>
+          <div style="flex:1">
+            <div class="ergo-text">20-20-20: á 20 mín → horfa á eitthvað 6m í burtu í 20 sek</div>
+            <div class="ergo-note">Glugginn út telst, þó þú sjáir aðeins þak</div>
+          </div>
+          <div class="ergo-check"></div>
+        </div>
+        <div class="ergo-item" data-id="6">
+          <span class="ergo-emoji">🚶</span>
+          <div style="flex:1">
+            <div class="ergo-text">Þú hefur staðið upp a.m.k. einu sinni</div>
+            <div class="ergo-note">Klósettferð telst. Vatnsglas-ferð líka.</div>
+          </div>
+          <div class="ergo-check"></div>
+        </div>
+        <div class="ergo-item" data-id="7">
+          <span class="ergo-emoji">💧</span>
+          <div style="flex:1">
+            <div class="ergo-text">Glasi af vatni er nálægt og þú ert að drekka það</div>
+            <div class="ergo-note">Bara að eiga glasið er ekki nóg, Bogga</div>
+          </div>
+          <div class="ergo-check"></div>
+        </div>
+        <div class="ergo-item" data-id="8">
+          <span class="ergo-emoji">💆</span>
+          <div style="flex:1">
+            <div class="ergo-text">Herðar losaðar — ekki upp við eyrun</div>
+            <div class="ergo-note">Slepptu þeim. Já, rétt núna. Betri, ekki satt?</div>
+          </div>
+          <div class="ergo-check"></div>
+        </div>
+      </div>
+      <div class="ergo-done-wrap" id="ergo-done">
+        <div class="ergo-score" id="ergo-score">0/9</div>
+        <div style="font-size:14px;color:var(--muted)">Bogga er stolt af þér 💚</div>
+      </div>
+      <button class="btn-ghost" style="width:100%;margin-top:16px" id="ergo-close">Loka 🌿</button>
+    </div>
+    <div class="ergo-modal" id="ergo-modal">
+      <!-- Ergo modal content omitted for brevity -->
+    </div>
+    <div class="toast" id="toast"></div>
 
-<div class="modal-overlay" id="edit-task-modal">
-  <div class="modal">
-    <div class="modal-title">Breyta verkefni</div>
-    <input class="modal-input" id="edit-task-title" type="text" placeholder="Heiti verkefnis..." maxlength="200" autocomplete="off">
-    <input class="modal-input" id="edit-task-tag" type="text" placeholder="Flokkur..." maxlength="40" list="edit-tag-suggestions" autocomplete="off">
-    <datalist id="edit-tag-suggestions"></datalist>
-    <input class="modal-input" id="edit-task-deadline" type="date">
-    <select class="modal-input" id="edit-task-recurrence">
-      <option value="">Engin endurtekning</option>
-      <option value="daily">Daglega</option>
-      <option value="weekly">Vikulega</option>
-      <option value="monthly">Mánaðarlega</option>
-    </select>
-    <button class="btn-primary" id="edit-task-save">Vista breytingar</button>
-    <button class="btn-ghost" id="edit-task-cancel">Hætta við</button>
-  </div>
-</div>
-
-<div class="ergo-modal" id="ergo-modal">
-  <div class="ergo-sheet">
-    <div class="ergo-title">🪑 Hvernig siturðu eiginlega?</div>
-    <div class="ergo-sub">Fandstu þetta?! Smelltu á það sem gildir 🤫</div>
-    <div id="ergo-list">
-      <div class="ergo-item" data-id="0">
-        <span class="ergo-emoji">🖥️</span>
-        <div style="flex:1"><div class="ergo-text">Skjárinn er á augnhæð</div><div class="ergo-note">Ekki þannig að þú þurfir að brjóta hnakkann til að lesa</div></div>
-        <div class="ergo-check"></div>
-      </div>
-      <div class="ergo-item" data-id="1">
-        <span class="ergo-emoji">🪑</span>
-        <div style="flex:1"><div class="ergo-text">Hnén eru í 90° og fætur á gólfinu</div><div class="ergo-note">Eða á fótapalli ef þú ert í minni kantinum</div></div>
-        <div class="ergo-check"></div>
-      </div>
-      <div class="ergo-item" data-id="2">
-        <span class="ergo-emoji">💪</span>
-        <div style="flex:1"><div class="ergo-text">Handleggir liggja lárétt á armstöðum</div><div class="ergo-note">Ekki upphafðir eins og þú sért að biðja um hjálp</div></div>
-        <div class="ergo-check"></div>
-      </div>
-      <div class="ergo-item" data-id="3">
-        <span class="ergo-emoji">🧍</span>
-        <div style="flex:1"><div class="ergo-text">Bakið er stutt (eða þykist)</div><div class="ergo-note">Við vitum að þú ert að siga — allir eru það</div></div>
-        <div class="ergo-check"></div>
-      </div>
-      <div class="ergo-item" data-id="4">
-        <span class="ergo-emoji">📏</span>
-        <div style="flex:1"><div class="ergo-text">Skjárinn er 50–70 cm frá andliti</div><div class="ergo-note">Ef þú nærð að snerta hann með hendina er hann of nálægt</div></div>
-        <div class="ergo-check"></div>
-      </div>
-      <div class="ergo-item" data-id="5">
-        <span class="ergo-emoji">👁️</span>
-        <div style="flex:1"><div class="ergo-text">20-20-20: á 20 mín → horfa á eitthvað 6m í burtu í 20 sek</div><div class="ergo-note">Glugginn út telst, þó þú sjáir aðeins þak</div></div>
-        <div class="ergo-check"></div>
-      </div>
-      <div class="ergo-item" data-id="6">
-        <span class="ergo-emoji">🚶</span>
-        <div style="flex:1"><div class="ergo-text">Þú hefur staðið upp a.m.k. einu sinni</div><div class="ergo-note">Klósettferð telst. Vatnsglas-ferð líka.</div></div>
-        <div class="ergo-check"></div>
-      </div>
-      <div class="ergo-item" data-id="7">
-        <span class="ergo-emoji">💧</span>
-        <div style="flex:1"><div class="ergo-text">Glasi af vatni er nálægt og þú ert að drekka það</div><div class="ergo-note">Bara að eiga glasið er ekki nóg, Bogga</div></div>
-        <div class="ergo-check"></div>
-      </div>
-      <div class="ergo-item" data-id="8">
-        <span class="ergo-emoji">💆</span>
-        <div style="flex:1"><div class="ergo-text">Herðar losaðar — ekki upp við eyrun</div><div class="ergo-note">Slepptu þeim. Já, rétt núna. Betri, ekki satt?</div></div>
-        <div class="ergo-check"></div>
+    <!-- Local AI Dashboard Bogga -->
+    <div class="bogga-scene-wrapper show-title" id="boggaWrapper" onmouseenter="showBoggaTitle()"
+      onmouseleave="hideBoggaTitle()">
+      <div class="bogga-title" id="boggaStatusText">Stimpluð inn — Nærðu að klára allt í dag?</div>
+      <div class="scene-container" id="boggaSceneBox" data-state="active" data-emotion="default" data-look="normal">
+        <div class="avatar-container" onclick="boggaClick()"><svg class="bogga-svg" viewBox="0 0 300 300"
+            xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <clipPath id="boggaCircleClip">
+                <circle cx="150" cy="150" r="150" />
+              </clipPath>
+              <g id="boggaEyelashes">
+                <path d="M -15 -10 Q -5 -20 0 0" fill="none" class="bogga-makeup" stroke="#2c3e50" stroke-width="2" />
+                <path d="M 15 -10 Q 5 -20 0 0" fill="none" class="bogga-makeup" stroke="#2c3e50" stroke-width="2" />
+                <path d="M 0 -15 Q 0 -5 0 0" fill="none" class="bogga-makeup" stroke="#2c3e50" stroke-width="2" />
+              </g>
+            </defs>
+            <g clip-path="url(#boggaCircleClip)">
+              <rect width="300" height="300" fill="#dcedfb" />
+              <g class="bogga-sparkle" stroke="#f1c40f" stroke-width="3" fill="none" stroke-linecap="round">
+                <path d="M 60 70 L 60 90 M 50 80 L 70 80" />
+                <path d="M 230 60 L 230 80 M 220 70 L 240 70" />
+                <path d="M 250 200 L 250 220 M 240 210 L 260 210" />
+              </g>
+              <path d="M 40 120 C 30 180, 40 250, 70 300 L 230 300 C 260 250, 270 180, 260 120 Z" fill="#2d1c15" />
+              <path class="bogga-hangover"
+                d="M 40 150 Q 0 160 20 200 M 260 150 Q 300 160 280 200 M 220 70 Q 250 30 270 80" fill="none"
+                stroke="#2d1c15" stroke-width="4" stroke-linecap="round" />
+              <path d="M 40 270 Q 150 230 260 270 L 300 350 L 0 350 Z" fill="#1e3a5f" />
+              <path
+                d="M 0 310 L 100 250 M 50 350 L 150 280 M 120 350 L 220 280 M 200 350 L 300 280 M 100 250 L 180 350 M 150 280 L 250 350 M 0 280 L 80 350"
+                fill="none" stroke="#152842" stroke-width="2" opacity="0.6" />
+              <path
+                d="M 60 260 C 90 220, 110 240, 150 260 C 190 240, 210 220, 240 260 C 260 280, 200 310, 150 310 C 100 310, 40 280, 60 260 Z"
+                fill="#fcf9f2" />
+              <path
+                d="M 70 260 A 10 10 0 1 1 90 250 A 10 10 0 1 1 110 250 A 10 10 0 1 1 130 255 A 10 10 0 1 1 150 260 A 10 10 0 1 1 170 255 A 10 10 0 1 1 190 250 A 10 10 0 1 1 210 250 A 10 10 0 1 1 230 260"
+                fill="none" stroke="#eadecc" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+              <rect x="130" y="210" width="40" height="60" fill="#f4cbb8" class="bogga-face" />
+              <path class="bogga-face"
+                d="M 80 130 C 80 60, 220 60, 220 130 C 220 210, 190 240, 150 240 C 110 240, 80 210, 80 130 Z"
+                fill="#fcd7cb" />
+              <circle cx="105" cy="180" r="15" fill="#f49cac" opacity="0.4" filter="blur(2px)" />
+              <circle cx="195" cy="180" r="15" fill="#f49cac" opacity="0.4" filter="blur(2px)" />
+              <circle class="bogga-makeup" cx="105" cy="175" r="18" fill="#e74c3c" opacity="0.5" filter="blur(3px)" />
+              <circle class="bogga-makeup" cx="195" cy="175" r="18" fill="#e74c3c" opacity="0.5" filter="blur(3px)" />
+              <ellipse class="bogga-makeup" cx="115" cy="120" rx="18" ry="8" fill="#9b59b6" opacity="0.4"
+                filter="blur(2px)" />
+              <ellipse class="bogga-makeup" cx="185" cy="120" rx="18" ry="8" fill="#9b59b6" opacity="0.4"
+                filter="blur(2px)" />
+              <path class="bogga-hangover" d="M 95 145 Q 115 155 135 145" fill="none" stroke="#90797f" stroke-width="3"
+                opacity="0.6" stroke-linecap="round" />
+              <path class="bogga-hangover" d="M 165 145 Q 185 155 205 145" fill="none" stroke="#90797f" stroke-width="3"
+                opacity="0.6" stroke-linecap="round" />
+              <path d="M 150 50 C 100 50, 60 90, 65 150 C 70 110, 100 90, 140 100 C 120 70, 140 60, 150 50 Z"
+                fill="#3b241c" />
+              <path d="M 150 50 C 200 50, 240 90, 235 150 C 230 110, 200 90, 160 100 C 180 70, 160 60, 150 50 Z"
+                fill="#362119" />
+              <circle cx="78" cy="140" r="12" fill="#f4cbb8" class="bogga-face" />
+              <circle cx="222" cy="140" r="12" fill="#f4cbb8" class="bogga-face" />
+              <path class="bogga-eyebrow bogga-eyebrow-l" d="M 95 105 Q 115 95 135 105" fill="none" stroke="#2d1c15"
+                stroke-width="4" stroke-linecap="round" />
+              <path class="bogga-eyebrow bogga-eyebrow-r" d="M 165 105 Q 185 95 205 105" fill="none" stroke="#2d1c15"
+                stroke-width="4" stroke-linecap="round" />
+              <g class="bogga-blink-wrap">
+                <path class="bogga-eye bogga-eye-l" d="M 100 130 Q 115 115 130 130 Q 115 145 100 130 Z" fill="#fff" />
+                <path class="bogga-eye bogga-eye-r" d="M 170 130 Q 185 115 200 130 Q 185 145 170 130 Z" fill="#fff" />
+                <use href="#boggaEyelashes" x="115" y="118" />
+                <use href="#boggaEyelashes" x="185" y="118" />
+                <g class="bogga-pupil">
+                  <circle cx="115" cy="130" r="7" fill="#3498db" />
+                  <circle cx="115" cy="130" r="3" fill="#2c3e50" />
+                  <circle cx="112" cy="127" r="2" fill="#fff" />
+                  <circle cx="185" cy="130" r="7" fill="#3498db" />
+                  <circle cx="185" cy="130" r="3" fill="#2c3e50" />
+                  <circle cx="182" cy="127" r="2" fill="#fff" />
+                </g>
+              </g>
+              <path d="M 145 150 Q 150 165 155 150" fill="none" stroke="#e2b29d" stroke-width="3"
+                stroke-linecap="round" />
+              <g class="bogga-mouth">
+                <path class="bogga-mouth-default" />
+                <path class="bogga-mouth-tongue" />
+              </g>
+              <g class="bogga-hand">
+                <path d="M 230 160 Q 220 200 250 210 Q 280 200 270 160 Z" fill="#fcd7cb" class="bogga-face" />
+                <rect x="235" y="110" width="12" height="60" rx="6" fill="#fcd7cb" class="bogga-face" />
+                <rect x="250" y="100" width="12" height="70" rx="6" fill="#fcd7cb" class="bogga-face" />
+                <rect x="265" y="110" width="12" height="60" rx="6" fill="#fcd7cb" class="bogga-face" />
+                <rect x="280" y="130" width="10" height="40" rx="5" fill="#fcd7cb" class="bogga-face" />
+                <rect x="215" y="140" width="12" height="35" rx="6" fill="#fcd7cb" class="bogga-face"
+                  transform="rotate(-35 215 140)" />
+                <path d="M 220 200 L 280 200 L 290 300 L 210 300 Z" fill="#1e3a5f" />
+              </g>
+            </g>
+          </svg></div>
+        <div class="bottle-container" onclick="boggaRubBottle()" title="Nudda flöskuna til að vekja Boggu!"><svg
+            viewBox="0 0 200 300" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+            <path d="M 100 150 Q 80 100 120 70 T 100 0" fill="none" stroke="rgba(139, 92, 246, 0.4)" stroke-width="15"
+              stroke-linecap="round" filter="blur(4px)">
+              <animate attributeName="d"
+                values="M 100 150 Q 80 100 120 70 T 100 0; M 100 150 Q 120 100 80 70 T 100 0; M 100 150 Q 80 100 120 70 T 100 0"
+                dur="4s" repeatCount="indefinite" />
+            </path>
+            <ellipse cx="100" cy="250" rx="60" ry="30" fill="#cd7f32" />
+            <path d="M 40 250 C 40 180, 80 170, 90 150 L 110 150 C 120 170, 160 180, 160 250 Z" fill="#f39c12" />
+            <ellipse cx="100" cy="220" rx="50" ry="25" fill="#e67e22" />
+            <path d="M 90 150 L 110 150 L 115 120 L 85 120 Z" fill="#d35400" />
+            <rect x="90" y="105" width="20" height="15" rx="3" fill="#7f8c8d" />
+            <polygon points="100,210 110,225 100,240 90,225" fill="#9b59b6" />
+            <polygon points="100,210 105,225 100,240 95,225" fill="#8e44ad" /><text x="100" y="280"
+              font-family="sans-serif" font-size="16" font-weight="bold" fill="#2c3e50" text-anchor="middle">Stimpluð
+              út!</text><text x="100" y="295" font-family="sans-serif" font-size="12" fill="#7f8c8d"
+              text-anchor="middle">(Smelltu / Nuddaðu)</text>
+          </svg></div>
       </div>
     </div>
-    <div class="ergo-done-wrap" id="ergo-done">
-      <div class="ergo-score" id="ergo-score">0/9</div>
-      <div style="font-size:14px;color:var(--muted)">Bogga er stolt af þér 💚</div>
-    </div>
-    <button class="btn-ghost" style="width:100%;margin-top:16px" id="ergo-close">Loka 🌿</button>
-  </div>
-</div>
-<div class="toast" id="toast"></div>
 
-<script>
-const S = { token: localStorage.getItem('bogga_token'), name: localStorage.getItem('bogga_name') || 'Bogga', lists: [], currentList: null, tasks: [], setupPinStep: 1, shareToken: null };
-const COLORS = [{ v: '#6366f1', l: '#ede9fe' }, { v: '#ec4899', l: '#fce7f3' }, { v: '#f59e0b', l: '#fef3c7' }, { v: '#10b981', l: '#d1fae5' }, { v: '#0ea5e9', l: '#e0f2fe' }, { v: '#8b5cf6', l: '#ede9fe' }];
-const LIST_TEMPLATES = [
-  { id: 'innkaup', title: 'Innkaupalisti', color: '#10b981', tasks: [{ title: 'Mjólk', tag: 'Innkaup' }, { title: 'Brauð', tag: 'Innkaup' }, { title: 'Ávextir', tag: 'Innkaup' }, { title: 'Kaffi', tag: 'Innkaup' }] },
-  { id: 'vika', title: 'Vikuskipulag', color: '#6366f1', tasks: [{ title: 'Skipuleggja vikuna', tag: 'Skipulag' }, { title: 'Yfirfara dagatal', tag: 'Skipulag' }, { title: 'Matskrá vikunnar', tag: 'Heimili' }, { title: 'Setja 3 forgangsverkefni', tag: 'Vinna' }] },
-  { id: 'ferdalag', title: 'Ferðalag', color: '#0ea5e9', tasks: [{ title: 'Bóka gistingu', tag: 'Ferðalag' }, { title: 'Pakka fatnaði', tag: 'Ferðalag' }, { title: 'Vegabréf og skilríki', tag: 'Ferðalag' }, { title: 'Ferðaáætlun tilbúin', tag: 'Ferðalag' }] },
-  { id: 'heimili', title: 'Heimilisverk', color: '#f59e0b', tasks: [{ title: 'Ryksuga', tag: 'Heimili' }, { title: 'Þrífa baðherbergi', tag: 'Heimili' }, { title: 'Þvottur', tag: 'Heimili' }, { title: 'Taka út rusl', tag: 'Heimili' }] },
-  { id: 'velferd', title: 'Sjálfsrækt', color: '#ec4899', tasks: [{ title: 'Ganga 30 mín', tag: 'Heilsa' }, { title: 'Drekka vatn', tag: 'Heilsa' }, { title: 'Taka pásu frá skjá', tag: 'Vellíðan' }, { title: 'Kvöldyfirlit', tag: 'Vellíðan' }] }
-];
-const JOKES = [
-  { h:8,  q: "Af hverju fara Íslendingar alltaf tvisvar í búðina?", a: "Í fyrsta sinn gleyma þeir hvað þeir ætluðu að kaupa — og í seinna sinn kaupa þeir ranga hlutinn." },
-  { h:9,  q: "Hvað er þyngst að bera?", a: "Leyndarmál. Þess vegna segjum við þau öllum." },
-  { h:10, q: "Af hverju er tölvunarfræðingurinn alltaf kaldur?", a: "Vegna þess að hann er alltaf með Windows opið." },
-  { h:11, q: "Hvernig líst íslenskum veðurfræðingi á starfið?", a: "Hann er eini maðurinn sem fær laun þegar hann hefur rangt fyrir sér." },
-  { h:12, q: "Hvað eru þrír Íslendingar á einum stað?", a: "Tveir þeirra þekkjast. Og sá þriðji er frændi þeirra." },
-  { h:13, q: "Hvernig þekkirðu vegan Íslending?", a: "Hann segir þér það á fyrstu 5 mínútunum — þó þú hafir bara boðið upp á skyr." },
-  { h:14, q: "Af hverju fer Íslendingur aldrei á fætur á réttum tíma?", a: "Vegna þess að „strax“ þýðir eitthvað allt annað hér norðan við pólheimkræðuna." },
-  { h:15, q: "Hvað segjir Íslendingur þegar eitthvað fer úrskeiðis?", a: "\"Þetta er alveg fínt\" — og meinar það ekki." },
-  { h:16, q: "Af hverju er veðrið alltaf umræðuefni nr. 1 á Íslandi?", a: "Vegna þess að það er eini hlutinn sem breytist hér — oft tvisvar á klukkustund." }
-];
-let selectedColor = COLORS[0].v;
-let editingTask = null;
-let activeFilter = 'all';
-let searchQuery = '';
+    <script>
+      const S = { token: localStorage.getItem('bogga_token'), name: localStorage.getItem('bogga_name') || 'Bogga', lists: [], currentList: null, tasks: [], setupPinStep: 1, shareToken: null };
+      const COLORS = [{ v: '#6366f1', l: '#ede9fe' }, { v: '#ec4899', l: '#fce7f3' }, { v: '#f59e0b', l: '#fef3c7' }, { v: '#10b981', l: '#d1fae5' }, { v: '#0ea5e9', l: '#e0f2fe' }, { v: '#8b5cf6', l: '#ede9fe' }];
+      const LIST_TEMPLATES = [
+        { id: 'innkaup', title: 'Innkaupalisti', color: '#10b981', tasks: [{ title: 'Mjólk', tag: 'Innkaup' }, { title: 'Brauð', tag: 'Innkaup' }, { title: 'Ávextir', tag: 'Innkaup' }, { title: 'Kaffi', tag: 'Innkaup' }] },
+        { id: 'vika', title: 'Vikuskipulag', color: '#6366f1', tasks: [{ title: 'Skipuleggja vikuna', tag: 'Skipulag' }, { title: 'Yfirfara dagatal', tag: 'Skipulag' }, { title: 'Matskrá vikunnar', tag: 'Heimili' }, { title: 'Setja 3 forgangsverkefni', tag: 'Vinna' }] },
+        { id: 'ferdalag', title: 'Ferðalag', color: '#0ea5e9', tasks: [{ title: 'Bóka gistingu', tag: 'Ferðalag' }, { title: 'Pakka fatnaði', tag: 'Ferðalag' }, { title: 'Vegabréf og skilríki', tag: 'Ferðalag' }, { title: 'Ferðaáætlun tilbúin', tag: 'Ferðalag' }] },
+        { id: 'heimili', title: 'Heimilisverk', color: '#f59e0b', tasks: [{ title: 'Ryksuga', tag: 'Heimili' }, { title: 'Þrífa baðherbergi', tag: 'Heimili' }, { title: 'Þvottur', tag: 'Heimili' }, { title: 'Taka út rusl', tag: 'Heimili' }] },
+        { id: 'velferd', title: 'Sjálfsrækt', color: '#ec4899', tasks: [{ title: 'Ganga 30 mín', tag: 'Heilsa' }, { title: 'Drekka vatn', tag: 'Heilsa' }, { title: 'Taka pásu frá skjá', tag: 'Vellíðan' }, { title: 'Kvöldyfirlit', tag: 'Vellíðan' }] }
+      ];
+      const JOKES = [
+        { h: 8, q: "Af hverju fara Íslendingar alltaf tvisvar í búðina?", a: "Í fyrsta sinn gleyma þeir hvað þeir ætluðu að kaupa — og í seinna sinn kaupa þeir ranga hlutinn." },
+        { h: 9, q: "Hvað er þyngst að bera?", a: "Leyndarmál. Þess vegna segjum við þau öllum." },
+        { h: 10, q: "Af hverju er tölvunarfræðingurinn alltaf kaldur?", a: "Vegna þess að hann er alltaf með Windows opið." },
+        { h: 11, q: "Hvernig líst íslenskum veðurfræðingi á starfið?", a: "Hann er eini maðurinn sem fær laun þegar hann hefur rangt fyrir sér." },
+        { h: 12, q: "Hvað eru þrír Íslendingar á einum stað?", a: "Tveir þeirra þekkjast. Og sá þriðji er frændi þeirra." },
+        { h: 13, q: "Hvernig þekkirðu vegan Íslending?", a: "Hann segir þér það á fyrstu 5 mínútunum — þó þú hafir bara boðið upp á skyr." },
+        { h: 14, q: "Af hverju fer Íslendingur aldrei á fætur á réttum tíma?", a: "Vegna þess að „strax“ þýðir eitthvað allt annað hér norðan við pólheimkræðuna." },
+        { h: 15, q: "Hvað segjir Íslendingur þegar eitthvað fer úrskeiðis?", a: "\"Þetta er alveg fínt\" — og meinar það ekki." },
+        { h: 16, q: "Af hverju er veðrið alltaf umræðuefni nr. 1 á Íslandi?", a: "Vegna þess að það er eini hlutinn sem breytist hér — oft tvisvar á klukkustund." }
+      ];
+      let selectedColor = COLORS[0].v;
+      let editingTask = null;
+      let activeFilter = 'all';
+      let searchQuery = '';
 
-function parseQuickAdd(text) {
-  let title = text, tag = '', deadline = '';
-  const tagMatch = title.match(/#(\S+)/); if (tagMatch) { tag = tagMatch[1]; title = title.replace(tagMatch[0], '').trim(); }
-  const today = new Date().toISOString().slice(0,10);
-  const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0,10);
-  if (/@í dag/i.test(title)) { deadline = today; title = title.replace(/@í dag/i, '').trim(); }
-  else if (/@á morgun/i.test(title)) { deadline = tomorrow; title = title.replace(/@á morgun/i, '').trim(); }
-  else { const dm = title.match(/@(\d{4}-\d{2}-\d{2})/); if (dm) { deadline = dm[1]; title = title.replace(dm[0], '').trim(); } }
-  return { title: title.replace(/\s+/g,' ').trim(), tag, deadline };
-}
+      function parseQuickAdd(text) {
+        let title = text, tag = '', deadline = '';
+        const tagMatch = title.match(/#(\S+)/); if (tagMatch) { tag = tagMatch[1]; title = title.replace(tagMatch[0], '').trim(); }
+        const today = new Date().toISOString().slice(0, 10);
+        const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+        if (/@í dag/i.test(title)) { deadline = today; title = title.replace(/@í dag/i, '').trim(); }
+        else if (/@á morgun/i.test(title)) { deadline = tomorrow; title = title.replace(/@á morgun/i, '').trim(); }
+        else { const dm = title.match(/@(\d{4}-\d{2}-\d{2})/); if (dm) { deadline = dm[1]; title = title.replace(dm[0], '').trim(); } }
+        return { title: title.replace(/\s+/g, ' ').trim(), tag, deadline };
+      }
 
-function updateTagSuggestions() {
-  const tags = [...new Set(S.tasks.filter(t => t.tag).map(t => t.tag))];
-  const opts = tags.map(t => `<option value="${esc(t)}">`).join('');
-  ['add-tag-suggestions', 'edit-tag-suggestions'].forEach(id => { const dl = document.getElementById(id); if (dl) dl.innerHTML = opts; });
-}
+      function updateTagSuggestions() {
+        const tags = [...new Set(S.tasks.filter(t => t.tag).map(t => t.tag))];
+        const opts = tags.map(t => `<option value="${esc(t)}">`).join('');
+        ['add-tag-suggestions', 'edit-tag-suggestions'].forEach(id => { const dl = document.getElementById(id); if (dl) dl.innerHTML = opts; });
+      }
 
-function openEditModal(task) {
-  editingTask = task;
-  document.getElementById('edit-task-title').value = task.title;
-  document.getElementById('edit-task-tag').value = task.tag || '';
-  document.getElementById('edit-task-deadline').value = task.deadline || '';
-  document.getElementById('edit-task-recurrence').value = task.recurrence || '';
-  updateTagSuggestions();
-  document.getElementById('edit-task-modal').classList.add('open');
-  setTimeout(() => document.getElementById('edit-task-title').focus(), 300);
-}
-document.getElementById('edit-task-cancel').addEventListener('click', () => { document.getElementById('edit-task-modal').classList.remove('open'); });
-document.getElementById('edit-task-modal').addEventListener('click', e => { if (e.target === document.getElementById('edit-task-modal')) document.getElementById('edit-task-modal').classList.remove('open'); });
-document.getElementById('edit-task-save').addEventListener('click', async () => {
-  if (!editingTask) return;
-  const title = document.getElementById('edit-task-title').value.trim();
-  if (!title) { toast('Titill vantar'); return; }
-  const tag = document.getElementById('edit-task-tag').value.trim();
-  const deadline = document.getElementById('edit-task-deadline').value;
-  const recurrence = document.getElementById('edit-task-recurrence').value;
-  try {
-    await api('PATCH', `/tasks/${editingTask.id}`, { title, tag, deadline, recurrence });
-    const t = S.tasks.find(t => t.id === editingTask.id);
-    if (t) { t.title = title; t.tag = tag || null; t.deadline = deadline || null; t.recurrence = recurrence || null; }
-    renderTasks();
-    document.getElementById('edit-task-modal').classList.remove('open');
-    toast('Verkefni uppfært ✓');
-  } catch (e) { toast(e.message); }
-});
-document.getElementById('edit-task-title').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('edit-task-save').click(); });
-
-async function api(method, path, body) {
-  const headers = { 'Content-Type': 'application/json' };
-  if (S.token) headers['Authorization'] = `Bearer ${S.token}`;
-  const res = await fetch('/api' + path, { method, headers, body: body ? JSON.stringify(body) : undefined });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    const e = new Error(data.error || 'Villa');
-    e.status = res.status;
-    throw e;
-  }
-  return data;
-}
-
-function startOfLocalDay(date = new Date()) {
-  const d = new Date(date);
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
-
-function parseLocalDate(dateStr) {
-  if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(String(dateStr))) return null;
-  const [y, m, d] = String(dateStr).split('-').map(Number);
-  return new Date(y, m - 1, d);
-}
-
-function route() {
-  const hash = location.hash;
-  if (hash.startsWith('#/s/')) { showShare(hash.slice(4)); return; }
-  if (!S.token) { checkSetup(); return; }
-  if (hash.startsWith('#/list/')) { showListDetail(hash.slice(7)); return; }
-  showLists();
-}
-window.addEventListener('hashchange', route);
-window.addEventListener('load', route);
-
-function showView(id) { document.querySelectorAll('.view').forEach(v => v.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-
-async function checkSetup() {
-  try {
-    const { setup } = await api('GET', '/status');
-    showView(setup ? 'view-pin' : 'view-setup');
-    const n = localStorage.getItem('bogga_name');
-    if (n) document.getElementById('pin-greeting').textContent = `Hæ ${n} 👋`;
-  } catch { showView('view-pin'); }
-}
-
-let setupPin = '', setupConfirmPin = '';
-document.getElementById('setup-name-next').addEventListener('click', () => {
-  S.name = document.getElementById('setup-name').value.trim() || 'Bogga';
-  document.getElementById('setup-step-name').classList.remove('active');
-  document.getElementById('setup-step-pin').classList.add('active');
-  S.setupPinStep = 1; setupPin = ''; updateDots('setup-dots', setupPin);
-});
-document.getElementById('setup-name').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('setup-name-next').click(); });
-document.getElementById('setup-pad').addEventListener('click', e => { const k = e.target.closest('[data-d]'); if (k) handleSetupKey(k.dataset.d); });
-document.getElementById('setup-del').addEventListener('click', () => {
-  if (S.setupPinStep === 1) { setupPin = setupPin.slice(0,-1); updateDots('setup-dots', setupPin); }
-  else { setupConfirmPin = setupConfirmPin.slice(0,-1); updateDots('setup-dots', setupConfirmPin); }
-});
-async function handleSetupKey(d) {
-  if (S.setupPinStep === 1) {
-    if (setupPin.length >= 4) return;
-    setupPin += d; updateDots('setup-dots', setupPin);
-    if (setupPin.length === 4) setTimeout(() => { S.setupPinStep = 2; setupConfirmPin = ''; document.getElementById('setup-pin-label').textContent = 'Staðfestu PIN-kóða'; updateDots('setup-dots', setupConfirmPin); }, 200);
-  } else {
-    if (setupConfirmPin.length >= 4) return;
-    setupConfirmPin += d; updateDots('setup-dots', setupConfirmPin);
-    if (setupConfirmPin.length === 4) {
-      if (setupConfirmPin !== setupPin) {
-        shakeElement('setup-dots'); toast('PIN-kóðar passa ekki — reyndu aftur');
-        setTimeout(() => { S.setupPinStep = 1; setupPin = ''; setupConfirmPin = ''; document.getElementById('setup-pin-label').textContent = 'Veldu 4 stafa PIN-kóða'; updateDots('setup-dots', setupPin); }, 500);
-      } else {
+      function openEditModal(task) {
+        editingTask = task;
+        document.getElementById('edit-task-title').value = task.title;
+        document.getElementById('edit-task-tag').value = task.tag || '';
+        document.getElementById('edit-task-deadline').value = task.deadline || '';
+        document.getElementById('edit-task-recurrence').value = task.recurrence || '';
+        updateTagSuggestions();
+        document.getElementById('edit-task-modal').classList.add('open');
+        setTimeout(() => document.getElementById('edit-task-title').focus(), 300);
+      }
+      document.getElementById('edit-task-cancel').addEventListener('click', () => { document.getElementById('edit-task-modal').classList.remove('open'); });
+      document.getElementById('edit-task-modal').addEventListener('click', e => { if (e.target === document.getElementById('edit-task-modal')) document.getElementById('edit-task-modal').classList.remove('open'); });
+      document.getElementById('edit-task-save').addEventListener('click', async () => {
+        if (!editingTask) return;
+        const title = document.getElementById('edit-task-title').value.trim();
+        if (!title) { toast('Titill vantar'); return; }
+        const tag = document.getElementById('edit-task-tag').value.trim();
+        const deadline = document.getElementById('edit-task-deadline').value;
+        const recurrence = document.getElementById('edit-task-recurrence').value;
         try {
-          const res = await api('POST', '/auth/setup', { pin: setupPin, name: S.name });
-          S.token = res.token; S.name = res.name;
-          localStorage.setItem('bogga_token', res.token); localStorage.setItem('bogga_name', res.name);
-          location.hash = '#/'; showLists();
+          await api('PATCH', `/tasks/${editingTask.id}`, { title, tag, deadline, recurrence });
+          const t = S.tasks.find(t => t.id === editingTask.id);
+          if (t) { t.title = title; t.tag = tag || null; t.deadline = deadline || null; t.recurrence = recurrence || null; }
+          renderTasks();
+          document.getElementById('edit-task-modal').classList.remove('open');
+          toast('Verkefni uppfært ✓');
+        } catch (e) { toast(e.message); }
+      });
+      document.getElementById('edit-task-title').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('edit-task-save').click(); });
+
+      async function api(method, path, body) {
+        const headers = { 'Content-Type': 'application/json' };
+        if (S.token) headers['Authorization'] = `Bearer ${S.token}`;
+        const res = await fetch('/api' + path, { method, headers, body: body ? JSON.stringify(body) : undefined });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          const e = new Error(data.error || 'Villa');
+          e.status = res.status;
+          throw e;
+        }
+        return data;
+      }
+
+      function startOfLocalDay(date = new Date()) {
+        const d = new Date(date);
+        d.setHours(0, 0, 0, 0);
+        return d;
+      }
+
+      function parseLocalDate(dateStr) {
+        if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(String(dateStr))) return null;
+        const [y, m, d] = String(dateStr).split('-').map(Number);
+        return new Date(y, m - 1, d);
+      }
+
+      function route() {
+        const hash = location.hash;
+        if (hash.startsWith('#/s/')) { showShare(hash.slice(4)); return; }
+        if (!S.token) { checkSetup(); return; }
+        if (hash.startsWith('#/list/')) { showListDetail(hash.slice(7)); return; }
+        showLists();
+      }
+      window.addEventListener('hashchange', route);
+      window.addEventListener('load', route);
+
+      function showView(id) { document.querySelectorAll('.view').forEach(v => v.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+
+      async function checkSetup() {
+        try {
+          const { setup } = await api('GET', '/status');
+          showView(setup ? 'view-pin' : 'view-setup');
+          const n = localStorage.getItem('bogga_name');
+          if (n) document.getElementById('pin-greeting').textContent = `Hæ ${n} 👋`;
+        } catch { showView('view-pin'); }
+      }
+
+      let setupPin = '', setupConfirmPin = '';
+      document.getElementById('setup-name-next').addEventListener('click', () => {
+        S.name = document.getElementById('setup-name').value.trim() || 'Bogga';
+        document.getElementById('setup-step-name').classList.remove('active');
+        document.getElementById('setup-step-pin').classList.add('active');
+        S.setupPinStep = 1; setupPin = ''; updateDots('setup-dots', setupPin);
+      });
+      document.getElementById('setup-name').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('setup-name-next').click(); });
+      document.getElementById('setup-pad').addEventListener('click', e => { const k = e.target.closest('[data-d]'); if (k) handleSetupKey(k.dataset.d); });
+      document.getElementById('setup-del').addEventListener('click', () => {
+        if (S.setupPinStep === 1) { setupPin = setupPin.slice(0, -1); updateDots('setup-dots', setupPin); }
+        else { setupConfirmPin = setupConfirmPin.slice(0, -1); updateDots('setup-dots', setupConfirmPin); }
+      });
+      async function handleSetupKey(d) {
+        if (S.setupPinStep === 1) {
+          if (setupPin.length >= 4) return;
+          setupPin += d; updateDots('setup-dots', setupPin);
+          if (setupPin.length === 4) setTimeout(() => { S.setupPinStep = 2; setupConfirmPin = ''; document.getElementById('setup-pin-label').textContent = 'Staðfestu PIN-kóða'; updateDots('setup-dots', setupConfirmPin); }, 200);
+        } else {
+          if (setupConfirmPin.length >= 4) return;
+          setupConfirmPin += d; updateDots('setup-dots', setupConfirmPin);
+          if (setupConfirmPin.length === 4) {
+            if (setupConfirmPin !== setupPin) {
+              shakeElement('setup-dots'); toast('PIN-kóðar passa ekki — reyndu aftur');
+              setTimeout(() => { S.setupPinStep = 1; setupPin = ''; setupConfirmPin = ''; document.getElementById('setup-pin-label').textContent = 'Veldu 4 stafa PIN-kóða'; updateDots('setup-dots', setupPin); }, 500);
+            } else {
+              try {
+                const res = await api('POST', '/auth/setup', { pin: setupPin, name: S.name });
+                S.token = res.token; S.name = res.name;
+                localStorage.setItem('bogga_token', res.token); localStorage.setItem('bogga_name', res.name);
+                location.hash = '#/'; showLists();
+              } catch (e) { toast(e.message); }
+            }
+          }
+        }
+      }
+
+      let loginPin = '';
+      document.getElementById('login-pad').addEventListener('click', e => { const k = e.target.closest('[data-d]'); if (k) handleLoginKey(k.dataset.d); });
+      document.getElementById('login-del').addEventListener('click', () => { loginPin = loginPin.slice(0, -1); updateDots('login-dots', loginPin); });
+      async function handleLoginKey(d) {
+        if (loginPin.length >= 4) return;
+        loginPin += d; updateDots('login-dots', loginPin);
+        if (loginPin.length === 4) {
+          try {
+            const res = await api('POST', '/auth/login', { pin: loginPin });
+            S.token = res.token; S.name = res.name;
+            localStorage.setItem('bogga_token', res.token); localStorage.setItem('bogga_name', res.name);
+            loginPin = ''; updateDots('login-dots', loginPin); location.hash = '#/'; showLists();
+          } catch { shakeElement('login-dots'); toast('Rangur PIN-kóði'); setTimeout(() => { loginPin = ''; updateDots('login-dots', loginPin); }, 400); }
+        }
+      }
+
+      async function showLists() {
+        showView('view-lists'); document.getElementById('lists-title').textContent = getIcelandicGreeting(S.name);
+        renderJokeCard(); startErgoHint();
+        try { S.lists = await api('GET', '/lists'); renderLists(); }
+        catch (e) { if (e.status === 401) logout(); else toast('Villa við að sækja lista'); }
+      }
+      function renderLists() {
+        const grid = document.getElementById('lists-grid'); grid.innerHTML = '';
+        const hasOverdue = S.lists.some(l => l.open_count > 0);
+        document.getElementById('notif-dot').classList.toggle('visible', hasOverdue);
+        S.lists.forEach(list => {
+          const card = document.createElement('div'); card.className = 'list-card animate-in'; card.style.setProperty('--c', list.color);
+          const open = list.open_count || 0, total = list.total_count || 0;
+          card.innerHTML = `<div class="list-card-title">${esc(list.title)}</div><div><div class="list-card-count">${total === 0 ? 'Tómur' : `${open} eftir af ${total}`}</div>${open > 0 ? `<div class="list-card-badge" style="--c:${list.color}">${open}</div>` : ''}</div>`;
+          card.addEventListener('click', () => { location.hash = `#/list/${list.id}`; });
+          grid.appendChild(card);
+        });
+        const addCard = document.createElement('div'); addCard.className = 'list-add-card';
+        addCard.innerHTML = `<div class="list-add-icon">+</div><div>Nýr listi</div>`;
+        addCard.addEventListener('click', openListModal); grid.appendChild(addCard);
+      }
+
+      function openListModal() {
+        document.getElementById('modal-list-title').value = '';
+        selectedColor = COLORS[0].v;
+        renderColorPicker();
+        renderTemplatePicker();
+        document.getElementById('list-modal').classList.add('open');
+        setTimeout(() => document.getElementById('modal-list-title').focus(), 300);
+      }
+      function closeListModal() { document.getElementById('list-modal').classList.remove('open'); }
+      document.getElementById('list-modal').addEventListener('click', e => { if (e.target === document.getElementById('list-modal')) closeListModal(); });
+      function renderColorPicker() {
+        const picker = document.getElementById('color-picker'); picker.innerHTML = '';
+        COLORS.forEach(({ v }) => { const sw = document.createElement('div'); sw.className = 'color-swatch' + (v === selectedColor ? ' selected' : ''); sw.style.background = v; sw.addEventListener('click', () => { selectedColor = v; renderColorPicker(); }); picker.appendChild(sw); });
+      }
+      function renderTemplatePicker() {
+        const wrap = document.getElementById('template-picker');
+        wrap.innerHTML = '';
+        LIST_TEMPLATES.forEach(template => {
+          const btn = document.createElement('button');
+          btn.className = 'template-btn';
+          btn.style.setProperty('--c', template.color);
+          btn.innerHTML = `<div class="template-btn-title">${esc(template.title)}</div><div class="template-btn-sub">${template.tasks.length} sjálfgefin verkefni</div>`;
+          btn.addEventListener('click', () => createListFromTemplate(template));
+          wrap.appendChild(btn);
+        });
+      }
+      async function createList(title, color, templateTasks = []) {
+        const list = await api('POST', '/lists', { title, color });
+        if (!templateTasks.length) {
+          list.open_count = 0;
+          list.total_count = 0;
+          return { list, createdTasks: 0, failedTasks: 0 };
+        }
+        const results = await Promise.allSettled(templateTasks.map(task => api('POST', `/lists/${list.id}/tasks`, { title: task.title, tag: task.tag || '', deadline: task.deadline || '' })));
+        const createdTasks = results.filter(r => r.status === 'fulfilled').length;
+        const failedTasks = results.length - createdTasks;
+        list.open_count = createdTasks;
+        list.total_count = createdTasks;
+        return { list, createdTasks, failedTasks };
+      }
+      async function createListFromTemplate(template) {
+        try {
+          const { list, createdTasks, failedTasks } = await createList(template.title, template.color, template.tasks);
+          S.lists.unshift(list);
+          renderLists();
+          closeListModal();
+          if (failedTasks > 0) toast(`${template.title} búinn til (${createdTasks}/${template.tasks.length} verkefni)`);
+          else toast(`${template.title} búinn til ✓`);
         } catch (e) { toast(e.message); }
       }
-    }
-  }
-}
+      document.getElementById('modal-list-save').addEventListener('click', async () => {
+        const title = document.getElementById('modal-list-title').value.trim();
+        if (!title) { toast('Titill vantar'); return; }
+        try {
+          const { list } = await createList(title, selectedColor);
+          S.lists.unshift(list);
+          renderLists();
+          closeListModal();
+          toast('Listi búinn til ✓');
+        } catch (e) { toast(e.message); }
+      });
+      document.getElementById('modal-list-title').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('modal-list-save').click(); });
 
-let loginPin = '';
-document.getElementById('login-pad').addEventListener('click', e => { const k = e.target.closest('[data-d]'); if (k) handleLoginKey(k.dataset.d); });
-document.getElementById('login-del').addEventListener('click', () => { loginPin = loginPin.slice(0,-1); updateDots('login-dots', loginPin); });
-async function handleLoginKey(d) {
-  if (loginPin.length >= 4) return;
-  loginPin += d; updateDots('login-dots', loginPin);
-  if (loginPin.length === 4) {
-    try {
-      const res = await api('POST', '/auth/login', { pin: loginPin });
-      S.token = res.token; S.name = res.name;
-      localStorage.setItem('bogga_token', res.token); localStorage.setItem('bogga_name', res.name);
-      loginPin = ''; updateDots('login-dots', loginPin); location.hash = '#/'; showLists();
-    } catch { shakeElement('login-dots'); toast('Rangur PIN-kóði'); setTimeout(() => { loginPin = ''; updateDots('login-dots', loginPin); }, 400); }
-  }
-}
-
-async function showLists() {
-  showView('view-lists'); document.getElementById('lists-title').textContent = getIcelandicGreeting(S.name);
-  renderJokeCard(); startErgoHint();
-  try { S.lists = await api('GET', '/lists'); renderLists(); }
-  catch (e) { if (e.status === 401) logout(); else toast('Villa við að sækja lista'); }
-}
-function renderLists() {
-  const grid = document.getElementById('lists-grid'); grid.innerHTML = '';
-  const hasOverdue = S.lists.some(l => l.open_count > 0);
-  document.getElementById('notif-dot').classList.toggle('visible', hasOverdue);
-  S.lists.forEach(list => {
-    const card = document.createElement('div'); card.className = 'list-card animate-in'; card.style.setProperty('--c', list.color);
-    const open = list.open_count || 0, total = list.total_count || 0;
-    card.innerHTML = `<div class="list-card-title">${esc(list.title)}</div><div><div class="list-card-count">${total === 0 ? 'Tómur' : `${open} eftir af ${total}`}</div>${open > 0 ? `<div class="list-card-badge" style="--c:${list.color}">${open}</div>` : ''}</div>`;
-    card.addEventListener('click', () => { location.hash = `#/list/${list.id}`; });
-    grid.appendChild(card);
-  });
-  const addCard = document.createElement('div'); addCard.className = 'list-add-card';
-  addCard.innerHTML = `<div class="list-add-icon">+</div><div>Nýr listi</div>`;
-  addCard.addEventListener('click', openListModal); grid.appendChild(addCard);
-}
-
-function openListModal() {
-  document.getElementById('modal-list-title').value = '';
-  selectedColor = COLORS[0].v;
-  renderColorPicker();
-  renderTemplatePicker();
-  document.getElementById('list-modal').classList.add('open');
-  setTimeout(() => document.getElementById('modal-list-title').focus(), 300);
-}
-function closeListModal() { document.getElementById('list-modal').classList.remove('open'); }
-document.getElementById('list-modal').addEventListener('click', e => { if (e.target === document.getElementById('list-modal')) closeListModal(); });
-function renderColorPicker() {
-  const picker = document.getElementById('color-picker'); picker.innerHTML = '';
-  COLORS.forEach(({ v }) => { const sw = document.createElement('div'); sw.className = 'color-swatch' + (v === selectedColor ? ' selected' : ''); sw.style.background = v; sw.addEventListener('click', () => { selectedColor = v; renderColorPicker(); }); picker.appendChild(sw); });
-}
-function renderTemplatePicker() {
-  const wrap = document.getElementById('template-picker');
-  wrap.innerHTML = '';
-  LIST_TEMPLATES.forEach(template => {
-    const btn = document.createElement('button');
-    btn.className = 'template-btn';
-    btn.style.setProperty('--c', template.color);
-    btn.innerHTML = `<div class="template-btn-title">${esc(template.title)}</div><div class="template-btn-sub">${template.tasks.length} sjálfgefin verkefni</div>`;
-    btn.addEventListener('click', () => createListFromTemplate(template));
-    wrap.appendChild(btn);
-  });
-}
-async function createList(title, color, templateTasks = []) {
-  const list = await api('POST', '/lists', { title, color });
-  if (!templateTasks.length) {
-    list.open_count = 0;
-    list.total_count = 0;
-    return { list, createdTasks: 0, failedTasks: 0 };
-  }
-  const results = await Promise.allSettled(templateTasks.map(task => api('POST', `/lists/${list.id}/tasks`, { title: task.title, tag: task.tag || '', deadline: task.deadline || '' })));
-  const createdTasks = results.filter(r => r.status === 'fulfilled').length;
-  const failedTasks = results.length - createdTasks;
-  list.open_count = createdTasks;
-  list.total_count = createdTasks;
-  return { list, createdTasks, failedTasks };
-}
-async function createListFromTemplate(template) {
-  try {
-    const { list, createdTasks, failedTasks } = await createList(template.title, template.color, template.tasks);
-    S.lists.unshift(list);
-    renderLists();
-    closeListModal();
-    if (failedTasks > 0) toast(`${template.title} búinn til (${createdTasks}/${template.tasks.length} verkefni)`);
-    else toast(`${template.title} búinn til ✓`);
-  } catch (e) { toast(e.message); }
-}
-document.getElementById('modal-list-save').addEventListener('click', async () => {
-  const title = document.getElementById('modal-list-title').value.trim();
-  if (!title) { toast('Titill vantar'); return; }
-  try {
-    const { list } = await createList(title, selectedColor);
-    S.lists.unshift(list);
-    renderLists();
-    closeListModal();
-    toast('Listi búinn til ✓');
-  } catch (e) { toast(e.message); }
-});
-document.getElementById('modal-list-title').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('modal-list-save').click(); });
-
-async function showListDetail(id) {
-  activeFilter = 'all'; searchQuery = '';
-  showView('view-list'); document.getElementById('add-bar').style.display = 'none'; document.getElementById('tasks-list').innerHTML = ''; document.getElementById('share-notice-wrap').innerHTML = '';
-  document.querySelectorAll('.filter-chip').forEach(c => c.classList.toggle('active', c.dataset.filter === 'all'));
-  document.getElementById('search-input').value = '';
-  try {
-    const { list, tasks } = await api('GET', `/lists/${id}/tasks`);
-    S.currentList = list; S.tasks = tasks;
-    document.getElementById('list-topbar').style.borderBottom = `3px solid ${list.color}`;
-    document.getElementById('list-title').textContent = list.title;
-    document.getElementById('filter-bar').style.display = '';
-    document.getElementById('search-wrap').style.display = '';
-    if (list.share_token) renderShareNotice(list.share_token, getShareRoleFromToken(list.share_token));
-    renderTasks(); document.getElementById('add-bar').style.display = 'flex'; document.getElementById('add-title').focus();
-  } catch (e) { toast(e.message); goBack(); }
-}
-function renderShareNotice(token, role = getShareRoleFromToken(token)) {
-  const url = `${location.origin}/#/s/${token}`;
-  const roleText = role === 'viewer' ? 'Aðeins lestur' : 'Má bæta við';
-  document.getElementById('share-notice-wrap').innerHTML = `<div class="share-notice"><span>🔗 Deildur listi er virkur · ${roleText}</span><button onclick="copyText('${url}')">Afrita hlekk</button><button onclick="removeShare()">Loka</button></div>`;
-}
-function renderTasks() {
-  const list = document.getElementById('tasks-list'); list.innerHTML = '';
-  let tasks = S.tasks;
-  if (searchQuery) { const q = searchQuery.toLowerCase(); tasks = tasks.filter(t => t.title.toLowerCase().includes(q) || (t.tag && t.tag.toLowerCase().includes(q))); }
-  const today = startOfLocalDay();
-  const tomorrow = new Date(today); tomorrow.setDate(today.getDate()+1);
-  const dayAfter = new Date(tomorrow); dayAfter.setDate(tomorrow.getDate()+1);
-  if (activeFilter === 'today') tasks = tasks.filter(t => t.status === 'open' && parseLocalDate(t.deadline)?.getTime() >= today.getTime() && parseLocalDate(t.deadline)?.getTime() < tomorrow.getTime());
-  else if (activeFilter === 'tomorrow') tasks = tasks.filter(t => t.status === 'open' && parseLocalDate(t.deadline)?.getTime() >= tomorrow.getTime() && parseLocalDate(t.deadline)?.getTime() < dayAfter.getTime());
-  else if (activeFilter === 'late') tasks = tasks.filter(t => t.status === 'open' && parseLocalDate(t.deadline)?.getTime() < today.getTime());
-  else if (activeFilter === 'open') tasks = tasks.filter(t => t.status==='open');
-  else if (activeFilter === 'done') tasks = tasks.filter(t => t.status==='done');
-  if (tasks.length === 0) {
-    const isEmpty = !searchQuery && activeFilter === 'all' && S.tasks.length === 0;
-    list.innerHTML = `<div class="empty"><div class="empty-icon">${isEmpty?'✅':'🔍'}</div><div class="empty-text">${isEmpty?'Engin verkefni enn — bættu við!':'Engin verkefni passa'}</div></div>`; updateTagSuggestions(); return;
-  }
-  const open = tasks.filter(t => t.status==='open'), done = tasks.filter(t => t.status==='done');
-  [...open, ...done].forEach(task => list.appendChild(makeTaskEl(task)));
-  updateTagSuggestions();
-}
-function makeTaskEl(task) {
-  const ci = COLORS.find(c => S.currentList && c.v === S.currentList.color) || COLORS[0];
-  const isDone = task.status === 'done', dl = task.deadline ? formatDeadline(task.deadline) : null, overdue = task.deadline && !isDone && parseLocalDate(task.deadline)?.getTime() < startOfLocalDay().getTime();
-  const rec = task.recurrence ? recurrenceLabel(task.recurrence) : null;
-  const el = document.createElement('div'); el.className = `task-item${isDone ? ' done' : ''} animate-in`; el.dataset.id = task.id;
-  el.innerHTML = `<div class="task-check${isDone ? ' checked' : ''}" data-task-id="${task.id}" data-done="${isDone}"></div><div class="task-body"><div class="task-title">${esc(task.title)}</div><div class="task-meta">${task.tag ? `<span class="task-tag" style="--c:${ci.v};--c-light:${ci.l}">${esc(task.tag)}</span>` : ''}${dl ? `<span class="task-deadline${overdue ? ' overdue' : ''}">📅 ${dl}</span>` : ''}${rec ? `<span class="task-deadline">🔁 ${rec}</span>` : ''}</div></div><div class="task-actions"><button class="task-edit" data-edit-id="${task.id}">✎</button><button class="task-del" data-del-id="${task.id}">✕</button></div>`;
-  return el;
-}
-document.getElementById('tasks-list').addEventListener('click', async e => {
-  const check = e.target.closest('.task-check');
-  if (check) { const id = check.dataset.taskId, done = check.dataset.done === 'true'; try { await api('PATCH', `/tasks/${id}`, { status: done ? 'open' : 'done' }); if (!done) playApplause(); await refreshCurrentListTasks(); } catch (e) { toast(e.message); } return; }
-  const edit = e.target.closest('[data-edit-id]');
-  if (edit) { const task = S.tasks.find(t => t.id === edit.dataset.editId); if (task) openEditModal(task); return; }
-  const del = e.target.closest('[data-del-id]');
-  if (del) { try { await api('DELETE', `/tasks/${del.dataset.delId}`); S.tasks = S.tasks.filter(t => t.id !== del.dataset.delId); renderTasks(); } catch (e) { toast(e.message); } }
-});
-document.getElementById('filter-bar').addEventListener('click', e => {
-  const chip = e.target.closest('.filter-chip');
-  if (!chip) return;
-  activeFilter = chip.dataset.filter || 'all';
-  document.querySelectorAll('.filter-chip').forEach(c => c.classList.toggle('active', c === chip));
-  renderTasks();
-});
-document.getElementById('search-input').addEventListener('input', e => {
-  searchQuery = (e.target.value || '').trim();
-  renderTasks();
-});
-document.getElementById('add-title').addEventListener('focus', () => document.getElementById('add-extras').classList.add('open'));
-document.getElementById('add-title').addEventListener('input', e => {
-  const raw = e.target.value;
-  if (!raw) return;
-  const { tag, deadline } = parseQuickAdd(raw);
-  if (tag) { document.getElementById('add-tag').value = tag; document.getElementById('add-extras').classList.add('open'); }
-  if (deadline) { document.getElementById('add-deadline').value = deadline; document.getElementById('add-extras').classList.add('open'); }
-});
-document.getElementById('add-title').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-add-task').click(); });
-document.getElementById('btn-add-task').addEventListener('click', async () => {
-  const rawTitle = document.getElementById('add-title').value.trim();
-  if (!rawTitle || !S.currentList) return;
-  let title = rawTitle;
-  let tag = document.getElementById('add-tag').value.trim();
-  let deadline = document.getElementById('add-deadline').value;
-  const recurrence = document.getElementById('add-recurrence').value;
-  if (/[#@]/.test(rawTitle)) {
-    const parsed = parseQuickAdd(rawTitle);
-    title = parsed.title || title;
-    if (!tag && parsed.tag) tag = parsed.tag;
-    if (!deadline && parsed.deadline) deadline = parsed.deadline;
-  }
-  if (!title) { toast('Titill vantar'); return; }
-  try { const task = await api('POST', `/lists/${S.currentList.id}/tasks`, { title, tag, deadline, recurrence }); S.tasks.unshift(task); renderTasks(); playAhh(); document.getElementById('add-title').value = ''; document.getElementById('add-tag').value = ''; document.getElementById('add-deadline').value = ''; document.getElementById('add-recurrence').value = ''; document.getElementById('add-extras').classList.remove('open'); document.getElementById('add-title').focus(); } catch (e) { toast(e.message); }
-});
-
-document.getElementById('btn-list-menu').addEventListener('click', () => { if (!S.currentList) return; document.getElementById('options-modal-title').textContent = S.currentList.title; document.getElementById('btn-share-toggle').textContent = S.currentList.share_token ? '🔗 Afrita deilihlekk' : '🔗 Deila lista'; document.getElementById('list-options-modal').classList.add('open'); });
-document.getElementById('list-options-modal').addEventListener('click', e => { if (e.target === document.getElementById('list-options-modal')) closeOptionsModal(); });
-function closeOptionsModal() { document.getElementById('list-options-modal').classList.remove('open'); }
-document.getElementById('btn-close-options').addEventListener('click', closeOptionsModal);
-document.getElementById('trash-modal').addEventListener('click', e => { if (e.target === document.getElementById('trash-modal')) closeTrashModal(); });
-document.getElementById('btn-close-trash').addEventListener('click', closeTrashModal);
-function closeTrashModal() { document.getElementById('trash-modal').classList.remove('open'); }
-async function refreshCurrentListTasks() {
-  if (!S.currentList) return;
-  const { tasks } = await api('GET', `/lists/${S.currentList.id}/tasks`);
-  S.tasks = tasks;
-  renderTasks();
-}
-function renderTrashItems(tasks) {
-  const el = document.getElementById('trash-list');
-  if (!tasks.length) {
-    el.innerHTML = `<div class="empty" style="padding:20px 8px"><div class="empty-icon">🗂</div><div class="empty-text">Ruslafatan er tóm</div></div>`;
-    return;
-  }
-  el.innerHTML = tasks.map(task => `<div class="trash-item"><div class="trash-item-title">${esc(task.title)}</div><div class="trash-item-meta">${task.tag ? `#${esc(task.tag)} · ` : ''}${task.deadline ? `Frestur: ${esc(task.deadline)}` : 'Enginn frestur'}</div><div class="trash-item-actions"><button class="btn-ghost" data-trash-restore="${task.id}">Endurheimta</button><button class="btn-ghost danger" data-trash-purge="${task.id}">Eyða varanlega</button></div></div>`).join('');
-}
-async function openTrashModal() {
-  if (!S.currentList) return;
-  try {
-    const { tasks } = await api('GET', `/lists/${S.currentList.id}/trash`);
-    renderTrashItems(tasks);
-    closeOptionsModal();
-    document.getElementById('trash-modal').classList.add('open');
-  } catch (e) { toast(e.message); }
-}
-document.getElementById('btn-open-trash').addEventListener('click', openTrashModal);
-document.getElementById('trash-list').addEventListener('click', async e => {
-  const restore = e.target.closest('[data-trash-restore]');
-  if (restore) {
-    try {
-      await api('POST', `/tasks/${restore.dataset.trashRestore}/restore`, {});
-      if (S.currentList) {
-        const { tasks } = await api('GET', `/lists/${S.currentList.id}/trash`);
-        renderTrashItems(tasks);
+      async function showListDetail(id) {
+        activeFilter = 'all'; searchQuery = '';
+        showView('view-list'); document.getElementById('add-bar').style.display = 'none'; document.getElementById('tasks-list').innerHTML = ''; document.getElementById('share-notice-wrap').innerHTML = '';
+        document.querySelectorAll('.filter-chip').forEach(c => c.classList.toggle('active', c.dataset.filter === 'all'));
+        document.getElementById('search-input').value = '';
+        try {
+          const { list, tasks } = await api('GET', `/lists/${id}/tasks`);
+          S.currentList = list; S.tasks = tasks;
+          document.getElementById('list-topbar').style.borderBottom = `3px solid ${list.color}`;
+          document.getElementById('list-title').textContent = list.title;
+          document.getElementById('filter-bar').style.display = '';
+          document.getElementById('search-wrap').style.display = '';
+          if (list.share_token) renderShareNotice(list.share_token, getShareRoleFromToken(list.share_token));
+          renderTasks(); document.getElementById('add-bar').style.display = 'flex'; document.getElementById('add-title').focus();
+        } catch (e) { toast(e.message); goBack(); }
       }
-      await refreshCurrentListTasks();
-      toast('Verkefni endurheimt ✓');
-    } catch (err) { toast(err.message); }
-    return;
-  }
-  const purge = e.target.closest('[data-trash-purge]');
-  if (purge) {
-    if (!confirm('Eyða verkefni varanlega?')) return;
-    try {
-      await api('DELETE', `/tasks/${purge.dataset.trashPurge}/purge`);
-      if (S.currentList) {
-        const { tasks } = await api('GET', `/lists/${S.currentList.id}/trash`);
-        renderTrashItems(tasks);
+      function renderShareNotice(token, role = getShareRoleFromToken(token)) {
+        const url = `${location.origin}/#/s/${token}`;
+        const roleText = role === 'viewer' ? 'Aðeins lestur' : 'Má bæta við';
+        document.getElementById('share-notice-wrap').innerHTML = `<div class="share-notice"><span>🔗 Deildur listi er virkur · ${roleText}</span><button onclick="copyText('${url}')">Afrita hlekk</button><button onclick="removeShare()">Loka</button></div>`;
       }
-      toast('Verkefni eytt varanlega');
-    } catch (err) { toast(err.message); }
-  }
-});
-document.getElementById('btn-share-toggle').addEventListener('click', async () => {
-  if (!S.currentList) return;
-  if (S.currentList.share_token) { copyText(`${location.origin}/#/s/${S.currentList.share_token}`); closeOptionsModal(); }
-  else {
-    const canEdit = confirm('Leyfa gestum að bæta við verkefnum?\n\nOK = Má bæta við\nCancel = Aðeins lestur');
-    const chosenRole = canEdit ? 'editor' : 'viewer';
-    try {
-      const { token, role } = await api('POST', `/lists/${S.currentList.id}/share`, { role: chosenRole });
-      S.currentList.share_token = token;
-      renderShareNotice(token, role);
-      copyText(`${location.origin}/#/s/${token}`);
-      closeOptionsModal();
-      toast(`Deilihlekkur afritaður ✓ (${role})`);
-    } catch (e) { toast(e.message); }
-  }
-});
-document.getElementById('btn-delete-list').addEventListener('click', async () => {
-  if (!S.currentList || !confirm(`Eyða "${S.currentList.title}"?`)) return;
-  try { await api('DELETE', `/lists/${S.currentList.id}`); closeOptionsModal(); toast('Lista eytt'); goBack(); } catch (e) { toast(e.message); }
-});
-async function removeShare() { try { await api('DELETE', `/lists/${S.currentList.id}/share`); S.currentList.share_token = null; document.getElementById('share-notice-wrap').innerHTML = ''; toast('Deiling lokuð'); } catch (e) { toast(e.message); } }
-
-async function showShare(token) {
-  showView('view-share'); S.shareToken = token;
-  try {
-    const { list, tasks, role } = await api('GET', `/share/${token}`);
-    document.getElementById('share-title').textContent = list.title;
-    document.getElementById('share-header').style.borderBottom = `3px solid ${list.color}`;
-    renderShareTasks(tasks, list, role);
-  }
-  catch {
-    document.getElementById('share-title').textContent = 'Listinn fannst ekki';
-    document.querySelector('.shared-add-bar').style.display = 'none';
-  }
-}
-function renderShareTasks(tasks, list, role = getShareRoleFromToken(S.shareToken)) {
-  const el = document.getElementById('share-tasks'); el.innerHTML = '';
-  const ci = COLORS.find(c => c.v === list.color) || COLORS[0];
-  const addBar = document.querySelector('.shared-add-bar');
-  if (role === 'viewer') {
-    addBar.style.display = 'none';
-  } else {
-    addBar.style.display = 'flex';
-  }
-  if (tasks.length === 0) { el.innerHTML = `<div class="empty"><div class="empty-icon">📋</div><div class="empty-text">Engin verkefni enn</div></div>`; return; }
-  tasks.forEach(task => { const isDone = task.status === 'done'; const rec = task.recurrence ? recurrenceLabel(task.recurrence) : null; const item = document.createElement('div'); item.className = `task-item${isDone ? ' done' : ''} animate-in`; item.innerHTML = `<div class="task-check${isDone ? ' checked' : ''}"></div><div class="task-body"><div class="task-title">${esc(task.title)}</div><div class="task-meta">${task.tag ? `<span class="task-tag" style="--c:${ci.v};--c-light:${ci.l}">${esc(task.tag)}</span>` : ''}${task.deadline ? `<span class="task-deadline">📅 ${formatDeadline(task.deadline)}</span>` : ''}${rec ? `<span class="task-deadline">🔁 ${rec}</span>` : ''}</div></div>`; el.appendChild(item); });
-}
-document.getElementById('btn-share-add').addEventListener('click', addSharedTask);
-document.getElementById('share-add-title').addEventListener('keydown', e => { if (e.key === 'Enter') addSharedTask(); });
-async function addSharedTask() {
-  const title = document.getElementById('share-add-title').value.trim(); if (!title || !S.shareToken) return;
-  try { await api('POST', `/share/${S.shareToken}/tasks`, { title }); document.getElementById('share-add-title').value = ''; const { list, tasks } = await api('GET', `/share/${S.shareToken}`); renderShareTasks(tasks, list); toast('Verkefni bætt við ✓'); } catch (e) { toast(e.message); }
-}
-
-let ergoTaps = 0, ergoTapTimer = null, ergoHintTimer = null;
-function startErgoHint() {
-  clearTimeout(ergoHintTimer);
-  const hint = document.getElementById('ergo-hint');
-  hint.classList.remove('peek','wave');
-  ergoHintTimer = setTimeout(() => {
-    hint.classList.add('peek');
-    let waves = 0;
-    const wiggle = setInterval(() => {
-      hint.classList.remove('wave');
-      void hint.offsetWidth;
-      hint.classList.add('wave');
-      waves++;
-      if (waves >= 3) { clearInterval(wiggle); hint.classList.remove('wave'); }
-    }, 45000);
-  }, 12000);
-}
-function stopErgoHint() {
-  clearTimeout(ergoHintTimer);
-  const hint = document.getElementById('ergo-hint');
-  hint.classList.remove('peek','wave');
-}
-document.getElementById('ergo-hint').addEventListener('click', openErgoModal);
-document.getElementById('lists-title').addEventListener('click', () => {
-  ergoTaps++;
-  clearTimeout(ergoTapTimer);
-  if (ergoTaps >= 5) { ergoTaps = 0; openErgoModal(); return; }
-  ergoTapTimer = setTimeout(() => { ergoTaps = 0; }, 1800);
-});
-function openErgoModal() {
-  document.querySelectorAll('.ergo-item').forEach(el => el.classList.remove('done'));
-  document.querySelectorAll('.ergo-check').forEach(el => el.textContent = '');
-  document.getElementById('ergo-done').classList.remove('visible');
-  document.getElementById('ergo-modal').classList.add('open');
-}
-document.getElementById('ergo-modal').addEventListener('click', e => { if (e.target === document.getElementById('ergo-modal')) closeErgoModal(); });
-document.getElementById('ergo-close').addEventListener('click', closeErgoModal);
-function closeErgoModal() { document.getElementById('ergo-modal').classList.remove('open'); }
-document.getElementById('ergo-list').addEventListener('click', e => {
-  const item = e.target.closest('.ergo-item'); if (!item) return;
-  item.classList.toggle('done');
-  item.querySelector('.ergo-check').textContent = item.classList.contains('done') ? '✓' : '';
-  const done = document.querySelectorAll('.ergo-item.done').length;
-  const total = document.querySelectorAll('.ergo-item').length;
-  document.getElementById('ergo-score').textContent = `${done}/${total}`;
-  document.getElementById('ergo-done').classList.toggle('visible', done > 0);
-  if (done === total) { playApplause(); document.getElementById('ergo-score').textContent = '9/9 🏆'; }
-});
-
-document.getElementById('btn-bell').addEventListener('click', () => {
-  const btn = document.getElementById('btn-bell');
-  btn.classList.add('bell-ringing'); setTimeout(() => btn.classList.remove('bell-ringing'), 600);
-  document.getElementById('notif-dot').classList.remove('visible');
-  const overdue = (S.lists || []).reduce((a, l) => a + (l.open_count || 0), 0);
-  if (overdue > 0) toast(`🔔 ${overdue} verkefni bíða þín!`);
-  else toast('🔔 Allt í lagi — ekkert í biðröð!');
-});
-document.getElementById('btn-back').addEventListener('click', goBack);
-function goBack() { activeFilter = 'all'; searchQuery = ''; document.getElementById('filter-bar').style.display = 'none'; document.getElementById('search-wrap').style.display = 'none'; S.currentList = null; S.tasks = []; stopErgoHint(); location.hash = '#/'; showLists(); }
-document.getElementById('btn-logout').addEventListener('click', () => { if (confirm('Útskrá?')) logout(); });
-function logout() { S.token = null; localStorage.removeItem('bogga_token'); location.hash = ''; checkSetup(); }
-function updateDots(id, pin) { document.querySelectorAll(`#${id} .pin-dot`).forEach((d, i) => d.classList.toggle('filled', i < pin.length)); }
-function shakeElement(id) { const el = document.getElementById(id); el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); }
-function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); }
-
-function playAhh() {
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    [261.63, 329.63, 392.00, 523.25].forEach((freq, i) => {
-      const osc = ctx.createOscillator(), gain = ctx.createGain();
-      osc.connect(gain); gain.connect(ctx.destination);
-      osc.type = 'sine'; osc.frequency.value = freq;
-      gain.gain.setValueAtTime(0, ctx.currentTime);
-      gain.gain.linearRampToValueAtTime(0.07, ctx.currentTime + 0.08 + i * 0.03);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.7);
-      osc.start(ctx.currentTime + i * 0.02); osc.stop(ctx.currentTime + 0.75);
-    });
-    setTimeout(() => ctx.close(), 900);
-  } catch(e) {}
-}
-
-function playApplause() {
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const dur = 2.2, sr = ctx.sampleRate;
-    const buf = ctx.createBuffer(2, sr * dur, sr);
-    for (let c = 0; c < 2; c++) {
-      const d = buf.getChannelData(c);
-      for (let i = 0; i < d.length; i++) {
-        const t = i / sr, env = Math.pow(Math.sin(t / dur * Math.PI), 0.6);
-        const burst = 0.6 + 0.4 * Math.abs(Math.sin(t * 7.3 + c));
-        d[i] = (Math.random() * 2 - 1) * env * burst * 0.4;
+      function renderTasks() {
+        const list = document.getElementById('tasks-list'); list.innerHTML = '';
+        let tasks = S.tasks;
+        if (searchQuery) { const q = searchQuery.toLowerCase(); tasks = tasks.filter(t => t.title.toLowerCase().includes(q) || (t.tag && t.tag.toLowerCase().includes(q))); }
+        const today = startOfLocalDay();
+        const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1);
+        const dayAfter = new Date(tomorrow); dayAfter.setDate(tomorrow.getDate() + 1);
+        if (activeFilter === 'today') tasks = tasks.filter(t => t.status === 'open' && parseLocalDate(t.deadline)?.getTime() >= today.getTime() && parseLocalDate(t.deadline)?.getTime() < tomorrow.getTime());
+        else if (activeFilter === 'tomorrow') tasks = tasks.filter(t => t.status === 'open' && parseLocalDate(t.deadline)?.getTime() >= tomorrow.getTime() && parseLocalDate(t.deadline)?.getTime() < dayAfter.getTime());
+        else if (activeFilter === 'late') tasks = tasks.filter(t => t.status === 'open' && parseLocalDate(t.deadline)?.getTime() < today.getTime());
+        else if (activeFilter === 'open') tasks = tasks.filter(t => t.status === 'open');
+        else if (activeFilter === 'done') tasks = tasks.filter(t => t.status === 'done');
+        if (tasks.length === 0) {
+          const isEmpty = !searchQuery && activeFilter === 'all' && S.tasks.length === 0;
+          list.innerHTML = `<div class="empty"><div class="empty-icon">${isEmpty ? '✅' : '🔍'}</div><div class="empty-text">${isEmpty ? 'Engin verkefni enn — bættu við!' : 'Engin verkefni passa'}</div></div>`; updateTagSuggestions(); return;
+        }
+        const open = tasks.filter(t => t.status === 'open'), done = tasks.filter(t => t.status === 'done');
+        [...open, ...done].forEach(task => list.appendChild(makeTaskEl(task)));
+        updateTagSuggestions();
       }
-    }
-    const src = ctx.createBufferSource(); src.buffer = buf;
-    const filt = ctx.createBiquadFilter(); filt.type = 'bandpass'; filt.frequency.value = 1400; filt.Q.value = 0.4;
-    const gain = ctx.createGain(); gain.gain.setValueAtTime(0.8, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
-    src.connect(filt); filt.connect(gain); gain.connect(ctx.destination);
-    src.start(); src.stop(ctx.currentTime + dur);
-    setTimeout(() => ctx.close(), (dur + 0.2) * 1000);
-  } catch(e) {}
-}
+      function makeTaskEl(task) {
+        const ci = COLORS.find(c => S.currentList && c.v === S.currentList.color) || COLORS[0];
+        const isDone = task.status === 'done', dl = task.deadline ? formatDeadline(task.deadline) : null, overdue = task.deadline && !isDone && parseLocalDate(task.deadline)?.getTime() < startOfLocalDay().getTime();
+        const rec = task.recurrence ? recurrenceLabel(task.recurrence) : null;
+        const el = document.createElement('div'); el.className = `task-item${isDone ? ' done' : ''} animate-in`; el.dataset.id = task.id;
+        el.innerHTML = `<div class="task-check${isDone ? ' checked' : ''}" data-task-id="${task.id}" data-done="${isDone}"></div><div class="task-body"><div class="task-title">${esc(task.title)}</div><div class="task-meta">${task.tag ? `<span class="task-tag" style="--c:${ci.v};--c-light:${ci.l}">${esc(task.tag)}</span>` : ''}${dl ? `<span class="task-deadline${overdue ? ' overdue' : ''}">📅 ${dl}</span>` : ''}${rec ? `<span class="task-deadline">🔁 ${rec}</span>` : ''}</div></div><div class="task-actions"><button class="task-edit" data-edit-id="${task.id}">✎</button><button class="task-del" data-del-id="${task.id}">✕</button></div>`;
+        return el;
+      }
+      document.getElementById('tasks-list').addEventListener('click', async e => {
+        const check = e.target.closest('.task-check');
+        if (check) { const id = check.dataset.taskId, done = check.dataset.done === 'true'; try { await api('PATCH', `/tasks/${id}`, { status: done ? 'open' : 'done' }); if (!done) playApplause(); await refreshCurrentListTasks(); } catch (e) { toast(e.message); } return; }
+        const edit = e.target.closest('[data-edit-id]');
+        if (edit) { const task = S.tasks.find(t => t.id === edit.dataset.editId); if (task) openEditModal(task); return; }
+        const del = e.target.closest('[data-del-id]');
+        if (del) { try { await api('DELETE', `/tasks/${del.dataset.delId}`); S.tasks = S.tasks.filter(t => t.id !== del.dataset.delId); renderTasks(); } catch (e) { toast(e.message); } }
+      });
+      document.getElementById('filter-bar').addEventListener('click', e => {
+        const chip = e.target.closest('.filter-chip');
+        if (!chip) return;
+        activeFilter = chip.dataset.filter || 'all';
+        document.querySelectorAll('.filter-chip').forEach(c => c.classList.toggle('active', c === chip));
+        renderTasks();
+      });
+      document.getElementById('search-input').addEventListener('input', e => {
+        searchQuery = (e.target.value || '').trim();
+        renderTasks();
+      });
+      document.getElementById('add-title').addEventListener('focus', () => document.getElementById('add-extras').classList.add('open'));
+      document.getElementById('add-title').addEventListener('input', e => {
+        const raw = e.target.value;
+        if (!raw) return;
+        const { tag, deadline } = parseQuickAdd(raw);
+        if (tag) { document.getElementById('add-tag').value = tag; document.getElementById('add-extras').classList.add('open'); }
+        if (deadline) { document.getElementById('add-deadline').value = deadline; document.getElementById('add-extras').classList.add('open'); }
+      });
+      document.getElementById('add-title').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-add-task').click(); });
+      document.getElementById('btn-add-task').addEventListener('click', async () => {
+        const rawTitle = document.getElementById('add-title').value.trim();
+        if (!rawTitle || !S.currentList) return;
+        let title = rawTitle;
+        let tag = document.getElementById('add-tag').value.trim();
+        let deadline = document.getElementById('add-deadline').value;
+        const recurrence = document.getElementById('add-recurrence').value;
+        if (/[#@]/.test(rawTitle)) {
+          const parsed = parseQuickAdd(rawTitle);
+          title = parsed.title || title;
+          if (!tag && parsed.tag) tag = parsed.tag;
+          if (!deadline && parsed.deadline) deadline = parsed.deadline;
+        }
+        if (!title) { toast('Titill vantar'); return; }
+        try { const task = await api('POST', `/lists/${S.currentList.id}/tasks`, { title, tag, deadline, recurrence }); S.tasks.unshift(task); renderTasks(); playAhh(); document.getElementById('add-title').value = ''; document.getElementById('add-tag').value = ''; document.getElementById('add-deadline').value = ''; document.getElementById('add-recurrence').value = ''; document.getElementById('add-extras').classList.remove('open'); document.getElementById('add-title').focus(); } catch (e) { toast(e.message); }
+      });
 
-function getJoke() {
-  const h = new Date().getHours();
-  return JOKES.find(j => j.h === h) || null;
-}
+      document.getElementById('btn-list-menu').addEventListener('click', () => { if (!S.currentList) return; document.getElementById('options-modal-title').textContent = S.currentList.title; document.getElementById('btn-share-toggle').textContent = S.currentList.share_token ? '🔗 Afrita deilihlekk' : '🔗 Deila lista'; document.getElementById('list-options-modal').classList.add('open'); });
+      document.getElementById('list-options-modal').addEventListener('click', e => { if (e.target === document.getElementById('list-options-modal')) closeOptionsModal(); });
+      function closeOptionsModal() { document.getElementById('list-options-modal').classList.remove('open'); }
+      document.getElementById('btn-close-options').addEventListener('click', closeOptionsModal);
+      document.getElementById('trash-modal').addEventListener('click', e => { if (e.target === document.getElementById('trash-modal')) closeTrashModal(); });
+      document.getElementById('btn-close-trash').addEventListener('click', closeTrashModal);
+      function closeTrashModal() { document.getElementById('trash-modal').classList.remove('open'); }
+      async function refreshCurrentListTasks() {
+        if (!S.currentList) return;
+        const { tasks } = await api('GET', `/lists/${S.currentList.id}/tasks`);
+        S.tasks = tasks;
+        renderTasks();
+      }
+      function renderTrashItems(tasks) {
+        const el = document.getElementById('trash-list');
+        if (!tasks.length) {
+          el.innerHTML = `<div class="empty" style="padding:20px 8px"><div class="empty-icon">🗂</div><div class="empty-text">Ruslafatan er tóm</div></div>`;
+          return;
+        }
+        el.innerHTML = tasks.map(task => `<div class="trash-item"><div class="trash-item-title">${esc(task.title)}</div><div class="trash-item-meta">${task.tag ? `#${esc(task.tag)} · ` : ''}${task.deadline ? `Frestur: ${esc(task.deadline)}` : 'Enginn frestur'}</div><div class="trash-item-actions"><button class="btn-ghost" data-trash-restore="${task.id}">Endurheimta</button><button class="btn-ghost danger" data-trash-purge="${task.id}">Eyða varanlega</button></div></div>`).join('');
+      }
+      async function openTrashModal() {
+        if (!S.currentList) return;
+        try {
+          const { tasks } = await api('GET', `/lists/${S.currentList.id}/trash`);
+          renderTrashItems(tasks);
+          closeOptionsModal();
+          document.getElementById('trash-modal').classList.add('open');
+        } catch (e) { toast(e.message); }
+      }
+      document.getElementById('btn-open-trash').addEventListener('click', openTrashModal);
+      document.getElementById('trash-list').addEventListener('click', async e => {
+        const restore = e.target.closest('[data-trash-restore]');
+        if (restore) {
+          try {
+            await api('POST', `/tasks/${restore.dataset.trashRestore}/restore`, {});
+            if (S.currentList) {
+              const { tasks } = await api('GET', `/lists/${S.currentList.id}/trash`);
+              renderTrashItems(tasks);
+            }
+            await refreshCurrentListTasks();
+            toast('Verkefni endurheimt ✓');
+          } catch (err) { toast(err.message); }
+          return;
+        }
+        const purge = e.target.closest('[data-trash-purge]');
+        if (purge) {
+          if (!confirm('Eyða verkefni varanlega?')) return;
+          try {
+            await api('DELETE', `/tasks/${purge.dataset.trashPurge}/purge`);
+            if (S.currentList) {
+              const { tasks } = await api('GET', `/lists/${S.currentList.id}/trash`);
+              renderTrashItems(tasks);
+            }
+            toast('Verkefni eytt varanlega');
+          } catch (err) { toast(err.message); }
+        }
+      });
+      document.getElementById('btn-share-toggle').addEventListener('click', async () => {
+        if (!S.currentList) return;
+        if (S.currentList.share_token) { copyText(`${location.origin}/#/s/${S.currentList.share_token}`); closeOptionsModal(); }
+        else {
+          const canEdit = confirm('Leyfa gestum að bæta við verkefnum?\n\nOK = Má bæta við\nCancel = Aðeins lestur');
+          const chosenRole = canEdit ? 'editor' : 'viewer';
+          try {
+            const { token, role } = await api('POST', `/lists/${S.currentList.id}/share`, { role: chosenRole });
+            S.currentList.share_token = token;
+            renderShareNotice(token, role);
+            copyText(`${location.origin}/#/s/${token}`);
+            closeOptionsModal();
+            toast(`Deilihlekkur afritaður ✓ (${role})`);
+          } catch (e) { toast(e.message); }
+        }
+      });
+      document.getElementById('btn-delete-list').addEventListener('click', async () => {
+        if (!S.currentList || !confirm(`Eyða "${S.currentList.title}"?`)) return;
+        try { await api('DELETE', `/lists/${S.currentList.id}`); closeOptionsModal(); toast('Lista eytt'); goBack(); } catch (e) { toast(e.message); }
+      });
+      async function removeShare() { try { await api('DELETE', `/lists/${S.currentList.id}/share`); S.currentList.share_token = null; document.getElementById('share-notice-wrap').innerHTML = ''; toast('Deiling lokuð'); } catch (e) { toast(e.message); } }
 
-function renderJokeCard() {
-  const existing = document.getElementById('joke-card-el');
-  if (existing) existing.remove();
-  const joke = getJoke();
-  if (!joke) return;
-  const el = document.createElement('div');
-  el.id = 'joke-card-el'; el.className = 'joke-card';
-  el.innerHTML = `<div class="joke-header">🃏 Brandari klukkustundarinnar · ${joke.h}:00</div><div class="joke-q">${esc(joke.q)}</div><div class="joke-a">— ${esc(joke.a)}</div><button class="joke-laugh" title="Hlæja!">😂</button>`;
-  el.querySelector('.joke-laugh').addEventListener('click', function() {
-    this.textContent = ['😂','🤣','💀','😹','🥲'][Math.floor(Math.random()*5)];
-    playApplause();
-    setTimeout(() => { this.textContent = '😂'; }, 1500);
-  });
-  const scroll = document.querySelector('#view-lists .scroll');
-  if (scroll) scroll.insertBefore(el, scroll.firstChild);
+      async function showShare(token) {
+        showView('view-share'); S.shareToken = token;
+        try {
+          const { list, tasks, role } = await api('GET', `/share/${token}`);
+          document.getElementById('share-title').textContent = list.title;
+          document.getElementById('share-header').style.borderBottom = `3px solid ${list.color}`;
+          renderShareTasks(tasks, list, role);
+        }
+        catch {
+          document.getElementById('share-title').textContent = 'Listinn fannst ekki';
+          document.querySelector('.shared-add-bar').style.display = 'none';
+        }
+      }
+      function renderShareTasks(tasks, list, role = getShareRoleFromToken(S.shareToken)) {
+        const el = document.getElementById('share-tasks'); el.innerHTML = '';
+        const ci = COLORS.find(c => c.v === list.color) || COLORS[0];
+        const addBar = document.querySelector('.shared-add-bar');
+        if (role === 'viewer') {
+          addBar.style.display = 'none';
+        } else {
+          addBar.style.display = 'flex';
+        }
+        if (tasks.length === 0) { el.innerHTML = `<div class="empty"><div class="empty-icon">📋</div><div class="empty-text">Engin verkefni enn</div></div>`; return; }
+        tasks.forEach(task => { const isDone = task.status === 'done'; const rec = task.recurrence ? recurrenceLabel(task.recurrence) : null; const item = document.createElement('div'); item.className = `task-item${isDone ? ' done' : ''} animate-in`; item.innerHTML = `<div class="task-check${isDone ? ' checked' : ''}"></div><div class="task-body"><div class="task-title">${esc(task.title)}</div><div class="task-meta">${task.tag ? `<span class="task-tag" style="--c:${ci.v};--c-light:${ci.l}">${esc(task.tag)}</span>` : ''}${task.deadline ? `<span class="task-deadline">📅 ${formatDeadline(task.deadline)}</span>` : ''}${rec ? `<span class="task-deadline">🔁 ${rec}</span>` : ''}</div></div>`; el.appendChild(item); });
+      }
+      document.getElementById('btn-share-add').addEventListener('click', addSharedTask);
+      document.getElementById('share-add-title').addEventListener('keydown', e => { if (e.key === 'Enter') addSharedTask(); });
+      async function addSharedTask() {
+        const title = document.getElementById('share-add-title').value.trim(); if (!title || !S.shareToken) return;
+        try { await api('POST', `/share/${S.shareToken}/tasks`, { title }); document.getElementById('share-add-title').value = ''; const { list, tasks } = await api('GET', `/share/${S.shareToken}`); renderShareTasks(tasks, list); toast('Verkefni bætt við ✓'); } catch (e) { toast(e.message); }
+      }
+
+      let ergoTaps = 0, ergoTapTimer = null, ergoHintTimer = null;
+      function startErgoHint() {
+        clearTimeout(ergoHintTimer);
+        const hint = document.getElementById('ergo-hint');
+        hint.classList.remove('peek', 'wave');
+        ergoHintTimer = setTimeout(() => {
+          hint.classList.add('peek');
+          let waves = 0;
+          const wiggle = setInterval(() => {
+            hint.classList.remove('wave');
+            void hint.offsetWidth;
+            hint.classList.add('wave');
+            waves++;
+            if (waves >= 3) { clearInterval(wiggle); hint.classList.remove('wave'); }
+          }, 45000);
+        }, 12000);
+      }
+      function stopErgoHint() {
+        clearTimeout(ergoHintTimer);
+        const hint = document.getElementById('ergo-hint');
+        hint.classList.remove('peek', 'wave');
+      }
+      document.getElementById('ergo-hint').addEventListener('click', openErgoModal);
+      document.getElementById('lists-title').addEventListener('click', () => {
+        ergoTaps++;
+        clearTimeout(ergoTapTimer);
+        if (ergoTaps >= 5) { ergoTaps = 0; openErgoModal(); return; }
+        ergoTapTimer = setTimeout(() => { ergoTaps = 0; }, 1800);
+      });
+      function openErgoModal() {
+        document.querySelectorAll('.ergo-item').forEach(el => el.classList.remove('done'));
+        document.querySelectorAll('.ergo-check').forEach(el => el.textContent = '');
+        document.getElementById('ergo-done').classList.remove('visible');
+        document.getElementById('ergo-modal').classList.add('open');
+      }
+      document.getElementById('ergo-modal').addEventListener('click', e => { if (e.target === document.getElementById('ergo-modal')) closeErgoModal(); });
+      document.getElementById('ergo-close').addEventListener('click', closeErgoModal);
+      function closeErgoModal() { document.getElementById('ergo-modal').classList.remove('open'); }
+      document.getElementById('ergo-list').addEventListener('click', e => {
+        const item = e.target.closest('.ergo-item'); if (!item) return;
+        item.classList.toggle('done');
+        item.querySelector('.ergo-check').textContent = item.classList.contains('done') ? '✓' : '';
+        const done = document.querySelectorAll('.ergo-item.done').length;
+        const total = document.querySelectorAll('.ergo-item').length;
+        document.getElementById('ergo-score').textContent = `${done}/${total}`;
+        document.getElementById('ergo-done').classList.toggle('visible', done > 0);
+        if (done === total) { playApplause(); document.getElementById('ergo-score').textContent = '9/9 🏆'; }
+      });
+
+      document.getElementById('btn-bell').addEventListener('click', () => {
+        const btn = document.getElementById('btn-bell');
+        btn.classList.add('bell-ringing'); setTimeout(() => btn.classList.remove('bell-ringing'), 600);
+        document.getElementById('notif-dot').classList.remove('visible');
+        const overdue = (S.lists || []).reduce((a, l) => a + (l.open_count || 0), 0);
+        if (overdue > 0) toast(`🔔 ${overdue} verkefni bíða þín!`);
+        else toast('🔔 Allt í lagi — ekkert í biðröð!');
+      });
+      document.getElementById('btn-back').addEventListener('click', goBack);
+      function goBack() { activeFilter = 'all'; searchQuery = ''; document.getElementById('filter-bar').style.display = 'none'; document.getElementById('search-wrap').style.display = 'none'; S.currentList = null; S.tasks = []; stopErgoHint(); location.hash = '#/'; showLists(); }
+      document.getElementById('btn-logout').addEventListener('click', () => { if (confirm('Útskrá?')) logout(); });
+      function logout() { S.token = null; localStorage.removeItem('bogga_token'); location.hash = ''; checkSetup(); }
+      function updateDots(id, pin) { document.querySelectorAll(`#${id} .pin-dot`).forEach((d, i) => d.classList.toggle('filled', i < pin.length)); }
+      function shakeElement(id) { const el = document.getElementById(id); el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); }
+      function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); }
+
+      function playAhh() {
+        try {
+          const ctx = new (window.AudioContext || window.webkitAudioContext)();
+          [261.63, 329.63, 392.00, 523.25].forEach((freq, i) => {
+            const osc = ctx.createOscillator(), gain = ctx.createGain();
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.type = 'sine'; osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0, ctx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.07, ctx.currentTime + 0.08 + i * 0.03);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.7);
+            osc.start(ctx.currentTime + i * 0.02); osc.stop(ctx.currentTime + 0.75);
+          });
+          setTimeout(() => ctx.close(), 900);
+        } catch (e) { }
+      }
+
+      function playApplause() {
+        try {
+          const ctx = new (window.AudioContext || window.webkitAudioContext)();
+          const dur = 2.2, sr = ctx.sampleRate;
+          const buf = ctx.createBuffer(2, sr * dur, sr);
+          for (let c = 0; c < 2; c++) {
+            const d = buf.getChannelData(c);
+            for (let i = 0; i < d.length; i++) {
+              const t = i / sr, env = Math.pow(Math.sin(t / dur * Math.PI), 0.6);
+              const burst = 0.6 + 0.4 * Math.abs(Math.sin(t * 7.3 + c));
+              d[i] = (Math.random() * 2 - 1) * env * burst * 0.4;
+            }
+          }
+          const src = ctx.createBufferSource(); src.buffer = buf;
+          const filt = ctx.createBiquadFilter(); filt.type = 'bandpass'; filt.frequency.value = 1400; filt.Q.value = 0.4;
+          const gain = ctx.createGain(); gain.gain.setValueAtTime(0.8, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+          src.connect(filt); filt.connect(gain); gain.connect(ctx.destination);
+          src.start(); src.stop(ctx.currentTime + dur);
+          setTimeout(() => ctx.close(), (dur + 0.2) * 1000);
+        } catch (e) { }
+      }
+
+      function getJoke() {
+        const h = new Date().getHours();
+        return JOKES.find(j => j.h === h) || null;
+      }
+
+      function renderJokeCard() {
+        const existing = document.getElementById('joke-card-el');
+        if (existing) existing.remove();
+        const joke = getJoke();
+        if (!joke) return;
+        const el = document.createElement('div');
+        el.id = 'joke-card-el'; el.className = 'joke-card';
+        el.innerHTML = `<div class="joke-header">🃏 Brandari klukkustundarinnar · ${joke.h}:00</div><div class="joke-q">${esc(joke.q)}</div><div class="joke-a">— ${esc(joke.a)}</div><button class="joke-laugh" title="Hlæja!">😂</button>`;
+        el.querySelector('.joke-laugh').addEventListener('click', function () {
+          this.textContent = ['😂', '🤣', '💀', '😹', '🥲'][Math.floor(Math.random() * 5)];
+          playApplause();
+          setTimeout(() => { this.textContent = '😂'; }, 1500);
+        });
+        const scroll = document.querySelector('#view-lists .scroll');
+        if (scroll) scroll.insertBefore(el, scroll.firstChild);
+      }
+      function copyText(text) { navigator.clipboard.writeText(text).then(() => toast('Hlekkur afritaður ✓')).catch(() => toast(text)); }
+      function getShareRoleFromToken(token) { return token && token.startsWith('v_') ? 'viewer' : 'editor'; }
+      function calcEaster(y) {
+        const f = Math.floor, G = y % 19, C = f(y / 100);
+        const H = (C - f(C / 4) - f((8 * C + 13) / 25) + 19 * G + 15) % 30;
+        const I = H - f(H / 28) * (1 - f(29 / (H + 1)) * f((21 - G) / 11));
+        const J = (y + f(y / 4) + I + 2 - C + f(C / 4)) % 7, L = I - J;
+        return new Date(y, 2 + f((L + 40) / 44), L + 28 - 31 * f((3 + f((L + 40) / 44)) / 4));
+      }
+      function nthWeekday(y, mo, weekday, nth) {
+        const d = new Date(y, mo - 1, 1);
+        while (d.getDay() !== weekday) d.setDate(d.getDate() + 1);
+        d.setDate(d.getDate() + (nth - 1) * 7); return d;
+      }
+      function firstWeekdayOnOrAfter(y, mo, day, weekday) {
+        const d = new Date(y, mo - 1, day);
+        while (d.getDay() !== weekday) d.setDate(d.getDate() + 1); return d;
+      }
+      function getIcelandicGreeting(name) {
+        const now = new Date(), h = now.getHours(), dow = now.getDay();
+        const y = now.getFullYear(), mo = now.getMonth() + 1, d = now.getDate();
+        const hol = getHoliday(y, mo, d);
+        if (hol) return `${hol.emoji} ${hol.greeting}, ${name}!`;
+        let g = h >= 5 && h < 10 ? 'Góðan morgun' : h >= 10 && h < 18 ? 'Góðan dag' : h >= 18 && h < 23 ? 'Gott kvöld' : 'Góða nótt';
+        const sfx = dow === 1 && h < 10 ? ' 😅' : dow === 5 && h >= 14 ? ' 🎉' : dow === 6 ? ' 🌟' : dow === 0 ? ' ☀️' : '';
+        return `${g}, ${name}!${sfx}`;
+      }
+      function getHoliday(y, mo, d) {
+        const E = calcEaster(y);
+        const ed = (offset = 0) => { const x = new Date(E); x.setDate(x.getDate() + offset); return [x.getMonth() + 1, x.getDate()]; };
+        const fwooa = (m, day, wday) => { const x = firstWeekdayOnOrAfter(y, m, day, wday); return [x.getMonth() + 1, x.getDate()]; };
+        const nwday = (m, wday, n) => { const x = nthWeekday(y, m, wday, n); return [x.getMonth() + 1, x.getDate()]; };
+        const match = (arr) => arr[0] === mo && arr[1] === d;
+        const DAYS = [
+          { check: [1, 1], greeting: 'Gleðilegt nýtt ár', emoji: '🥂' },
+          { check: [1, 6], greeting: 'Gleðilegan þrettánda', emoji: '🎄' },
+          { check: [2, 14], greeting: 'Gleðilegan valentínusardag', emoji: '❤️' },
+          { check: [5, 1], greeting: 'Gleðilegan 1. maí', emoji: '✊' },
+          { check: [6, 17], greeting: 'Gleðilegan þjóðhátíðardag', emoji: '🇮🇸' },
+          { check: [12, 1], greeting: 'Gleðilegar aðventukveðjur', emoji: '🕯️' },
+          { check: [12, 23], greeting: 'Gleðilega Þórláksmessu', emoji: '🐟' },
+          { check: [12, 24], greeting: 'Gleðilegan aðfangadag', emoji: '🎄' },
+          { check: [12, 25], greeting: 'Gleðileg jól', emoji: '🎁' },
+          { check: [12, 26], greeting: 'Gleðileg jól', emoji: '🎁' },
+          { check: [12, 31], greeting: 'Gleðilegan gamlársdag', emoji: '🎆' },
+          { check: [4, 22], greeting: 'Gleðilegan fullveldisdag', emoji: '🇮🇸' },
+          { check: [10, 31], greeting: 'Skelfilega góðan hrekkjavöku', emoji: '🎃' },
+          { check: ed(-3), greeting: 'Gleðilegan skírdag', emoji: '✝️' },
+          { check: ed(-2), greeting: 'Gleðilegan föstudaginn langa', emoji: '✝️' },
+          { check: ed(0), greeting: 'Gleðilega páska', emoji: '🐣' },
+          { check: ed(1), greeting: 'Gleðilega páska', emoji: '🐣' },
+          { check: ed(39), greeting: 'Gleðilegan uppstigningardag', emoji: '☁️' },
+          { check: ed(49), greeting: 'Gleðilega hvítasunnu', emoji: '🕊️' },
+          { check: ed(50), greeting: 'Gleðilega hvítasunnu', emoji: '🕊️' },
+          { check: fwooa(4, 19, 4), greeting: 'Gleðilegan sumardaginn fyrsta', emoji: '🌸' },
+          { check: nwday(8, 1, 1), greeting: 'Gleðilegan verslunarmannadag', emoji: '☀️' },
+        ];
+        return DAYS.find(x => match(x.check)) || null;
+      }
 }
-function copyText(text) { navigator.clipboard.writeText(text).then(() => toast('Hlekkur afritaður ✓')).catch(() => toast(text)); }
-function getShareRoleFromToken(token) { return token && token.startsWith('v_') ? 'viewer' : 'editor'; }
-function calcEaster(y) {
-  const f = Math.floor, G = y%19, C = f(y/100);
-  const H = (C-f(C/4)-f((8*C+13)/25)+19*G+15)%30;
-  const I = H-f(H/28)*(1-f(29/(H+1))*f((21-G)/11));
-  const J = (y+f(y/4)+I+2-C+f(C/4))%7, L = I-J;
-  return new Date(y, 2+f((L+40)/44), L+28-31*f((3+f((L+40)/44))/4));
-}
-function nthWeekday(y, mo, weekday, nth) {
-  const d = new Date(y, mo-1, 1);
-  while (d.getDay() !== weekday) d.setDate(d.getDate()+1);
-  d.setDate(d.getDate()+(nth-1)*7); return d;
-}
-function firstWeekdayOnOrAfter(y, mo, day, weekday) {
-  const d = new Date(y, mo-1, day);
-  while (d.getDay() !== weekday) d.setDate(d.getDate()+1); return d;
-}
-function getIcelandicGreeting(name) {
-  const now = new Date(), h = now.getHours(), dow = now.getDay();
-  const y = now.getFullYear(), mo = now.getMonth()+1, d = now.getDate();
-  const hol = getHoliday(y, mo, d);
-  if (hol) return `${hol.emoji} ${hol.greeting}, ${name}!`;
-  let g = h>=5&&h<10 ? 'Góðan morgun' : h>=10&&h<18 ? 'Góðan dag' : h>=18&&h<23 ? 'Gott kvöld' : 'Góða nótt';
-  const sfx = dow===1&&h<10?' 😅':dow===5&&h>=14?' 🎉':dow===6?' 🌟':dow===0?' ☀️':'';
-  return `${g}, ${name}!${sfx}`;
-}
-function getHoliday(y, mo, d) {
-  const E = calcEaster(y);
-  const ed = (offset=0) => { const x=new Date(E); x.setDate(x.getDate()+offset); return [x.getMonth()+1, x.getDate()]; };
-  const fwooa = (m,day,wday) => { const x=firstWeekdayOnOrAfter(y,m,day,wday); return [x.getMonth()+1, x.getDate()]; };
-  const nwday = (m,wday,n) => { const x=nthWeekday(y,m,wday,n); return [x.getMonth()+1, x.getDate()]; };
-  const match = (arr) => arr[0]===mo && arr[1]===d;
-  const DAYS = [
-    { check:[1,1],   greeting:'Gleðilegt nýtt ár',            emoji:'🥂' },
-    { check:[1,6],   greeting:'Gleðilegan þrettánda',          emoji:'🎄' },
-    { check:[2,14],  greeting:'Gleðilegan valentínusardag',    emoji:'❤️' },
-    { check:[5,1],   greeting:'Gleðilegan 1. maí',             emoji:'✊' },
-    { check:[6,17],  greeting:'Gleðilegan þjóðhátíðardag',     emoji:'🇮🇸' },
-    { check:[12,1],  greeting:'Gleðilegar aðventukveðjur',     emoji:'🕯️' },
-    { check:[12,23], greeting:'Gleðilega Þórláksmessu',        emoji:'🐟' },
-    { check:[12,24], greeting:'Gleðilegan aðfangadag',         emoji:'🎄' },
-    { check:[12,25], greeting:'Gleðileg jól',                  emoji:'🎁' },
-    { check:[12,26], greeting:'Gleðileg jól',                  emoji:'🎁' },
-    { check:[12,31], greeting:'Gleðilegan gamlársdag',         emoji:'🎆' },
-    { check:[4,22],  greeting:'Gleðilegan fullveldisdag',      emoji:'🇮🇸' },
-    { check:[10,31], greeting:'Skelfilega góðan hrekkjavöku',  emoji:'🎃' },
-    { check:ed(-3),  greeting:'Gleðilegan skírdag',            emoji:'✝️' },
-    { check:ed(-2),  greeting:'Gleðilegan föstudaginn langa',  emoji:'✝️' },
-    { check:ed(0),   greeting:'Gleðilega páska',               emoji:'🐣' },
-    { check:ed(1),   greeting:'Gleðilega páska',               emoji:'🐣' },
-    { check:ed(39),  greeting:'Gleðilegan uppstigningardag',   emoji:'☁️' },
-    { check:ed(49),  greeting:'Gleðilega hvítasunnu',          emoji:'🕊️' },
-    { check:ed(50),  greeting:'Gleðilega hvítasunnu',          emoji:'🕊️' },
-    { check:fwooa(4,19,4), greeting:'Gleðilegan sumardaginn fyrsta', emoji:'🌸' },
-    { check:nwday(8,1,1),  greeting:'Gleðilegan verslunarmannadag', emoji:'☀️' },
-  ];
-  return DAYS.find(x => match(x.check)) || null;
-}
-function recurrenceLabel(rule) { if (rule === 'daily') return 'Daglega'; if (rule === 'weekly') return 'Vikulega'; if (rule === 'monthly') return 'Mánaðarlega'; return ''; }
-function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function formatDeadline(dateStr) {
-  const d = parseLocalDate(dateStr);
-  if (!d) return '';
-  const now = startOfLocalDay();
-  const diff = Math.round((d.getTime() - now.getTime()) / 86400000);
-  if (diff === 0) return 'Í dag'; if (diff === 1) return 'Á morgun'; if (diff === -1) return 'Í gær';
-  if (diff < 0) return `${Math.abs(diff)} dögum síðan`; if (diff < 7) return `eftir ${diff} daga`;
-  return d.toLocaleDateString('is-IS', { month: 'short', day: 'numeric' });
-}
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
-</script>
+      function recurrenceLabel(rule) { if (rule === 'daily') return 'Daglega'; if (rule === 'weekly') return 'Vikulega'; if (rule === 'monthly') return 'Mánaðarlega'; return ''; }
+      function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+      function formatDeadline(dateStr) {
+        const d = parseLocalDate(dateStr);
+        if (!d) return '';
+        const now = startOfLocalDay();
+        const diff = Math.round((d.getTime() - now.getTime()) / 86400000);
+        if (diff === 0) return 'Í dag'; if (diff === 1) return 'Á morgun'; if (diff === -1) return 'Í gær';
+        if (diff < 0) return `${Math.abs(diff)} dögum síðan`; if (diff < 7) return `eftir ${diff} daga`;
+        return d.toLocaleDateString('is-IS', { month: 'short', day: 'numeric' });
+      }
+      if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => { });
+
+      // Bogga JS
+      let boggaIdleTimer; const BOGGA_IDLE_TIMEOUT_MS = 60000;
+      function setBoggaEmotion(emotion) { const sceneBox = document.getElementById('boggaSceneBox'); if (!sceneBox || sceneBox.getAttribute('data-state') === 'bottle') return; sceneBox.setAttribute('data-emotion', emotion); resetBoggaIdleTimer(); }
+      function setBoggaLook(look) { const sceneBox = document.getElementById('boggaSceneBox'); if (sceneBox) sceneBox.setAttribute('data-look', look); resetBoggaIdleTimer(); }
+      function boggaClockOut() { const sceneBox = document.getElementById('boggaSceneBox'); const statusText = document.getElementById('boggaStatusText'); if (sceneBox) sceneBox.setAttribute('data-state', 'bottle'); if (statusText) { statusText.innerHTML = "Ertu farinn í pásu eða hvað? 🧐 <br/><br/><strong>Á ég að skrá þig út og hvað eigum við að gera svo í næsta sessioni?</strong>"; } }
+      function boggaClockIn() { const sceneBox = document.getElementById('boggaSceneBox'); const statusText = document.getElementById('boggaStatusText'); if (sceneBox) sceneBox.setAttribute('data-state', 'active'); if (statusText) statusText.textContent = "Bogga on it! Mætt aftur... Hvað erum við að gleyma að gera?"; resetBoggaIdleTimer(); }
+      function boggaRubBottle() { boggaClockIn(); const random = Math.random(); if (random > 0.8) setBoggaLook('hangover'); else if (random > 0.5) setBoggaLook('makeup'); else setBoggaLook('normal'); setBoggaEmotion('happy'); }
+      function boggaClick() { const random = Math.random(); if (random > 0.8) setBoggaEmotion('highfive'); else if (random > 0.5) setBoggaEmotion('thinking'); else if (random > 0.2) setBoggaEmotion('sad'); else setBoggaEmotion('happy'); resetBoggaIdleTimer(); }
+      function checkBoggaAutoClockOut() { const currentHour = new Date().getHours(); if (currentHour >= 16 || currentHour < 8) { boggaClockOut(); const statusText = document.getElementById('boggaStatusText'); if (statusText) statusText.innerHTML = "Dómsdags klukkan sló fjögur. Ég er búin af. 😴<br/><strong>Á ég skrá tímana og plana hvað við gerum í næsta session?</strong>"; } }
+      function resetBoggaIdleTimer() { clearTimeout(boggaIdleTimer); const sceneBox = document.getElementById('boggaSceneBox'); if (sceneBox && sceneBox.getAttribute('data-state') !== 'bottle') { boggaIdleTimer = setTimeout(() => { boggaClockOut(); }, BOGGA_IDLE_TIMEOUT_MS); } }
+      function showBoggaTitle() { document.getElementById('boggaWrapper')?.classList.add('show-title'); }
+      function hideBoggaTitle() { }
+      function initBoggaAvatar() { window.addEventListener('mousemove', () => { const sceneBox = document.getElementById('boggaSceneBox'); if (sceneBox && sceneBox.getAttribute('data-state') === 'active') { resetBoggaIdleTimer(); } }); window.addEventListener('keydown', () => { const sceneBox = document.getElementById('boggaSceneBox'); if (sceneBox && sceneBox.getAttribute('data-state') === 'active') { resetBoggaIdleTimer(); } }); checkBoggaAutoClockOut(); resetBoggaIdleTimer(); setTimeout(() => { document.getElementById('boggaWrapper')?.classList.remove('show-title'); }, 4000); }
+      window.addEventListener('load', initBoggaAvatar);
+    </script>
 </body>
+
 </html>
